@@ -1,0 +1,372 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  INFLUENCER
+  BRAND
+  ADMIN
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+  IN_PROGRESS
+  DELIVERED
+  REVISION_REQUESTED
+  COMPLETED
+  DISPUTED
+}
+
+enum OfferInitiator {
+  BRAND
+  INFLUENCER
+}
+
+enum PaymentStatus {
+  WAITING
+  SUCCESS
+  FAILED
+}
+
+enum DeliveryStatus {
+  SUBMITTED
+  APPROVED
+  REVISION_REQUESTED
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  TIKTOK
+  YOUTUBE
+}
+
+enum VerificationMethod {
+  OAUTH
+  BIO_CODE
+  MANUAL
+}
+
+enum MessageKind {
+  TEXT
+  MEDIA
+}
+
+enum CollaborationMediaKind {
+  IMAGE
+  VIDEO
+}
+
+model User {
+  id             String   @id @default(cuid())
+  name           String
+  email          String   @unique
+  role           UserRole
+  isVerified     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  passwordHash String?
+
+  influencer      InfluencerProfile?
+  brand           BrandProfile?
+  sentOffers      Offer[]  @relation("BrandOffers")
+  receivedOffers  Offer[]  @relation("InfluencerOffers")
+  messages        Message[]
+  reviewsWritten  Review[] @relation("UserReviewsWritten")
+  reviewsReceived Review[] @relation("UserReviewsReceived")
+  collaborationRatingsGiven    CollaborationRating[] @relation("CollaborationRatingsGiven")
+  collaborationRatingsReceived CollaborationRating[] @relation("CollaborationRatingsReceived")
+  socialAccounts    SocialAccount[]
+  deliveriesSubmitted OfferDelivery[] @relation("OfferDeliverySubmitter")
+  collaborationMediaUploaded CollaborationMedia[] @relation("CollaborationMediaUploader")
+}
+
+model InfluencerProfile {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  username        String  @unique
+  profileImageUrl String?
+  bio             String?
+  city            String?
+  category        String
+  followerCount   Int
+  basePriceTRY    Int
+  tiktokUrl       String?
+  instagramUrl    String?
+  /** Serbest metin niş (ör. kahve, kamp-karavan); arama v1’de kullanılmıyor. */
+  nicheText       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user               User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  selectedCategories InfluencerSelectedCategory[]
+  portfolioItems     InfluencerPortfolioItem[]
+}
+
+model BrandProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  /** Public slug (/brand/[username]); null = henüz herkese açık profil yok */
+  username        String?  @unique
+  companyName     String
+  profileImageUrl String?
+  website         String?
+  city            String?
+  bio             String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user               User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  selectedCategories BrandSelectedCategory[]
+}
+
+model BrandSelectedCategory {
+  id               String   @id @default(cuid())
+  brandProfileId   String
+  categoryKey      String
+  createdAt        DateTime @default(now())
+
+  brandProfile BrandProfile @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([brandProfileId, categoryKey])
+  @@index([brandProfileId])
+}
+
+model SocialAccount {
+  id                 String              @id @default(cuid())
+  userId             String
+  platform           SocialPlatform
+  username           String
+  profileUrl         String?
+  displayName        String?
+  avatarUrl          String?
+  followerCount      Int?
+  externalAccountId  String?
+  isConnected        Boolean             @default(false)
+  isVerified         Boolean             @default(false)
+  verificationMethod VerificationMethod?
+  verificationCode   String?
+  verifiedAt         DateTime?
+  lastSyncedAt       DateTime?
+  metadataJson       Json?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([platform, username])
+  @@index([userId])
+}
+
+enum PortfolioPlatform {
+  INSTAGRAM
+  TIKTOK
+  OTHER
+}
+
+model InfluencerPortfolioItem {
+  id                  String            @id @default(cuid())
+  influencerProfileId String
+  platform            PortfolioPlatform
+  title               String?
+  url                 String
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  influencerProfile InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+}
+
+model InfluencerSelectedCategory {
+  id                  String   @id @default(cuid())
+  influencerProfileId String
+  categoryKey         String
+  createdAt           DateTime @default(now())
+
+  influencerProfile InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([influencerProfileId, categoryKey])
+}
+
+model Offer {
+  id             String         @id @default(cuid())
+  brandId        String
+  influencerId   String
+  title          String
+  brief          String
+  offerAmountTRY Int
+  commissionRate Float          @default(0.15)
+  commissionTRY  Int
+  netPayoutTRY   Int
+  status         OfferStatus    @default(PENDING)
+  initiatedBy    OfferInitiator @default(BRAND)
+  campaignName   String?
+  deliverableType String?
+  deliverableCount Int?
+  budgetTRY      Int?
+  dueDate        DateTime?
+  revisionCount  Int            @default(0)
+  usageRights    String?
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  brand        User          @relation("BrandOffers", fields: [brandId], references: [id])
+  influencer   User          @relation("InfluencerOffers", fields: [influencerId], references: [id])
+  conversation Conversation?
+  payment      Payment?
+  reviews               Review[]
+  collaborationRatings CollaborationRating[]
+  deliveries   OfferDelivery[]
+  collaborationMedia CollaborationMedia[]
+
+  @@index([brandId, influencerId])
+}
+
+model OfferDelivery {
+  id             String         @id @default(cuid())
+  offerId        String
+  submittedById  String
+  deliveryUrl    String?
+  deliveryText   String?
+  status         DeliveryStatus @default(SUBMITTED)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  offer       Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  submittedBy User  @relation("OfferDeliverySubmitter", fields: [submittedById], references: [id], onDelete: Cascade)
+
+  @@index([offerId, createdAt])
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  offerId   String   @unique
+  createdAt DateTime @default(now())
+  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  collaborationMedia CollaborationMedia[]
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String       @default("")
+  kind           MessageKind  @default(TEXT)
+  isDelivered    Boolean      @default(false)
+  deliveredAt    DateTime?
+  isSeen         Boolean      @default(false)
+  seenAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  collaborationMedia CollaborationMedia?
+
+  @@index([conversationId])
+}
+
+model CollaborationMedia {
+  id                   String                 @id @default(cuid())
+  offerId              String
+  conversationId       String
+  uploaderUserId       String
+  messageId            String                 @unique
+  kind                 CollaborationMediaKind
+  mimeType             String
+  storedFilename       String
+  sizeBytes            Int
+  originalFilenameSafe String?
+  createdAt            DateTime               @default(now())
+
+  offer        Offer        @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  uploader     User         @relation("CollaborationMediaUploader", fields: [uploaderUserId], references: [id], onDelete: Cascade)
+  message      Message      @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([offerId])
+}
+
+model Payment {
+  id                  String        @id @default(cuid())
+  offerId             String        @unique
+  iyzicoPaymentId     String?       @unique
+  iyzicoConversation  String?
+  status              PaymentStatus @default(WAITING)
+  paidAmountTRY       Int
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+}
+
+/**
+ * Tamamlanan iş birliği (Offer) bağlamında, yorum içermeyen 1–5 puan.
+ * Aynı (teklif, puanlayan, hedef) üçlüsü tekil — çift taraflı senaryoda iki satır olabilir (her taraf bir kez).
+ */
+model CollaborationRating {
+  id          String @id @default(cuid())
+  offerId     String
+  raterUserId String
+  rateeUserId String
+  /** 1–5; uygulama ve DB CHECK ile doğrulanmalı */
+  rating      Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  rater User  @relation("CollaborationRatingsGiven", fields: [raterUserId], references: [id], onDelete: Cascade)
+  ratee User  @relation("CollaborationRatingsReceived", fields: [rateeUserId], references: [id], onDelete: Cascade)
+
+  @@unique([offerId, raterUserId, rateeUserId])
+  @@index([offerId])
+  @@index([raterUserId])
+  @@index([rateeUserId])
+  @@index([rateeUserId, createdAt])
+}
+
+/** Post-completion collaboration rating (one row per reviewer per offer). */
+model Review {
+  id             String   @id @default(cuid())
+  offerId        String
+  reviewerUserId String
+  revieweeUserId String
+  rating         Int
+  comment        String?
+  isPublic       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  offer    Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  reviewer User  @relation("UserReviewsWritten", fields: [reviewerUserId], references: [id], onDelete: Cascade)
+  reviewee User  @relation("UserReviewsReceived", fields: [revieweeUserId], references: [id], onDelete: Cascade)
+
+  @@unique([offerId, reviewerUserId])
+  @@index([offerId])
+  @@index([revieweeUserId, createdAt])
+  @@index([reviewerUserId])
+}
+
+model InfluencerStats {
+  id                  String   @id @default(cuid())
+  influencerProfileId String
+  platform            String
+  followers           Int
+  avgEngagementRate   Float?
+  avgViews            Int?
+  postsLast30d        Int?
+  capturedAt          DateTime
+  createdAt           DateTime @default(now())
+
+  @@unique([influencerProfileId, platform, capturedAt])
+  @@index([influencerProfileId, capturedAt])
+}

@@ -1,0 +1,273 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useRef, useState } from "react";
+import type { OfferStatus } from "@prisma/client";
+import type { CollaborationCardOffer } from "./collaborationCardOffer";
+import { StatusBadge } from "./StatusBadge";
+
+export type { CollaborationCardOffer } from "./collaborationCardOffer";
+
+const ACTION_LABELS: Record<OfferStatus, string> = {
+  PENDING: "Bekliyor",
+  ACCEPTED: "Kabul Et",
+  REJECTED: "Reddet",
+  CANCELLED: "İptal Et",
+  IN_PROGRESS: "İşe Başla",
+  DELIVERED: "Teslim Et",
+  REVISION_REQUESTED: "Revize İste",
+  COMPLETED: "Tamamlandı Olarak İşaretle",
+  DISPUTED: "Anlaşmazlık Bildir",
+};
+
+const DELIVERY_DRIVEN_STATUSES: OfferStatus[] = ["DELIVERED", "COMPLETED", "REVISION_REQUESTED"];
+
+const ACTION_ORDER: OfferStatus[] = [
+  "ACCEPTED",
+  "REJECTED",
+  "IN_PROGRESS",
+  "CANCELLED",
+  "DISPUTED",
+];
+
+function sortTransitions(t: OfferStatus[]): OfferStatus[] {
+  return [...t].sort((a, b) => ACTION_ORDER.indexOf(a) - ACTION_ORDER.indexOf(b));
+}
+
+function isPrimaryAction(next: OfferStatus): boolean {
+  return next === "ACCEPTED" || next === "IN_PROGRESS";
+}
+
+function transitionButtonClass(next: OfferStatus): string {
+  if (isPrimaryAction(next)) return "btn";
+  if (next === "REJECTED" || next === "CANCELLED" || next === "DISPUTED") {
+    return "btn secondary btn--subtle";
+  }
+  return "btn secondary";
+}
+
+function briefPreview(brief: string, max = 160): string {
+  const t = brief.trim();
+  if (t.length <= max) return t;
+  return `${t.slice(0, max).trim()}…`;
+}
+
+function formatDue(d: string | null | undefined): string | null {
+  if (!d) return null;
+  try {
+    return new Date(d).toLocaleDateString("tr-TR", { dateStyle: "medium" });
+  } catch {
+    return null;
+  }
+}
+
+function formatShortDateTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString("tr-TR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
+  } catch {
+    return "—";
+  }
+}
+
+export function CollaborationCard({
+  offer,
+  otherSideLabel,
+  otherSideName,
+  profileHref,
+  chatHref,
+  availableNextTransitions,
+}: {
+  offer: CollaborationCardOffer;
+  otherSideLabel: string;
+  otherSideName: string;
+  profileHref: string | null;
+  chatHref: string | null;
+  availableNextTransitions: OfferStatus[];
+}) {
+  const router = useRouter();
+  const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const busyRef = useRef(false);
+
+  const displayName =
+    (offer.campaignName && offer.campaignName.trim()) ||
+    (offer.title && offer.title.trim()) ||
+    "İşbirliği isteği";
+
+  const budget = offer.budgetTRY ?? offer.offerAmountTRY;
+  const transitions = sortTransitions(
+    availableNextTransitions.filter((t) => !DELIVERY_DRIVEN_STATUSES.includes(t)),
+  );
+
+  const showDeliveryNote =
+    offer.status === "IN_PROGRESS" || offer.status === "DELIVERED" || offer.status === "REVISION_REQUESTED";
+
+  const metaChips = useMemo(() => {
+    const dueStr = formatDue(offer.dueDate);
+    const chips: { key: string; label: string; value: string }[] = [];
+    chips.push({
+      key: "offer",
+      label: "Teklif tutarı",
+      value: `${offer.offerAmountTRY.toLocaleString("tr-TR")} TRY`,
+    });
+    const ratePct = Math.round(offer.commissionRate * 1000) / 10;
+    chips.push({
+      key: "commission",
+      label: "Komisyon",
+      value: `${offer.commissionTRY.toLocaleString("tr-TR")} TRY (${ratePct}%)`,
+    });
+    chips.push({
+      key: "net",
+      label: "Net ödeme",
+      value: `${offer.netPayoutTRY.toLocaleString("tr-TR")} TRY`,
+    });
+    if (dueStr) {
+      chips.push({ key: "due", label: "Teslim tarihi", value: dueStr });
+    }
+    if (offer.deliverableType || offer.deliverableCount != null) {
+      const parts: string[] = [];
+      if (offer.deliverableType) parts.push(offer.deliverableType);
+      if (offer.deliverableCount != null) parts.push(`${offer.deliverableCount} adet`);
+      chips.push({ key: "deliverable", label: "İçerik", value: parts.join(" · ") });
+    }
+    if (offer.revisionCount > 0) {
+      chips.push({
+        key: "rev",
+        label: "Revizyon turu",
+        value: String(offer.revisionCount),
+      });
+    }
+    if (offer.deliveryCount > 0) {
+      chips.push({
+        key: "deliveries",
+        label: "Teslim kaydı",
+        value: String(offer.deliveryCount),
+      });
+    }
+    chips.push({
+      key: "created",
+      label: "Oluşturulma",
+      value: formatShortDateTime(offer.createdAt),
+    });
+    chips.push({
+      key: "updated",
+      label: "Güncellendi",
+      value: formatShortDateTime(offer.updatedAt),
+    });
+    return chips;
+  }, [offer]);
+
+  const runTransition = useCallback(
+    async (nextStatus: OfferStatus) => {
+      if (busyRef.current) return;
+      const key = `${offer.id}:${nextStatus}`;
+      busyRef.current = true;
+      setError(null);
+      setPendingKey(key);
+      try {
+        const res = await fetch(`/api/offers/${offer.id}/transition`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nextStatus }),
+        });
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        if (!res.ok) {
+          setError(data.error ?? "İşlem tamamlanamadı.");
+          return;
+        }
+        router.refresh();
+      } catch {
+        setError("Bağlantı hatası.");
+      } finally {
+        busyRef.current = false;
+        setPendingKey(null);
+      }
+    },
+    [offer.id, router],
+  );
+
+  const hasBrief = Boolean(offer.brief.trim());
+
+  return (
+    <article className="collab-card collab-card--surface">
+      <header className="collab-card__head">
+        <h3 className="collab-card__campaign">{displayName}</h3>
+        <StatusBadge status={offer.status} />
+      </header>
+
+      <div className="collab-card__party">
+        <span className="collab-card__party-label">{otherSideLabel}</span>
+        <span className="collab-card__party-name">{otherSideName}</span>
+      </div>
+
+      <div className="collab-card__budget-block">
+        <span className="collab-card__budget-label">Bütçe</span>
+        <span className="collab-card__budget-value">{budget.toLocaleString("tr-TR")} TRY</span>
+      </div>
+
+      {metaChips.length > 0 ? (
+        <ul className="collab-card__meta-chips" aria-label="Teklif detayları">
+          {metaChips.map((c) => (
+            <li key={c.key} className="collab-meta-chip">
+              <span className="collab-meta-chip__label">{c.label}</span>
+              <span className="collab-meta-chip__value">{c.value}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {hasBrief ? (
+        <div className="collab-card__brief">
+          <p className="collab-card__brief-label">Özet</p>
+          <p className="collab-card__brief-text">{briefPreview(offer.brief)}</p>
+        </div>
+      ) : null}
+
+      {error ? <p className="alert-inline alert-inline--error collab-card__alert">{error}</p> : null}
+
+      <div className="collab-card__actions collab-card__actions--primary">
+        {chatHref ? (
+          <a className="btn" href={chatHref}>
+            Sohbete git
+          </a>
+        ) : null}
+        {profileHref ? (
+          <a className="btn secondary" href={profileHref}>
+            Profili görüntüle
+          </a>
+        ) : null}
+      </div>
+
+      {showDeliveryNote ? (
+        <p className="muted collab-card__hint">
+          Teslim ve inceleme işlemleri sohbet ekranından yönetilecektir.
+        </p>
+      ) : null}
+
+      {transitions.length > 0 ? (
+        <div className="collab-card__actions collab-card__actions--transitions">
+          {transitions.map((next) => {
+            const key = `${offer.id}:${next}`;
+            const loading = pendingKey === key;
+            const disabled = Boolean(pendingKey);
+            return (
+              <button
+                key={next}
+                type="button"
+                className={transitionButtonClass(next)}
+                disabled={disabled}
+                onClick={() => void runTransition(next)}
+                style={{ opacity: loading ? 0.75 : 1 }}
+              >
+                {loading ? "…" : ACTION_LABELS[next] ?? next}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </article>
+  );
+}
