@@ -18,3 +18,4 @@ out/
 # OS / editor
 .DS_Store
 *.log
+private/collab-media/
