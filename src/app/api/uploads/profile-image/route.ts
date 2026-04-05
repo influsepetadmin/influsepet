@@ -84,8 +84,10 @@ export async function POST(request: Request) {
 
   try {
     const url = await saveProfileImageFile(buffer, magic.mime);
+    console.log("PROFILE_IMAGE_UPLOAD_URL", url);
     return NextResponse.json({ ok: true, url });
-  } catch {
+  } catch (error) {
+    console.error("PROFILE_IMAGE_UPLOAD_FAILED", error);
     return NextResponse.json({ error: "Yukleme basarisiz. Tekrar deneyin." }, { status: 500 });
   }
 }
