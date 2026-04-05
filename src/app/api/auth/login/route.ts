@@ -3,14 +3,34 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { setSessionCookie } from "@/lib/session";
 
+function getRequestOrigin(request: Request): string {
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+
+  if (forwardedProto && forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (explicit) {
+    try {
+      return new URL(explicit).origin;
+    } catch {}
+  }
+
+  return new URL(request.url).origin;
+}
+
 /** Tarayıcıda bu URL açılırsa (GET) form yok; ana sayfadaki girişe yönlendir. */
 export async function GET(request: Request) {
-  const u = new URL("/", request.url);
+  const origin = getRequestOrigin(request);
+  const u = new URL("/", origin);
   u.searchParams.set("mode", "login");
   return NextResponse.redirect(u);
 }
 
 export async function POST(request: Request) {
+  const origin = getRequestOrigin(request);
   const form = await request.formData();
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   const password = String(form.get("password") ?? "");
@@ -18,7 +38,7 @@ export async function POST(request: Request) {
   const errUrl = (msg: string) => {
     const returnRaw = String(form.get("authReturn") ?? "").trim();
     const basePath = returnRaw === "/giris" ? "/giris" : "/";
-    const x = new URL(basePath, request.url);
+    const x = new URL(basePath, origin);
     x.searchParams.set("err", msg);
     x.searchParams.set("mode", "login");
     const hint = String(form.get("roleHint") ?? "").toUpperCase();
@@ -43,7 +63,7 @@ export async function POST(request: Request) {
 
   if (user.role === "ADMIN") {
     await setSessionCookie(user.id);
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/", origin));
   }
 
   if (user.role !== roleHint) {
@@ -59,10 +79,10 @@ export async function POST(request: Request) {
   await setSessionCookie(user.id);
 
   if (user.role === "BRAND") {
-    return NextResponse.redirect(new URL("/marka", request.url));
+    return NextResponse.redirect(new URL("/marka", origin));
   }
   if (user.role === "INFLUENCER") {
-    return NextResponse.redirect(new URL("/influencer", request.url));
+    return NextResponse.redirect(new URL("/influencer", origin));
   }
-  return NextResponse.redirect(new URL("/", request.url));
+  return NextResponse.redirect(new URL("/", origin));
 }
