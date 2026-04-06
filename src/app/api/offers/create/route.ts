@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
+import {
+  PLATFORM_COMMISSION_RATE,
+  commissionTRYFromOfferAmount,
+  netPayoutTRYFromOfferAmount,
+} from "@/lib/platformCommission";
 import { prisma } from "@/lib/prisma";
 import { getSessionPayload } from "@/lib/session";
 
@@ -114,9 +119,9 @@ export async function POST(request: Request) {
 
   const p = parseCreatePayload(record);
 
-  const commissionRate = 0.15;
-  const commissionTRY = Math.floor(p.offerAmountTRY * commissionRate);
-  const netPayoutTRY = p.offerAmountTRY - commissionTRY;
+  const commissionRate = PLATFORM_COMMISSION_RATE;
+  const commissionTRY = commissionTRYFromOfferAmount(p.offerAmountTRY);
+  const netPayoutTRY = netPayoutTRYFromOfferAmount(p.offerAmountTRY);
 
   const offerDataBase = {
     title: p.title,

@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { OfferStatus } from "@prisma/client";
+import { formatCommissionPercentTr } from "@/lib/platformCommission";
+import type { RateeReputationStats } from "@/lib/offers/rateeReputation";
 import type { CollaborationCardOffer } from "./collaborationCardOffer";
 import { StatusBadge } from "./StatusBadge";
 
@@ -72,6 +74,15 @@ function formatShortDateTime(iso: string): string {
   }
 }
 
+function counterpartyRatingBadge(
+  status: OfferStatus,
+  rep: RateeReputationStats | null | undefined,
+): { averageRating: number; ratingCount: number } | null {
+  if (status !== "COMPLETED" || !rep) return null;
+  if (rep.ratingCount === 0 || rep.averageRating == null) return null;
+  return { averageRating: rep.averageRating, ratingCount: rep.ratingCount };
+}
+
 export function CollaborationCard({
   offer,
   otherSideLabel,
@@ -79,6 +90,7 @@ export function CollaborationCard({
   profileHref,
   chatHref,
   availableNextTransitions,
+  counterpartyRating,
 }: {
   offer: CollaborationCardOffer;
   otherSideLabel: string;
@@ -86,6 +98,8 @@ export function CollaborationCard({
   profileHref: string | null;
   chatHref: string | null;
   availableNextTransitions: OfferStatus[];
+  /** Karşı tarafın (iş birliği puanları) özeti; yalnızca COMPLETED kartlarda anlamlı. */
+  counterpartyRating?: RateeReputationStats | null;
 }) {
   const router = useRouter();
   const [pendingKey, setPendingKey] = useState<string | null>(null);
@@ -113,7 +127,7 @@ export function CollaborationCard({
       label: "Teklif tutarı",
       value: `${offer.offerAmountTRY.toLocaleString("tr-TR")} TRY`,
     });
-    const ratePct = Math.round(offer.commissionRate * 1000) / 10;
+    const ratePct = formatCommissionPercentTr(offer.commissionRate);
     chips.push({
       key: "commission",
       label: "Komisyon",
@@ -190,6 +204,7 @@ export function CollaborationCard({
   );
 
   const hasBrief = Boolean(offer.brief.trim());
+  const ratingBadge = counterpartyRatingBadge(offer.status, counterpartyRating ?? null);
 
   return (
     <article className="collab-card collab-card--surface">
@@ -201,6 +216,23 @@ export function CollaborationCard({
       <div className="collab-card__party">
         <span className="collab-card__party-label">{otherSideLabel}</span>
         <span className="collab-card__party-name">{otherSideName}</span>
+        {ratingBadge ? (
+          <div
+            className="collab-card__rating-badge"
+            title="Karşı tarafın tamamlanan iş birliklerindeki ortalama puanı"
+            aria-label={`Karşı tarafın ortalama puanı ${ratingBadge.averageRating.toFixed(1)}, ${ratingBadge.ratingCount} puanlama`}
+          >
+            <span className="collab-card__rating-badge-star" aria-hidden>
+              ★
+            </span>
+            <span className="collab-card__rating-badge-score">
+              {ratingBadge.averageRating.toFixed(1)}
+            </span>
+            <span className="collab-card__rating-badge-meta">
+              {ratingBadge.ratingCount.toLocaleString("tr-TR")} puanlama
+            </span>
+          </div>
+        ) : null}
       </div>
 
       <div className="collab-card__budget-block">

@@ -81,3 +81,18 @@ export type CollaborationRatingGetResponse = {
   /** İki yönlü puan akışının özeti (chat UI için). */
   ratingState: CollaborationRatingFlowState;
 };
+
+/** POST /api/offers/[offerId]/rating başarı gövdesi (Review API’sinden ayrı). */
+export type CollaborationRatingCreatedSummary = {
+  id: string;
+  offerId: string;
+  raterUserId: string;
+  rateeUserId: string;
+  rating: number;
+};
+
+export type CollaborationRatingPostSuccessResponse = {
+  success: true;
+  message: string;
+  rating: CollaborationRatingCreatedSummary;
+};

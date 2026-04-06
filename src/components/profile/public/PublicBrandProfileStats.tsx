@@ -6,7 +6,7 @@ export function PublicBrandProfileStats({ data }: { data: PublicBrandProfileResp
     { label: "Tamamlanan iş birliği", value: String(data.completedCollaborationsCount) },
     {
       label: "Ortalama puan",
-      value: data.ratingAverage != null ? data.ratingAverage.toFixed(1) : "—",
+      value: data.averageRating != null ? data.averageRating.toFixed(1) : "—",
     },
     { label: "Puanlama sayısı", value: String(data.ratingCount) },
   ];

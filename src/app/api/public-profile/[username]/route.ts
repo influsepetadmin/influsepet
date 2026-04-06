@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getRecentPublicReviewsForPublicProfile } from "@/lib/publicProfile/influencerPublicReviews";
 import { mapToPublicProfileByUsernameResponse } from "@/lib/publicProfile/publicProfileByUsername";
 
 /**
@@ -40,7 +41,7 @@ export async function GET(
 
   const userId = profile.userId;
 
-  const [completedCount, ratingAgg, verifiedSocial] = await Promise.all([
+  const [completedCount, ratingAgg, verifiedSocial, recentPublicReviews] = await Promise.all([
     prisma.offer.count({
       where: {
         status: "COMPLETED",
@@ -65,10 +66,11 @@ export async function GET(
       },
       orderBy: { platform: "asc" },
     }),
+    getRecentPublicReviewsForPublicProfile(userId),
   ]);
 
   const ratingCount = ratingAgg._count._all;
-  const ratingAverage =
+  const averageRating =
     ratingCount > 0 && ratingAgg._avg.rating != null
       ? Math.round(ratingAgg._avg.rating * 100) / 100
       : null;
@@ -87,9 +89,10 @@ export async function GET(
       user: { id: profile.user.id, name: profile.user.name, role: "INFLUENCER" },
     },
     completedCount,
-    ratingAverage,
+    averageRating,
     ratingCount,
     verifiedSocial,
+    recentPublicReviews,
   );
 
   return NextResponse.json(body, {

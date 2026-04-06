@@ -1,5 +1,6 @@
 import { getCategoryLabel } from "@/lib/categories";
 import type { SocialPlatform } from "@prisma/client";
+import type { PublicProfileRecentReviewJson } from "@/lib/publicProfile/influencerPublicReviews";
 
 /** GET /api/public-profile/[username] — public-safe JSON (no UI). */
 export type PublicProfileByUsernameResponse = {
@@ -22,8 +23,11 @@ export type PublicProfileByUsernameResponse = {
     verifiedAt: string | null;
   }[];
   completedCollaborationsCount: number;
-  ratingAverage: number | null;
+  /** Ortalama yıldız: CollaborationRating (tamamlanan teklifler), Review ile karıştırılmaz. */
+  averageRating: number | null;
   ratingCount: number;
+  /** Opsiyonel metin değerlendirmeler (Review, isPublic); hero ortalaması buradan değil. */
+  recentPublicReviews: PublicProfileRecentReviewJson[];
 };
 
 type ProfileRow = {
@@ -42,7 +46,7 @@ type ProfileRow = {
 export function mapToPublicProfileByUsernameResponse(
   profile: ProfileRow,
   completedCollaborationsCount: number,
-  ratingAverage: number | null,
+  averageRating: number | null,
   ratingCount: number,
   verifiedSocial: {
     platform: SocialPlatform;
@@ -50,6 +54,7 @@ export function mapToPublicProfileByUsernameResponse(
     profileUrl: string | null;
     verifiedAt: Date | null;
   }[],
+  recentPublicReviews: PublicProfileRecentReviewJson[],
 ): PublicProfileByUsernameResponse {
   return {
     id: profile.user.id,
@@ -74,7 +79,8 @@ export function mapToPublicProfileByUsernameResponse(
       verifiedAt: s.verifiedAt ? s.verifiedAt.toISOString() : null,
     })),
     completedCollaborationsCount,
-    ratingAverage,
+    averageRating,
     ratingCount,
+    recentPublicReviews,
   };
 }

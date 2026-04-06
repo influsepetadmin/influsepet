@@ -1,36 +1,57 @@
 "use client";
 
-/** Tıklanabilir 1–5 yıldız seçimi (amber). */
+import { useId } from "react";
+
+/**
+ * 1–5 yıldız seçimi (CollaborationRating — yorum değil).
+ * Aynı isimli radyolar: klavye okları ve ekran okuyucu uyumu.
+ */
 export function RatingStarsInput({
   value,
   onChange,
   disabled,
-  idPrefix = "rating-star",
+  idPrefix = "collab-rating",
 }: {
   value: number | null;
   onChange: (rating: number) => void;
   disabled?: boolean;
   idPrefix?: string;
 }) {
+  const uid = useId();
+  const name = `${idPrefix}-stars-${uid}`;
+
   return (
-    <div className="collab-rating-input" role="group" aria-label="Puan seçin (1–5)">
-      {[1, 2, 3, 4, 5].map((n) => {
-        const active = value != null && n <= value;
-        return (
-          <button
-            key={n}
-            type="button"
-            id={`${idPrefix}-${n}`}
-            className={`collab-rating-input__star ${active ? "collab-rating-input__star--on" : ""}`}
-            disabled={disabled}
-            aria-pressed={active}
-            aria-label={`${n} yıldız`}
-            onClick={() => onChange(n)}
-          >
-            ★
-          </button>
-        );
-      })}
-    </div>
+    <fieldset className="collab-rating-fieldset" disabled={disabled}>
+      <legend className="collab-rating-sr-only">
+        Karşı tarafa vereceğiniz iş birliği puanını seçin (1 ile 5 yıldız arası)
+      </legend>
+      <div className="collab-rating-input collab-rating-input--radios">
+        {[1, 2, 3, 4, 5].map((n) => {
+          const id = `${idPrefix}-${n}-${uid}`;
+          const filled = value != null && n <= value;
+          return (
+            <label
+              key={n}
+              htmlFor={id}
+              className={`collab-rating-input__option ${filled ? "collab-rating-input__option--fill" : ""}`}
+            >
+              <input
+                id={id}
+                type="radio"
+                name={name}
+                value={String(n)}
+                checked={value === n}
+                onChange={() => onChange(n)}
+                className="collab-rating-input__radio"
+              />
+              <span className="collab-rating-input__face" aria-hidden>
+                ★
+              </span>
+              <span className="collab-rating-sr-only">{n} yıldız</span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }

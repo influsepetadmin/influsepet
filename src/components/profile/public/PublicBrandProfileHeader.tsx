@@ -2,6 +2,7 @@ import type { PublicBrandProfileResponse } from "@/lib/publicProfile/publicBrand
 import { getAvatarUrl } from "@/lib/avatar";
 import { CategoryBadgeGroup } from "./CategoryBadgeGroup";
 import { PublicProfileRatingSummary } from "./PublicProfileRatingSummary";
+import { PublicRecentReviewsSection } from "./PublicRecentReviewsSection";
 
 function safeWebsiteHref(url: string): string | null {
   const t = url.trim();
@@ -60,9 +61,11 @@ export function PublicBrandProfileHeader({ data }: { data: PublicBrandProfileRes
         </div>
 
         <PublicProfileRatingSummary
-          ratingAverage={data.ratingAverage}
+          averageRating={data.averageRating}
           ratingCount={data.ratingCount}
         />
+
+        <PublicRecentReviewsSection reviews={data.recentPublicReviews} />
 
         <CategoryBadgeGroup bare categories={data.categories} nicheText={null} sectionTitle="Sektör" />
 

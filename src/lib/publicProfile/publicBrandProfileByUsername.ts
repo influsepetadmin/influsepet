@@ -1,5 +1,6 @@
 import { getCategoryLabel } from "@/lib/categories";
 import type { SocialPlatform } from "@prisma/client";
+import type { PublicProfileRecentReviewJson } from "@/lib/publicProfile/influencerPublicReviews";
 
 /** GET /api/public-brand-profile/[username] — public-safe JSON. */
 export type PublicBrandProfileResponse = {
@@ -22,8 +23,9 @@ export type PublicBrandProfileResponse = {
     verifiedAt: string | null;
   }[];
   completedCollaborationsCount: number;
-  ratingAverage: number | null;
+  averageRating: number | null;
   ratingCount: number;
+  recentPublicReviews: PublicProfileRecentReviewJson[];
 };
 
 type BrandProfileRow = {
@@ -41,7 +43,7 @@ type BrandProfileRow = {
 export function mapToPublicBrandProfileResponse(
   profile: BrandProfileRow,
   completedCollaborationsCount: number,
-  ratingAverage: number | null,
+  averageRating: number | null,
   ratingCount: number,
   verifiedSocial: {
     platform: SocialPlatform;
@@ -49,6 +51,7 @@ export function mapToPublicBrandProfileResponse(
     profileUrl: string | null;
     verifiedAt: Date | null;
   }[],
+  recentPublicReviews: PublicProfileRecentReviewJson[],
 ): PublicBrandProfileResponse {
   return {
     id: profile.user.id,
@@ -71,7 +74,8 @@ export function mapToPublicBrandProfileResponse(
       verifiedAt: s.verifiedAt ? s.verifiedAt.toISOString() : null,
     })),
     completedCollaborationsCount,
-    ratingAverage,
+    averageRating,
     ratingCount,
+    recentPublicReviews,
   };
 }

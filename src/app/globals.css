@@ -594,37 +594,133 @@ main:has(.chat-layout) {
   color: #e2e8f0;
 }
 
+.collab-rating-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.collab-rating-fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
 .collab-rating-input {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 8px 0 10px;
+}
+
+.collab-rating-input--radios {
   gap: 4px 6px;
-  margin: 6px 0 10px;
 }
 
-.collab-rating-input__star {
+.collab-rating-input__option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   margin: 0;
-  padding: 0 2px;
-  border: none;
-  background: transparent;
+  padding: 4px 6px;
   cursor: pointer;
-  font-size: 1.35rem;
-  line-height: 1;
-  color: #e2e8f0;
-  transition: color 0.12s ease, transform 0.12s ease;
+  border-radius: 10px;
+  transition:
+    background 0.12s ease,
+    box-shadow 0.12s ease,
+    transform 0.12s ease;
 }
 
-.collab-rating-input__star:hover:not(:disabled) {
+.collab-rating-input__option:hover .collab-rating-input__face {
   color: #fcd34d;
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
-.collab-rating-input__star:disabled {
+.collab-rating-fieldset:disabled .collab-rating-input__option {
   cursor: not-allowed;
   opacity: 0.65;
 }
 
-.collab-rating-input__star--on {
+.collab-rating-input__radio {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.collab-rating-input__option:has(.collab-rating-input__radio:focus-visible) {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.collab-rating-input__face {
+  font-size: 1.45rem;
+  line-height: 1;
+  color: #e2e8f0;
+  transition: color 0.12s ease, transform 0.12s ease;
+  pointer-events: none;
+}
+
+.collab-rating-input__option--fill .collab-rating-input__face {
   color: #f59e0b;
+}
+
+.collab-rating-input__option:has(.collab-rating-input__radio:checked) .collab-rating-input__face {
+  color: #f59e0b;
+}
+
+.collab-rating-panel__selected-preview {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.collab-rating-panel__selected-preview--placeholder {
+  font-weight: 500;
+}
+
+.collab-rating-panel__score-readout {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.collab-rating-panel__score-num {
+  font-size: 1.85rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: #b45309;
+}
+
+.collab-rating-panel__score-max {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+.collab-rating-panel__block--done {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 251, 235, 0.65);
+  border: 1px solid rgba(253, 230, 138, 0.5);
 }
 
 .collab-rating-panel__block {
@@ -1339,6 +1435,15 @@ main:has(.chat-layout) {
   padding: clamp(14px, 2.5vw, 24px) clamp(14px, 2.5vw, 20px) clamp(16px, 3vw, 28px);
 }
 
+.auth-landing-contact {
+  margin-top: clamp(12px, 2vw, 20px);
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .auth-shell {
   display: grid;
   grid-template-columns: minmax(280px, 1fr) minmax(320px, 460px);
@@ -1664,24 +1769,12 @@ main:has(.chat-layout) {
     grid-template-columns: minmax(200px, 1fr) minmax(160px, 1fr);
     gap: 20px 28px;
   }
-
-  .site-footer-meta {
-    grid-column: 1 / -1;
-    padding-top: 12px;
-    border-top: 1px solid rgba(219, 227, 239, 0.85);
-  }
 }
 
 @media (min-width: 960px) {
   .site-footer-main {
-    grid-template-columns: minmax(200px, 1fr) minmax(180px, 0.95fr) minmax(200px, 1.05fr);
+    grid-template-columns: minmax(200px, 1fr) minmax(180px, 0.95fr);
     gap: 20px 28px;
-  }
-
-  .site-footer-meta {
-    border-top: none;
-    padding-top: 0;
-    margin-top: 0;
   }
 }
 
@@ -2294,6 +2387,53 @@ main:has(.dashboard-page) {
   font-weight: 600;
   color: var(--text);
   word-break: break-word;
+}
+
+.collab-card__rating-badge {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 2px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #92400e;
+  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  box-shadow: 0 1px 2px rgba(180, 83, 9, 0.06);
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: flex-start;
+}
+
+@media (min-width: 520px) {
+  .collab-card__rating-badge {
+    margin-top: 0;
+    margin-left: auto;
+    flex: 0 1 auto;
+    justify-content: flex-end;
+  }
+}
+
+.collab-card__rating-badge-star {
+  color: #f59e0b;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.collab-card__rating-badge-score {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.collab-card__rating-badge-meta {
+  font-weight: 500;
+  color: #a16207;
+  opacity: 0.95;
+  font-size: 0.72rem;
 }
 
 .collab-card__budget-block {
@@ -3126,6 +3266,31 @@ main:has(.dashboard-page) {
   gap: 24px;
 }
 
+.public-profile-home-link {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  padding: 0 2px;
+}
+
+@media (max-width: 639px) {
+  .public-profile-home-link {
+    justify-content: center;
+  }
+}
+
+.public-profile-home-link__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.public-profile-home-link__icon {
+  font-size: 1em;
+  line-height: 1;
+  opacity: 0.85;
+}
+
 /* Hero */
 .public-profile-hero {
   display: flex;
@@ -3333,74 +3498,168 @@ main:has(.dashboard-page) {
   flex-shrink: 0;
 }
 
-/* Rating summary (shared) */
-.public-profile-rating-summary {
+/* Public profile — rating card (hero, shared influencer + brand) */
+.public-profile-rating-card {
   width: 100%;
-  margin: 12px 0 16px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(253, 230, 138, 0.45);
-  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 65%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  max-width: 100%;
+  margin: 14px 0 18px;
+  padding: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: linear-gradient(165deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 4px 12px rgba(15, 23, 42, 0.06);
 }
 
-.public-profile-rating-summary--has {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 10px 12px;
+.public-profile-rating-card--has {
+  border-color: rgba(251, 191, 36, 0.35);
+  background: linear-gradient(165deg, #fffbeb 0%, #ffffff 55%, #fafaf9 100%);
+  box-shadow:
+    0 1px 2px rgba(180, 83, 9, 0.06),
+    0 6px 16px rgba(15, 23, 42, 0.07);
+}
+
+.public-profile-rating-card--empty {
+  border-style: solid;
+  border-color: rgba(226, 232, 240, 0.9);
+  background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.035),
+    0 3px 10px rgba(15, 23, 42, 0.045);
+}
+
+.public-profile-rating-card__inner {
+  padding: 16px 18px;
+  box-sizing: border-box;
+}
+
+.public-profile-rating-card__body {
+  width: 100%;
+}
+
+.public-profile-rating-card__body--filled {
+  text-align: center;
 }
 
 @media (min-width: 640px) {
-  .public-profile-rating-summary--has {
-    justify-content: flex-start;
+  .public-profile-rating-card__body--filled {
+    text-align: left;
   }
 }
 
-.public-profile-rating-summary--empty {
+.public-profile-rating-card__eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.public-profile-rating-card__main-row {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 10px 12px;
-  border-style: dashed;
-  border-color: rgba(203, 213, 225, 0.95);
-  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  gap: 12px;
+}
+
+@media (min-width: 480px) {
+  .public-profile-rating-card__main-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 14px 20px;
+  }
 }
 
 @media (min-width: 640px) {
-  .public-profile-rating-summary--empty {
+  .public-profile-rating-card__main-row {
     justify-content: flex-start;
+    align-items: flex-end;
   }
 }
 
-.public-profile-rating-summary__num {
-  font-size: 1.65rem;
+.public-profile-rating-card__score {
+  font-size: clamp(2.25rem, 6.5vw, 2.85rem);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
   color: #b45309;
-  line-height: 1;
+  flex-shrink: 0;
 }
 
-.public-profile-rating-summary__meta {
-  font-size: 0.84rem;
-  font-weight: 500;
-  color: var(--muted);
+.public-profile-rating-card__stars-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 }
 
-.public-profile-rating-summary__meta::before {
-  content: "·";
-  margin-right: 6px;
-  color: #cbd5e1;
-  font-weight: 700;
+@media (min-width: 640px) {
+  .public-profile-rating-card__stars-wrap {
+    align-items: flex-start;
+  }
 }
 
-.public-profile-rating-summary__empty-label {
+.public-profile-rating-card__count {
+  margin: 0;
   font-size: 0.88rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--muted);
-  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+
+.public-profile-rating-card__body--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: 4px 0 2px;
+}
+
+@media (min-width: 640px) {
+  .public-profile-rating-card__body--empty {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 14px;
+  }
+}
+
+.public-profile-rating-card__empty-msg {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.4;
+  max-width: 22rem;
+}
+
+.public-profile-rating-card__stars--muted .rating-stars__empty {
+  color: #cbd5e1;
+  opacity: 0.85;
+}
+
+.public-profile-rating-card__stars--muted .rating-stars__fill {
+  color: #e2e8f0;
+}
+
+.public-profile-rating-card__slot {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(226, 232, 240, 0.85);
+}
+
+.public-profile-rating-card__slot:empty {
+  display: none;
 }
 
 .rating-stars {
@@ -3416,12 +3675,105 @@ main:has(.dashboard-page) {
   gap: 1px;
 }
 
+.rating-stars--lg {
+  font-size: clamp(1.25rem, 3.8vw, 1.45rem);
+  gap: 3px;
+}
+
 .rating-stars__fill {
   color: #f59e0b;
 }
 
 .rating-stars__empty {
   color: #e2e8f0;
+}
+
+/* Public profile — son metin değerlendirmeleri (Review; CollaborationRating özeti hero’da) */
+.public-profile-recent-reviews {
+  width: 100%;
+  margin: 18px 0 20px;
+  padding: 0;
+}
+
+.public-profile-recent-reviews__title {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+@media (max-width: 639px) {
+  .public-profile-recent-reviews__title {
+    text-align: center;
+  }
+}
+
+.public-profile-recent-reviews__empty {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 639px) {
+  .public-profile-recent-reviews__empty {
+    text-align: center;
+  }
+}
+
+.public-profile-recent-reviews__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.public-profile-recent-reviews__card {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 4px 14px rgba(15, 23, 42, 0.05);
+  text-align: left;
+}
+
+.public-profile-recent-reviews__card-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.public-profile-recent-reviews__date {
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.public-profile-recent-reviews__attribution {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.public-profile-recent-reviews__comment {
+  margin: 10px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .public-profile-category-bare {

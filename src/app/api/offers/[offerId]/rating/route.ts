@@ -7,6 +7,7 @@ import {
   computeRatingFlowState,
   parseRating,
   type CollaborationRatingGetResponse,
+  type CollaborationRatingPostSuccessResponse,
 } from "@/lib/offers/collaborationRating";
 import { isOfferParticipant, type OfferForCollaborationReview } from "@/lib/offers/reviews";
 
@@ -157,6 +158,7 @@ export async function POST(
         rating: ratingParsed.rating,
       },
       select: {
+        id: true,
         rating: true,
         offerId: true,
         raterUserId: true,
@@ -164,13 +166,19 @@ export async function POST(
       },
     });
 
-    return NextResponse.json({
+    const body: CollaborationRatingPostSuccessResponse = {
       success: true,
-      rating: row.rating,
-      offerId: row.offerId,
-      raterUserId: row.raterUserId,
-      rateeUserId: row.rateeUserId,
-    });
+      message: "Puanınız kaydedildi.",
+      rating: {
+        id: row.id,
+        offerId: row.offerId,
+        raterUserId: row.raterUserId,
+        rateeUserId: row.rateeUserId,
+        rating: row.rating,
+      },
+    };
+
+    return NextResponse.json(body);
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
       return NextResponse.json(

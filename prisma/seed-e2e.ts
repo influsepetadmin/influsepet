@@ -5,6 +5,11 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { E2E_FIXTURE } from "../tests/e2e/helpers/e2eFixture";
+import {
+  PLATFORM_COMMISSION_RATE,
+  commissionTRYFromOfferAmount,
+  netPayoutTRYFromOfferAmount,
+} from "../src/lib/platformCommission";
 
 const prisma = new PrismaClient();
 
@@ -16,8 +21,8 @@ function offerBase(overrides: {
   status: "PENDING" | "REJECTED" | "IN_PROGRESS" | "DELIVERED" | "REVISION_REQUESTED" | "COMPLETED";
 }) {
   const offerAmountTRY = overrides.offerAmountTRY;
-  const commissionTRY = Math.round(offerAmountTRY * 0.15);
-  const netPayoutTRY = offerAmountTRY - commissionTRY;
+  const commissionTRY = commissionTRYFromOfferAmount(offerAmountTRY);
+  const netPayoutTRY = netPayoutTRYFromOfferAmount(offerAmountTRY);
   return {
     id: overrides.id,
     brandId: E2E_FIXTURE.brand.userId,
@@ -27,7 +32,7 @@ function offerBase(overrides: {
     offerAmountTRY,
     commissionTRY,
     netPayoutTRY,
-    commissionRate: 0.15,
+    commissionRate: PLATFORM_COMMISSION_RATE,
     status: overrides.status,
     initiatedBy: "BRAND" as const,
   };

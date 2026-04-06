@@ -3,11 +3,19 @@
 import type { OfferStatus } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { CollaborationRatingGetResponse } from "@/lib/offers/collaborationRating";
+import type {
+  CollaborationRatingGetResponse,
+  CollaborationRatingPostSuccessResponse,
+} from "@/lib/offers/collaborationRating";
 import { RatingStarsInput } from "./RatingStarsInput";
 import { RatingStarsReadonly } from "./RatingStarsReadonly";
 
 type LoadState = "idle" | "loading" | "error";
+
+type PostErrorJson = {
+  error?: string;
+  code?: string;
+};
 
 export function CollaborationRatingPanel({
   offerId,
@@ -30,6 +38,7 @@ export function CollaborationRatingPanel({
     "duplicate" | "invalid" | "unauthorized" | "forbidden" | "other" | null
   >(null);
   const [successFlash, setSuccessFlash] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const fetchRating = useCallback(async () => {
     setLoadError(null);
@@ -93,17 +102,17 @@ export function CollaborationRatingPanel({
     setSubmitError(null);
     setSubmitErrorKind(null);
     setSuccessFlash(false);
+    setSuccessMessage(null);
     try {
       const res = await fetch(`/api/offers/${encodeURIComponent(offerId)}/rating`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rating: selected }),
       });
-      const json = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        code?: string;
-        success?: boolean;
-      };
+      const json = (await res.json().catch(() => ({}))) as
+        | CollaborationRatingPostSuccessResponse
+        | PostErrorJson
+        | Record<string, unknown>;
 
       if (res.status === 401) {
         setSubmitError("Oturum süresi doldu. Tekrar giriş yapın.");
@@ -115,26 +124,45 @@ export function CollaborationRatingPanel({
         setSubmitErrorKind("forbidden");
         return;
       }
-      if (res.status === 409 || json.code === "DUPLICATE_RATING") {
+      if (
+        res.status === 409 ||
+        ("code" in json && json.code === "DUPLICATE_RATING")
+      ) {
         setSubmitError("Bu iş birliği için zaten puan verdiniz.");
         setSubmitErrorKind("duplicate");
         await fetchRating();
         return;
       }
       if (res.status === 400) {
-        setSubmitError(json.error ?? "Puan gönderilemedi.");
-        setSubmitErrorKind(json.code === "INVALID_STATE" ? "invalid" : "other");
+        const err = json as PostErrorJson;
+        setSubmitError(
+          typeof err.error === "string" ? err.error : "Puan gönderilemedi.",
+        );
+        setSubmitErrorKind(err.code === "INVALID_STATE" ? "invalid" : "other");
         return;
       }
-      if (!res.ok || !json.success) {
-        setSubmitError(json.error ?? "Puan gönderilemedi.");
+      if (
+        !res.ok ||
+        !("success" in json) ||
+        json.success !== true ||
+        !("rating" in json)
+      ) {
+        const err = json as PostErrorJson;
+        setSubmitError(
+          typeof err.error === "string" ? err.error : "Puan gönderilemedi.",
+        );
         setSubmitErrorKind("other");
         return;
       }
 
+      const ok = json as CollaborationRatingPostSuccessResponse;
+      setSuccessMessage(ok.message ?? "Puanınız kaydedildi.");
       setSelected(null);
       setSuccessFlash(true);
-      window.setTimeout(() => setSuccessFlash(false), 3500);
+      window.setTimeout(() => {
+        setSuccessFlash(false);
+        setSuccessMessage(null);
+      }, 5000);
       await fetchRating();
       router.refresh();
     } catch {
@@ -187,39 +215,70 @@ export function CollaborationRatingPanel({
   }
 
   const { mine, theirs, ratingState } = data;
+  const showForm = !mine.submitted || mine.rating == null;
 
   return (
     <section
-      className="chat-panel chat-panel--collaboration-rating"
+      className="chat-panel chat-panel--collaboration-rating collab-rating-panel"
       aria-labelledby="chat-collab-rating-heading"
     >
       <h3 id="chat-collab-rating-heading" className="chat-panel__section-title">
         İş birliği puanı
       </h3>
       <p className="chat-panel__section-hint muted">
-        Tamamlanan iş birliğinde karşı tarafı 1–5 yıldız ile değerlendirin.
+        Tamamlanan iş birliğinde yalnızca karşı tarafa 1–5 yıldız verirsiniz (yorum bu adımda yok).
       </p>
 
-      {successFlash ? (
-        <p className="collab-rating-panel__success" role="status">
-          Puanınız kaydedildi.
+      {successFlash && successMessage ? (
+        <p className="collab-rating-panel__success" role="status" aria-live="polite">
+          {successMessage}
         </p>
       ) : null}
 
-      {mine.submitted && mine.rating != null ? (
-        <div className="collab-rating-panel__block">
-          <p className="collab-rating-panel__label muted">Sizin puanınız</p>
+      {!showForm && mine.rating != null ? (
+        <div className="collab-rating-panel__block collab-rating-panel__block--done">
+          <p className="collab-rating-panel__label muted">Verdiğiniz puan</p>
           <div className="collab-rating-panel__row">
-            <RatingStarsReadonly rating={mine.rating} label={`Verdiğiniz puan: ${mine.rating}`} />
+            <div className="collab-rating-panel__score-readout" aria-label={`Verdiğiniz puan: ${mine.rating} üzerinden 5`}>
+              <span className="collab-rating-panel__score-num">{mine.rating}</span>
+              <span className="collab-rating-panel__score-max">/ 5</span>
+              <RatingStarsReadonly rating={mine.rating} label={`${mine.rating} yıldız`} />
+            </div>
             <span className="collab-rating-panel__badge">Puan verildi</span>
           </div>
         </div>
       ) : (
-        <form className="collab-rating-panel__form" onSubmit={(e) => void handleSubmit(e)}>
-          <p className="collab-rating-panel__label muted">Karşı tarafı puanlayın</p>
-          <RatingStarsInput value={selected} onChange={setSelected} disabled={submitting} />
+        <form
+          className="collab-rating-panel__form"
+          onSubmit={(e) => void handleSubmit(e)}
+          aria-busy={submitting}
+        >
+          <p className="collab-rating-panel__label muted" id="collab-rating-form-label">
+            Karşı tarafı puanlayın
+          </p>
+          <div aria-labelledby="collab-rating-form-label">
+            <RatingStarsInput
+              value={selected}
+              onChange={setSelected}
+              disabled={submitting}
+              idPrefix={`offer-${offerId}-rating`}
+            />
+          </div>
+          {selected != null ? (
+            <p className="collab-rating-panel__selected-preview" aria-live="polite">
+              Seçilen puan: <strong>{selected}</strong> / 5
+            </p>
+          ) : (
+            <p className="collab-rating-panel__selected-preview collab-rating-panel__selected-preview--placeholder muted">
+              1–5 arası bir puan seçin.
+            </p>
+          )}
           <div className="collab-rating-panel__actions">
-            <button type="submit" className="btn btn--sm" disabled={selected == null || submitting}>
+            <button
+              type="submit"
+              className="btn btn--sm"
+              disabled={selected == null || submitting}
+            >
               {submitting ? "Gönderiliyor…" : "Puanı gönder"}
             </button>
           </div>

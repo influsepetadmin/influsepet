@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { PublicProfileHomeLink } from "@/components/profile/public/PublicProfileHomeLink";
 import { PublicBrandProfileHeader } from "@/components/profile/public/PublicBrandProfileHeader";
 import { PublicBrandProfileStats } from "@/components/profile/public/PublicBrandProfileStats";
 import { VerifiedSocialAccounts } from "@/components/profile/public/VerifiedSocialAccounts";
 import { PublicProfileNotFound } from "@/components/profile/public/PublicProfileNotFound";
+import { getDashboardBackHref } from "@/lib/me";
 import { fetchPublicBrandProfileByUsername } from "@/lib/publicProfile/fetchPublicBrandProfileServer";
 
 type Props = { params: Promise<{ username: string }> };
@@ -21,7 +23,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicBrandProfilePage({ params }: Props) {
   const { username } = await params;
-  const data = await fetchPublicBrandProfileByUsername(username);
+  const [data, homeHref] = await Promise.all([
+    fetchPublicBrandProfileByUsername(username),
+    getDashboardBackHref(),
+  ]);
 
   if (!data) {
     return (
@@ -38,6 +43,7 @@ export default async function PublicBrandProfilePage({ params }: Props) {
     <div className="public-profile-page public-profile-page--brand">
       <div className="public-profile-page__inner">
         <div className="public-profile-shell">
+          <PublicProfileHomeLink href={homeHref} />
           <PublicBrandProfileHeader data={data} />
           <PublicBrandProfileStats data={data} />
           <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />

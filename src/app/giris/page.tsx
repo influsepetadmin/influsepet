@@ -12,6 +12,12 @@ export default async function GirisPage({
   const err = p.err != null && String(p.err).trim() !== "" ? String(p.err) : null;
 
   return (
-    <AuthLandingShell initialRole={role} initialMode={mode} initialErr={err} basePath="/giris" />
+    <AuthLandingShell
+      initialRole={role}
+      initialMode={mode}
+      initialErr={err}
+      basePath="/giris"
+      showFooterContact
+    />
   );
 }

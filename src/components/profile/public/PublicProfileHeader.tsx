@@ -2,6 +2,7 @@ import type { PublicProfileByUsernameResponse } from "@/lib/publicProfile/public
 import { getAvatarUrl } from "@/lib/avatar";
 import { CategoryBadgeGroup } from "./CategoryBadgeGroup";
 import { PublicProfileRatingSummary } from "./PublicProfileRatingSummary";
+import { PublicRecentReviewsSection } from "./PublicRecentReviewsSection";
 
 export function PublicProfileHeader({ data }: { data: PublicProfileByUsernameResponse }) {
   const avatarSrc = data.avatarUrl?.trim() || getAvatarUrl(data.id);
@@ -41,9 +42,11 @@ export function PublicProfileHeader({ data }: { data: PublicProfileByUsernameRes
         </div>
 
         <PublicProfileRatingSummary
-          ratingAverage={data.ratingAverage}
+          averageRating={data.averageRating}
           ratingCount={data.ratingCount}
         />
+
+        <PublicRecentReviewsSection reviews={data.recentPublicReviews} />
 
         <CategoryBadgeGroup bare categories={data.categories} nicheText={data.nicheText} />
 

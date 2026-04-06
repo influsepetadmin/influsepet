@@ -5,15 +5,24 @@ import {
   type AuthMode,
   type AuthRole,
 } from "@/components/auth/UnifiedAuthEntry";
+import { SiteFooterContactBlock } from "@/components/SiteFooterContactBlock";
 
 type Props = {
   initialRole: AuthRole;
   initialMode: AuthMode;
   initialErr: string | null;
   basePath: AuthLandingBasePath;
+  /** Yalnızca /giris — adres & iletişim bloğu */
+  showFooterContact?: boolean;
 };
 
-export function AuthLandingShell({ initialRole, initialMode, initialErr, basePath }: Props) {
+export function AuthLandingShell({
+  initialRole,
+  initialMode,
+  initialErr,
+  basePath,
+  showFooterContact = false,
+}: Props) {
   return (
     <div className="auth-landing-wrap">
       <section className="auth-shell">
@@ -49,6 +58,11 @@ export function AuthLandingShell({ initialRole, initialMode, initialErr, basePat
           basePath={basePath}
         />
       </section>
+      {showFooterContact ? (
+        <div className="auth-landing-contact">
+          <SiteFooterContactBlock />
+        </div>
+      ) : null}
     </div>
   );
 }

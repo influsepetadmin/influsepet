@@ -15,6 +15,7 @@ import InfluencerPortfolioManager from "@/components/InfluencerPortfolioManager"
 import CitySelect from "@/components/CitySelect";
 import { CollaborationCard } from "@/components/offers/CollaborationCard";
 import { toCollaborationCardOffer } from "@/components/offers/collaborationCardOffer";
+import { getRateeReputationByUserIds } from "@/lib/offers/rateeReputation";
 import { getAvailableOfferTransitions } from "@/lib/offers/transitions";
 import { SocialAccountsSection } from "@/components/social/SocialAccountsSection";
 
@@ -152,6 +153,14 @@ export default async function InfluencerPage({
           },
         })
       : [];
+
+  const collabOffersForReputation = [...receivedOffers, ...sentOffersToBrands];
+  const completedBrandIds = [
+    ...new Set(
+      collabOffersForReputation.filter((o) => o.status === "COMPLETED").map((o) => o.brandId),
+    ),
+  ];
+  const rateeReputationByUserId = await getRateeReputationByUserIds(completedBrandIds);
 
   const brandResults =
     profile && hasBrandSearch
@@ -371,6 +380,7 @@ export default async function InfluencerPage({
                   otherSideName={o.brand?.brand?.companyName ?? o.brand?.name ?? "-"}
                   profileHref={o.brand?.id ? `/profil/marka/${o.brand.id}` : null}
                   chatHref={o.conversation?.id ? `/chat/${o.conversation.id}` : null}
+                  counterpartyRating={rateeReputationByUserId.get(o.brandId) ?? null}
                   availableNextTransitions={getAvailableOfferTransitions({
                     offer: {
                       id: o.id,
@@ -411,6 +421,7 @@ export default async function InfluencerPage({
                   otherSideName={o.brand?.brand?.companyName ?? o.brand?.name ?? "-"}
                   profileHref={o.brand?.id ? `/profil/marka/${o.brand.id}` : null}
                   chatHref={o.conversation?.id ? `/chat/${o.conversation.id}` : null}
+                  counterpartyRating={rateeReputationByUserId.get(o.brandId) ?? null}
                   availableNextTransitions={getAvailableOfferTransitions({
                     offer: {
                       id: o.id,

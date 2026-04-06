@@ -202,7 +202,7 @@ model Offer {
   title          String
   brief          String
   offerAmountTRY Int
-  commissionRate Float          @default(0.15)
+  commissionRate Float          @default(0.085)
   commissionTRY  Int
   netPayoutTRY   Int
   status         OfferStatus    @default(PENDING)

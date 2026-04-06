@@ -60,6 +60,42 @@ export function formatAverageRating(value: number): string {
  * Backend-side selection for the public influencer profile reviews block.
  * Does not return offer IDs, amounts, or reviewer PII — only role for type badge.
  */
+/** JSON-serializable row for public profile API (`/api/public-profile`, `/api/public-brand-profile`). */
+export type PublicProfileRecentReviewJson = {
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  reviewerTypeLabel: string;
+};
+
+/**
+ * Recent text reviews (Review model, isPublic) for public profile JSON — not used for average star score
+ * (that comes from CollaborationRating elsewhere).
+ */
+export async function getRecentPublicReviewsForPublicProfile(
+  revieweeUserId: string,
+  limit = PUBLIC_INFLUENCER_PROFILE_REVIEWS_LIMIT,
+): Promise<PublicProfileRecentReviewJson[]> {
+  const where = publicInfluencerReviewsWhere(revieweeUserId);
+  const rows = await prisma.review.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    select: {
+      rating: true,
+      comment: true,
+      createdAt: true,
+      reviewer: { select: { role: true } },
+    },
+  });
+  return rows.map((row) => ({
+    rating: row.rating,
+    comment: row.comment,
+    createdAt: row.createdAt.toISOString(),
+    reviewerTypeLabel: reviewerRolePublicLabel(row.reviewer.role),
+  }));
+}
+
 export async function getPublicInfluencerReviewsSectionData(
   influencerUserId: string,
 ): Promise<PublicInfluencerReviewsSectionData> {

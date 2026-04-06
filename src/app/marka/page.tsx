@@ -13,6 +13,7 @@ import { isBrandDashboardProfileComplete } from "@/lib/dashboardProfileCompletio
 import { BrandProfilePanel } from "@/components/dashboard/BrandProfilePanel";
 import { CollaborationCard } from "@/components/offers/CollaborationCard";
 import { toCollaborationCardOffer } from "@/components/offers/collaborationCardOffer";
+import { getRateeReputationByUserIds } from "@/lib/offers/rateeReputation";
 import { getAvailableOfferTransitions } from "@/lib/offers/transitions";
 import { SocialAccountsSection } from "@/components/social/SocialAccountsSection";
 
@@ -138,7 +139,15 @@ export default async function BrandPage({
           },
         },
       })
-    : [];
+      : [];
+
+  const collabOffersForReputation = [...offersFromInfluencers, ...sentOffers];
+  const completedInfluencerIds = [
+    ...new Set(
+      collabOffersForReputation.filter((o) => o.status === "COMPLETED").map((o) => o.influencerId),
+    ),
+  ];
+  const rateeReputationByUserId = await getRateeReputationByUserIds(completedInfluencerIds);
 
   const influencerResults = canUseMarketplace
     ? hasActiveSearch
@@ -250,6 +259,7 @@ export default async function BrandPage({
                   otherSideName={o.influencer?.influencer?.username ?? o.influencer?.name ?? "-"}
                   profileHref={o.influencer?.id ? `/profil/influencer/${o.influencer.id}` : null}
                   chatHref={o.conversation?.id ? `/chat/${o.conversation.id}` : null}
+                  counterpartyRating={rateeReputationByUserId.get(o.influencerId) ?? null}
                   availableNextTransitions={getAvailableOfferTransitions({
                     offer: {
                       id: o.id,
@@ -393,6 +403,7 @@ export default async function BrandPage({
                   otherSideName={o.influencer?.influencer?.username ?? "-"}
                   profileHref={o.influencer?.id ? `/profil/influencer/${o.influencer.id}` : null}
                   chatHref={o.conversation?.id ? `/chat/${o.conversation.id}` : null}
+                  counterpartyRating={rateeReputationByUserId.get(o.influencerId) ?? null}
                   availableNextTransitions={getAvailableOfferTransitions({
                     offer: {
                       id: o.id,
