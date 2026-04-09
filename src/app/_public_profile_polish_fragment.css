@@ -15,6 +15,22 @@
   gap: 24px;
 }
 
+.public-profile-page--influencer {
+  width: 100%;
+}
+
+.public-profile-page__inner--influencer {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 2px;
+}
+
+.public-profile-shell--influencer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 /* Hero */
 .public-profile-hero {
   display: flex;
@@ -191,6 +207,38 @@
 .public-profile-hero__meta-icon {
   margin-right: 6px;
   opacity: 0.75;
+}
+
+.public-profile-hero__meta-line--icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.public-profile-hero__meta-icon--svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+  opacity: 1;
+}
+
+.public-profile-hero__trust-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.public-profile-icon {
+  flex-shrink: 0;
+}
+
+.public-profile-icon--meta {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: var(--muted);
+  opacity: 0.82;
 }
 
 .public-profile-hero__meta-line--trust {
@@ -419,17 +467,74 @@
   letter-spacing: 0.02em;
 }
 
-/* Stats grid */
-.public-profile-stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  align-items: stretch;
+.public-profile-hero__cta--brand-panel .public-profile-hero__cta-btn:not(:disabled) {
+  opacity: 1;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.public-profile-hero__cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
 }
 
 @media (min-width: 640px) {
-  .public-profile-stats {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  .public-profile-hero__cta-actions {
+    justify-content: flex-start;
+  }
+}
+
+/* Stats grid — count-aware columns avoid a single card stranded on row 2 (e.g. 4+1). */
+.public-profile-stats {
+  display: grid;
+  gap: 12px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+/* Default / legacy: two columns on narrow viewports */
+.public-profile-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Three stats (e.g. brand): one column on very small screens, then one balanced row */
+.public-profile-stats[data-stat-count="3"] {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 480px) {
+  .public-profile-stats[data-stat-count="3"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Four stats: 2×2 until wide enough for a single row */
+.public-profile-stats[data-stat-count="4"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 900px) {
+  .public-profile-stats[data-stat-count="4"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Five stats (full influencer): stack on tiny screens, 3+2 on tablet, one row on desktop */
+.public-profile-stats[data-stat-count="5"] {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 520px) {
+  .public-profile-stats[data-stat-count="5"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .public-profile-stats[data-stat-count="5"] {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
@@ -460,6 +565,18 @@
   background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
   border: 1px solid rgba(226, 232, 240, 0.95);
   opacity: 0.92;
+}
+
+.public-profile-stat-card__icon--line {
+  font-size: 0;
+  line-height: 0;
+}
+
+.public-profile-icon--stat {
+  width: 1.05rem;
+  height: 1.05rem;
+  color: #64748b;
+  opacity: 0.9;
 }
 
 .public-profile-stat-card__body {

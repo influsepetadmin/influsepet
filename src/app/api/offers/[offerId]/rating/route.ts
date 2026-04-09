@@ -5,6 +5,7 @@ import { getSessionPayload } from "@/lib/session";
 import {
   canSubmitCollaborationRating,
   computeRatingFlowState,
+  parseOptionalReviewText,
   parseRating,
   type CollaborationRatingGetResponse,
   type CollaborationRatingPostSuccessResponse,
@@ -50,18 +51,24 @@ export async function GET(
   const counterpartyUserId =
     offer.brandId === session.uid ? offer.influencerId : offer.brandId;
 
+  /** Rating I gave (rater = me). */
   const [myRow, theirRow] = await Promise.all([
     prisma.collaborationRating.findFirst({
       where: { offerId, raterUserId: session.uid },
-      select: { rating: true, rateeUserId: true },
+      select: { rating: true, rateeUserId: true, reviewText: true },
     }),
+    /**
+     * Rating I received on this offer: ratee = me, rater = the other participant.
+     * Equivalent to filtering by counterparty as rater, but avoids relying on a separate
+     * counterparty id for matching (two-party offer ⇒ at most one such row).
+     */
     prisma.collaborationRating.findFirst({
       where: {
         offerId,
-        raterUserId: counterpartyUserId,
         rateeUserId: session.uid,
+        raterUserId: { not: session.uid },
       },
-      select: { rating: true },
+      select: { rating: true, reviewText: true },
     }),
   ]);
 
@@ -78,10 +85,12 @@ export async function GET(
       submitted: iRated,
       rating: myRow?.rating ?? null,
       rateeUserId: myRow?.rateeUserId ?? null,
+      reviewText: myRow?.reviewText ?? null,
     },
     theirs: {
       submitted: theyRated,
       rating: theirRow?.rating ?? null,
+      reviewText: theirRow?.reviewText ?? null,
     },
     ratingState: computeRatingFlowState({ iRated, theyRated }),
   };
@@ -107,6 +116,11 @@ export async function POST(
   const ratingParsed = parseRating(body?.rating);
   if ("error" in ratingParsed) {
     return NextResponse.json({ error: ratingParsed.error }, { status: 400 });
+  }
+
+  const textParsed = parseOptionalReviewText(body?.reviewText);
+  if (textParsed.ok === false) {
+    return NextResponse.json({ error: textParsed.error }, { status: 400 });
   }
 
   const offer = await loadOfferForRating(offerId);
@@ -156,6 +170,7 @@ export async function POST(
         raterUserId: session.uid,
         rateeUserId,
         rating: ratingParsed.rating,
+        reviewText: textParsed.text,
       },
       select: {
         id: true,
@@ -163,6 +178,7 @@ export async function POST(
         offerId: true,
         raterUserId: true,
         rateeUserId: true,
+        reviewText: true,
       },
     });
 
@@ -175,6 +191,7 @@ export async function POST(
         raterUserId: row.raterUserId,
         rateeUserId: row.rateeUserId,
         rating: row.rating,
+        reviewText: row.reviewText,
       },
     };
 

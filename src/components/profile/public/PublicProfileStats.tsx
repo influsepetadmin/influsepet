@@ -21,5 +21,5 @@ export function PublicProfileStats({ data }: { data: PublicProfileByUsernameResp
     });
   }
 
-  return <PublicProfileStatCards items={items} />;
+  return <PublicProfileStatCards items={items} iconTreatment="line" />;
 }

@@ -3,7 +3,7 @@
 import { useId } from "react";
 
 /**
- * 1–5 yıldız seçimi (CollaborationRating — yorum değil).
+ * 1–5 yıldız seçimi (CollaborationRating; isteğe bağlı kısa not ayrı alanda).
  * Aynı isimli radyolar: klavye okları ve ekran okuyucu uyumu.
  */
 export function RatingStarsInput({

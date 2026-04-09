@@ -6,7 +6,6 @@ import InfluencerProfileForm from "@/components/InfluencerProfileForm";
 export function InfluencerProfilePanel({
   err,
   profileComplete,
-  userId,
   displayName,
   initial,
   isExistingProfile,
@@ -14,7 +13,6 @@ export function InfluencerProfilePanel({
 }: {
   err: string | null | undefined;
   profileComplete: boolean;
-  userId: string;
   displayName: string;
   initial: {
     username: string;
@@ -103,7 +101,7 @@ export function InfluencerProfilePanel({
 
       {showForm ? (
         <div style={{ marginTop: profileComplete ? 14 : 0 }}>
-          <InfluencerProfileForm userId={userId} initial={initial} isExistingProfile={isExistingProfile} />
+          <InfluencerProfileForm initial={initial} isExistingProfile={isExistingProfile} />
         </div>
       ) : null}
     </>

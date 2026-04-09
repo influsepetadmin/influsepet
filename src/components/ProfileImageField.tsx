@@ -1,28 +1,55 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { isStockProfileImageUrl } from "@/lib/avatar";
 
 type Props = {
   initialUrl: string;
-  /** Shown when URL is empty (e.g. deterministic avatar). */
-  fallbackPreviewUrl?: string;
   inputId?: string;
   name?: string;
 };
 
+function normalizeInitialProfileUrl(raw: string): string {
+  const t = raw.trim();
+  if (!t || isStockProfileImageUrl(t)) return "";
+  return raw;
+}
+
+function ProfileImagePlaceholder() {
+  return (
+    <div className="profile-image-field__placeholder" aria-hidden>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="42"
+        height="42"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.45"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="profile-image-field__placeholder-icon"
+      >
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+        <circle cx="12" cy="13" r="4" />
+      </svg>
+      <span className="profile-image-field__placeholder-label">Fotoğraf yükleyin</span>
+    </div>
+  );
+}
+
 export default function ProfileImageField({
   initialUrl,
-  fallbackPreviewUrl,
   inputId = "profileImageUrl",
   name = "profileImageUrl",
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [url, setUrl] = useState(initialUrl);
+  const [url, setUrl] = useState(() => normalizeInitialProfileUrl(initialUrl));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const trimmed = url.trim();
-  const previewSrc = trimmed || fallbackPreviewUrl || undefined;
+  const hasRealImage = Boolean(trimmed) && !isStockProfileImageUrl(trimmed);
 
   async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -65,38 +92,24 @@ export default function ProfileImageField({
         }}
       >
         <div
+          className={`profile-image-field__preview${hasRealImage ? "" : " profile-image-field__preview--empty"}`}
           style={{
             width: 96,
             height: 96,
             borderRadius: 12,
             overflow: "hidden",
-            border: "1px solid #e2e8f0",
-            background: "#f3f4f6",
+            border: "1px solid var(--border)",
             flexShrink: 0,
           }}
         >
-          {previewSrc ? (
+          {hasRealImage ? (
             <img
-              src={previewSrc}
+              src={trimmed}
               alt=""
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ) : (
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "0.75rem",
-                color: "#9ca3af",
-                padding: 8,
-                textAlign: "center",
-              }}
-            >
-              Onizleme yok
-            </div>
+            <ProfileImagePlaceholder />
           )}
         </div>
         <div style={{ flex: "1 1 200px", minWidth: 0 }}>

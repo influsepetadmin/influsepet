@@ -9,6 +9,33 @@ export type SafeUrlResult =
   | { ok: true; value: string | null }
   | { ok: false; error: string };
 
+/**
+ * Kullanıcı girişini `new URL()` için hazırlar: şemasız alan adlarına https ekler,
+ * protocol-relative (`//host/...`) adresleri https ile çözer.
+ */
+export function prepareUserHttpUrlInput(trimmed: string): string {
+  const t = trimmed.trim();
+  if (!t) return t;
+  if (/^mailto:/i.test(t)) return t;
+  if (t.startsWith("//")) return `https:${t}`;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(t)) {
+    return t;
+  }
+  return `https://${t}`;
+}
+
+/** Tek etiketli host adlarını (örn. "abc") reddetmek için — gerçek alan adlarında en az bir nokta beklenir. */
+function isPlausibleHttpUrlHostname(hostname: string): boolean {
+  const h = hostname.toLowerCase();
+  if (h === "localhost") return true;
+  if (h.startsWith("[") && h.endsWith("]")) return true;
+  if (/^(?:\d{1,3}\.){3}\d{1,3}$/.test(h)) return true;
+  if (!h.includes(".")) return false;
+  const labels = h.split(".");
+  if (labels.some((l) => l.length === 0)) return false;
+  return h.length >= 4;
+}
+
 function looksDangerous(trimmed: string): boolean {
   const lower = trimmed.toLowerCase();
   if (BLOCKED_PROTOCOL.test(lower)) return true;
@@ -65,10 +92,13 @@ export function parseOptionalHttpHttpsUrl(raw: string | null | undefined): SafeU
     return { ok: false, error: "Bu baglanti turune izin verilmez." };
   }
   try {
-    const normalized = t.includes("://") ? t : `https://${t}`;
+    const normalized = prepareUserHttpUrlInput(t);
     const u = new URL(normalized);
     if (u.protocol !== "http:" && u.protocol !== "https:") {
       return { ok: false, error: "Yalnizca http ve https baglantilarina izin verilir." };
+    }
+    if (!isPlausibleHttpUrlHostname(u.hostname)) {
+      return { ok: false, error: "Gecersiz URL." };
     }
     return { ok: true, value: u.href };
   } catch {

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { PublicProfileIconListBullet, PublicProfileIconStar } from "./publicProfileInfluencerIcons";
 import { RatingStars } from "./RatingStars";
 
 function ratingCountLabel(count: number): string {
@@ -32,12 +33,18 @@ export function PublicProfileRatingSummary({
       <div className="public-profile-rating-card__inner">
         {hasRating ? (
           <div className="public-profile-rating-card__body public-profile-rating-card__body--filled">
-            <p className="public-profile-rating-card__eyebrow">Ortalama puan</p>
+            <p className="public-profile-rating-card__eyebrow">
+              <PublicProfileIconStar className="public-profile-icon public-profile-icon--rating-eyebrow" />
+              Ortalama puan
+            </p>
             <div className="public-profile-rating-card__main-row">
               <span className="public-profile-rating-card__score">{averageRating!.toFixed(1)}</span>
               <div className="public-profile-rating-card__stars-wrap">
                 <RatingStars value={averageRating!} size="lg" />
-                <p className="public-profile-rating-card__count">{ratingCountLabel(ratingCount)}</p>
+                <p className="public-profile-rating-card__count">
+                  <PublicProfileIconListBullet className="public-profile-icon public-profile-icon--rating-count" />
+                  {ratingCountLabel(ratingCount)}
+                </p>
               </div>
             </div>
           </div>

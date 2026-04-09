@@ -87,6 +87,21 @@ model User {
   socialAccounts    SocialAccount[]
   deliveriesSubmitted OfferDelivery[] @relation("OfferDeliverySubmitter")
   collaborationMediaUploaded CollaborationMedia[] @relation("CollaborationMediaUploader")
+  passwordResetTokens      PasswordResetToken[]
+}
+
+/** Single-use password reset token (raw token is shown once in email; DB stores SHA-256 hash). */
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model InfluencerProfile {
@@ -310,7 +325,7 @@ model Payment {
 }
 
 /**
- * Tamamlanan iş birliği (Offer) bağlamında, yorum içermeyen 1–5 puan.
+ * Tamamlanan iş birliği (Offer) bağlamında 1–5 puan; isteğe bağlı kısa metin notu.
  * Aynı (teklif, puanlayan, hedef) üçlüsü tekil — çift taraflı senaryoda iki satır olabilir (her taraf bir kez).
  */
 model CollaborationRating {
@@ -320,6 +335,8 @@ model CollaborationRating {
   rateeUserId String
   /** 1–5; uygulama ve DB CHECK ile doğrulanmalı */
   rating      Int
+  /** İsteğe bağlı kısa değerlendirme notu (chat içi; public Review modelinden ayrı). */
+  reviewText  String?  @db.VarChar(160)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

@@ -15,6 +15,11 @@ export const metadata: Metadata = {
   description: siteDescription,
   applicationName: "InfluSepet",
   authors: [{ name: "InfluSepet" }],
+  /** Tab + home-screen: purple basket mark only (`logo-primary` stays for OG / full wordmark UI). */
+  icons: {
+    icon: [{ url: "/branding/influsepet-logo-icon.png", type: "image/png" }],
+    apple: [{ url: "/branding/influsepet-logo-icon.png", type: "image/png" }],
+  },
   openGraph: {
     type: "website",
     locale: "tr_TR",

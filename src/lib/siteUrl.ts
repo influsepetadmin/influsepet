@@ -17,5 +17,6 @@ export function getSiteOrigin(): string {
     const host = vercel.replace(/^https?:\/\//, "");
     return `https://${host}`;
   }
+  /** Dev fallback for metadataBase / sitemap only — API redirects use `sameOriginRedirect(request, ...)`. */
   return "http://localhost:3000";
 }

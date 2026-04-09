@@ -212,7 +212,6 @@ export default async function BrandPage({
         <BrandProfilePanel
           err={err}
           profileComplete={profileComplete}
-          userId={user.id}
           displayName={user.name}
           initial={{
             companyName: profile?.companyName ?? "",
@@ -364,8 +363,11 @@ export default async function BrandPage({
                         name="offerAmountTRY"
                         type="number"
                         required
-                        min={1}
-                        defaultValue={p.basePriceTRY > 0 ? p.basePriceTRY : 1}
+                        min={100}
+                        step={100}
+                        defaultValue={
+                          p.basePriceTRY > 0 ? Math.max(100, Math.ceil(p.basePriceTRY / 100) * 100) : 100
+                        }
                       />
 
                       <button className="btn" type="submit">
@@ -420,11 +422,6 @@ export default async function BrandPage({
           )}
         </section>
       )}
-
-      <div className="dashboard-page__note muted">
-        Influencer arayabilir, iş birliği isteği gönderebilir ve süreç ilerledikçe sohbet üzerinden iletişim
-        kurabilirsiniz.
-      </div>
     </div>
   );
 }

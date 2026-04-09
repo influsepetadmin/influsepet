@@ -128,7 +128,7 @@ export default async function ChatIndexPage() {
           <h1 className="chat-page-header__title">Sohbetler</h1>
           <p className="chat-page-header__lede muted">İş birliği görüşmeleriniz burada listelenir.</p>
         </div>
-        <Link className="btn secondary" href={panelHref}>
+        <Link className="btn secondary chat-page-toolbar__panel" href={panelHref}>
           Panele dön
         </Link>
       </header>

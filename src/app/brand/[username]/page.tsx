@@ -41,12 +41,14 @@ export default async function PublicBrandProfilePage({ params }: Props) {
 
   return (
     <div className="public-profile-page public-profile-page--brand">
-      <div className="public-profile-page__inner">
-        <div className="public-profile-shell">
+      <div className="public-profile-page__inner public-profile-page__inner--brand">
+        <div className="public-profile-shell public-profile-shell--brand">
           <PublicProfileHomeLink href={homeHref} />
           <PublicBrandProfileHeader data={data} />
-          <PublicBrandProfileStats data={data} />
-          <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
+          <div className="public-profile-brand-secondary">
+            <PublicBrandProfileStats data={data} />
+            <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
+          </div>
         </div>
       </div>
     </div>

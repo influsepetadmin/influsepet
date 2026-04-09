@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sameOriginRedirect } from "@/lib/sameOriginRedirect";
 import { getSessionPayload } from "@/lib/session";
 import { CATEGORY_KEYS } from "@/lib/categories";
 import { parseOptionalHttpHttpsUrl, parseOptionalProfileImageUrl } from "@/lib/safeUrl";
@@ -32,17 +33,15 @@ export async function POST(request: Request) {
 
   const profileImageUrlCheck = parseOptionalProfileImageUrl(profileImageUrlRaw);
   if (profileImageUrlCheck.ok === false) {
-    return NextResponse.redirect(
-      new URL("/influencer?err=" + encodeURIComponent(profileImageUrlCheck.error), request.url),
-    );
+    return sameOriginRedirect(request, "/influencer?err=" + encodeURIComponent(profileImageUrlCheck.error));
   }
   const instagramCheck = parseOptionalHttpHttpsUrl(instagramUrlRaw);
   if (instagramCheck.ok === false) {
-    return NextResponse.redirect(new URL("/influencer?err=" + encodeURIComponent(instagramCheck.error), request.url));
+    return sameOriginRedirect(request, "/influencer?err=" + encodeURIComponent(instagramCheck.error));
   }
   const tiktokCheck = parseOptionalHttpHttpsUrl(tiktokUrlRaw);
   if (tiktokCheck.ok === false) {
-    return NextResponse.redirect(new URL("/influencer?err=" + encodeURIComponent(tiktokCheck.error), request.url));
+    return sameOriginRedirect(request, "/influencer?err=" + encodeURIComponent(tiktokCheck.error));
   }
 
   const profileImageUrl = profileImageUrlCheck.value;
@@ -58,13 +57,13 @@ export async function POST(request: Request) {
   const primaryCategory = categoryKeys[0] ?? user.influencer.category;
 
   if (username.length < 3) {
-    return NextResponse.redirect(new URL("/influencer?err=" + encodeURIComponent("Kullanici adi gecersiz"), request.url));
+    return sameOriginRedirect(request, "/influencer?err=" + encodeURIComponent("Kullanici adi gecersiz"));
   }
 
   if (username !== user.influencer.username) {
     const taken = await prisma.influencerProfile.findUnique({ where: { username } });
     if (taken) {
-      return NextResponse.redirect(new URL("/influencer?err=" + encodeURIComponent("Kullanici adi alinmis"), request.url));
+      return sameOriginRedirect(request, "/influencer?err=" + encodeURIComponent("Kullanici adi alinmis"));
     }
   }
 
@@ -96,5 +95,5 @@ export async function POST(request: Request) {
     }
   });
 
-  return NextResponse.redirect(new URL("/influencer", request.url));
+  return sameOriginRedirect(request, "/influencer");
 }

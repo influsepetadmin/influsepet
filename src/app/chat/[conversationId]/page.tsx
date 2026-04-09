@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
+import { getAvatarUrl } from "@/lib/avatar";
 import { prisma } from "@/lib/prisma";
 import { getSessionPayload } from "@/lib/session";
 import ChatClient from "./ChatClient";
@@ -53,13 +54,15 @@ export default async function ChatConversationPage({
             brand: {
               select: {
                 name: true,
-                brand: { select: { companyName: true } },
+                brand: {
+                  select: { companyName: true, username: true, profileImageUrl: true },
+                },
               },
             },
             influencer: {
               select: {
                 name: true,
-                influencer: { select: { username: true } },
+                influencer: { select: { username: true, profileImageUrl: true } },
               },
             },
           },
@@ -100,13 +103,28 @@ export default async function ChatConversationPage({
 
   const o = conversation.offer;
   const isBrandViewer = o.brandId === session.uid;
+  const otherUserId = isBrandViewer ? o.influencerId : o.brandId;
   const otherSideName = isBrandViewer
-    ? o.influencer?.influencer?.username ?? o.influencer?.name ?? "Influencer"
-    : o.brand?.brand?.companyName ?? o.brand?.name ?? "Marka";
+    ? o.influencer?.name?.trim() || o.influencer?.influencer?.username || "Influencer"
+    : o.brand?.brand?.companyName?.trim() || o.brand?.name?.trim() || "Marka";
   const otherSideRole = isBrandViewer ? "Influencer" : "Marka";
   const profileHref = isBrandViewer
     ? `/profil/influencer/${o.influencerId}`
     : `/profil/marka/${o.brandId}`;
+
+  const rawImg = isBrandViewer
+    ? o.influencer?.influencer?.profileImageUrl?.trim()
+    : o.brand?.brand?.profileImageUrl?.trim();
+  const otherSideAvatarSrc = rawImg || getAvatarUrl(otherUserId);
+
+  let otherSideHandleLine: string | null = null;
+  if (isBrandViewer) {
+    const u = o.influencer?.influencer?.username;
+    if (u) otherSideHandleLine = `@${u}`;
+  } else {
+    const bu = o.brand?.brand?.username?.trim();
+    if (bu) otherSideHandleLine = `@${bu}`;
+  }
 
   return (
     <div className="chat-layout">
@@ -114,7 +132,7 @@ export default async function ChatConversationPage({
         <Link className="btn secondary btn--sm chat-page-toolbar__back" href="/chat">
           ← Sohbetler
         </Link>
-        <Link className="btn secondary" href={homeHref}>
+        <Link className="btn secondary chat-page-toolbar__panel" href={homeHref}>
           Panele dön
         </Link>
       </div>
@@ -132,6 +150,8 @@ export default async function ChatConversationPage({
         chatContext={{
           otherSideName,
           otherSideRole,
+          otherSideAvatarSrc,
+          otherSideHandleLine,
           profileHref,
           offerTitle: offerTitle(o.title, o.campaignName),
         }}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { OfferStatus } from "@prisma/client";
 import { formatCommissionPercentTr } from "@/lib/platformCommission";
 import type { RateeReputationStats } from "@/lib/offers/rateeReputation";
@@ -103,8 +103,18 @@ export function CollaborationCard({
 }) {
   const router = useRouter();
   const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busyRef = useRef(false);
+
+  useEffect(() => {
+    if (!cancelConfirmOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setCancelConfirmOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [cancelConfirmOpen]);
 
   const displayName =
     (offer.campaignName && offer.campaignName.trim()) ||
@@ -203,6 +213,11 @@ export function CollaborationCard({
     [offer.id, router],
   );
 
+  const confirmCancelCollaboration = useCallback(() => {
+    setCancelConfirmOpen(false);
+    void runTransition("CANCELLED");
+  }, [runTransition]);
+
   const hasBrief = Boolean(offer.brief.trim());
   const ratingBadge = counterpartyRatingBadge(offer.status, counterpartyRating ?? null);
 
@@ -284,20 +299,59 @@ export function CollaborationCard({
           {transitions.map((next) => {
             const key = `${offer.id}:${next}`;
             const loading = pendingKey === key;
-            const disabled = Boolean(pendingKey);
+            const disabled = Boolean(pendingKey) || cancelConfirmOpen;
             return (
               <button
                 key={next}
                 type="button"
                 className={transitionButtonClass(next)}
                 disabled={disabled}
-                onClick={() => void runTransition(next)}
+                onClick={() => {
+                  if (next === "CANCELLED") {
+                    setCancelConfirmOpen(true);
+                    return;
+                  }
+                  void runTransition(next);
+                }}
                 style={{ opacity: loading ? 0.75 : 1 }}
               >
                 {loading ? "…" : ACTION_LABELS[next] ?? next}
               </button>
             );
           })}
+        </div>
+      ) : null}
+
+      {cancelConfirmOpen ? (
+        <div
+          className="confirm-dialog-backdrop"
+          role="presentation"
+          onClick={() => setCancelConfirmOpen(false)}
+        >
+          <div
+            className="confirm-dialog-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="collab-cancel-title"
+            aria-describedby="collab-cancel-desc"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="collab-cancel-title" className="confirm-dialog-panel__title">
+              İş birliğini iptal et
+            </h2>
+            <div id="collab-cancel-desc" className="confirm-dialog-panel__body-stack">
+              <p className="confirm-dialog-panel__body">İptal etmek istediğinize emin misiniz?</p>
+              <p className="confirm-dialog-panel__body-note muted">Bu işlem geri alınamaz.</p>
+            </div>
+            <div className="confirm-dialog-panel__actions">
+              <button type="button" className="btn secondary" onClick={() => setCancelConfirmOpen(false)}>
+                Vazgeç
+              </button>
+              <button type="button" className="btn btn--danger" onClick={confirmCancelCollaboration}>
+                İptal et
+              </button>
+            </div>
+          </div>
         </div>
       ) : null}
     </article>

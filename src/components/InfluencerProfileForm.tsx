@@ -1,14 +1,11 @@
 import CitySelect from "@/components/CitySelect";
 import CategoryMultiSelect from "@/components/CategoryMultiSelect";
 import ProfileImageField from "@/components/ProfileImageField";
-import { getAvatarUrl } from "@/lib/avatar";
 
 export default function InfluencerProfileForm({
   initial,
   isExistingProfile,
-  userId,
 }: {
-  userId: string;
   initial: {
     username: string;
     followerCount: number;
@@ -66,11 +63,7 @@ export default function InfluencerProfileForm({
         style={{ maxWidth: "100%", fontSize: "0.95rem" }}
       />
 
-      <ProfileImageField
-        initialUrl={initial.profileImageUrl}
-        fallbackPreviewUrl={getAvatarUrl(userId)}
-        inputId="profileImageUrl"
-      />
+      <ProfileImageField initialUrl={initial.profileImageUrl} inputId="profileImageUrl" />
 
       <p className="muted" style={{ marginTop: 12, marginBottom: 6, fontSize: "0.88rem" }}>
         Güven ve doğrulama için öncelikle paneldeki <strong>Sosyal Hesaplar</strong> bölümünden hesap bağlayıp
@@ -78,10 +71,24 @@ export default function InfluencerProfileForm({
       </p>
 
       <label htmlFor="instagramUrl">Instagram URL (opsiyonel)</label>
-      <input id="instagramUrl" name="instagramUrl" type="url" defaultValue={initial.instagramUrl} />
+      <input
+        id="instagramUrl"
+        name="instagramUrl"
+        type="text"
+        inputMode="url"
+        autoComplete="url"
+        defaultValue={initial.instagramUrl}
+      />
 
       <label htmlFor="tiktokUrl">TikTok URL (opsiyonel)</label>
-      <input id="tiktokUrl" name="tiktokUrl" type="url" defaultValue={initial.tiktokUrl} />
+      <input
+        id="tiktokUrl"
+        name="tiktokUrl"
+        type="text"
+        inputMode="url"
+        autoComplete="url"
+        defaultValue={initial.tiktokUrl}
+      />
 
       <div style={{ marginTop: 12 }}>
         <button className="btn" type="submit">

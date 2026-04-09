@@ -225,7 +225,6 @@ export default async function InfluencerPage({
         <InfluencerProfilePanel
           err={err}
           profileComplete={profileComplete}
-          userId={user.id}
           displayName={user.name}
           initial={{
             username: profile?.username ?? "",
@@ -343,8 +342,13 @@ export default async function InfluencerPage({
                       name="offerAmountTRY"
                       type="number"
                       required
-                      min={1}
-                      defaultValue={profile.basePriceTRY > 0 ? profile.basePriceTRY : 1}
+                      min={100}
+                      step={100}
+                      defaultValue={
+                        profile.basePriceTRY > 0
+                          ? Math.max(100, Math.ceil(profile.basePriceTRY / 100) * 100)
+                          : 100
+                      }
                     />
                     <button className="btn" type="submit">
                       Markaya iş birliği isteği gönder
@@ -448,11 +452,6 @@ export default async function InfluencerPage({
           <InfluencerPortfolioManager initialItems={portfolioItems} />
         </section>
       )}
-
-      <div className="dashboard-page__note muted">
-        Markalardan gelen iş birliği isteklerini yanıtlayabilir veya marka arayıp kendi isteğinizi
-        gönderebilirsiniz; süreç ilerledikçe aynı iş birliği üzerinden sohbet edersiniz.
-      </div>
     </div>
   );
 }

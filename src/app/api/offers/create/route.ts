@@ -6,6 +6,7 @@ import {
   netPayoutTRYFromOfferAmount,
 } from "@/lib/platformCommission";
 import { prisma } from "@/lib/prisma";
+import { sameOriginRedirect } from "@/lib/sameOriginRedirect";
 import { getSessionPayload } from "@/lib/session";
 
 function parseOptionalInt(v: unknown, opts?: { min?: number }): number | null {
@@ -88,10 +89,10 @@ export async function POST(request: Request) {
   const wantsRedirect = !contentType.includes("application/json");
 
   const redirectWithErr = (path: string, message: string) => {
-    const u = new URL(path, request.url);
-    u.searchParams.set("err", message);
-    u.searchParams.set("mode", "login");
-    return NextResponse.redirect(u);
+    const sp = new URLSearchParams();
+    sp.set("err", message);
+    sp.set("mode", "login");
+    return sameOriginRedirect(request, `${path}?${sp.toString()}`);
   };
 
   if (!session) {
@@ -189,7 +190,7 @@ export async function POST(request: Request) {
 
       const conversationId = offer.conversation?.id;
       if (wantsRedirect && conversationId) {
-        return NextResponse.redirect(new URL(`/chat/${conversationId}`, request.url));
+        return sameOriginRedirect(request, `/chat/${conversationId}`);
       }
 
       return NextResponse.json({ ok: true, offerId: offer.id, conversationId });
@@ -235,7 +236,7 @@ export async function POST(request: Request) {
 
     const conversationId = offer.conversation?.id;
     if (wantsRedirect && conversationId) {
-      return NextResponse.redirect(new URL(`/chat/${conversationId}`, request.url));
+      return sameOriginRedirect(request, `/chat/${conversationId}`);
     }
 
     return NextResponse.json({ ok: true, offerId: offer.id, conversationId });

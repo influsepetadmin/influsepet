@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import type { SocialPlatform } from "@prisma/client";
+import { prepareUserHttpUrlInput } from "@/lib/safeUrl";
 
 const MAX_INPUT_LEN = 512;
 
@@ -127,7 +128,7 @@ export function extractUsernameFromUrl(input: string, platform: SocialPlatform):
   const raw = input.trim();
   let url: URL;
   try {
-    url = new URL(raw.includes("://") ? raw : `https://${raw}`);
+    url = new URL(prepareUserHttpUrlInput(raw));
   } catch {
     return null;
   }

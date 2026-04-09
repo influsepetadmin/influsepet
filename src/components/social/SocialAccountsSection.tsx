@@ -58,7 +58,8 @@ export function SocialAccountsSection() {
         Sosyal hesaplar
       </h2>
       <p className="dash-section__lede muted">
-        Instagram, TikTok veya YouTube hesabınızı bağlayıp doğrulama durumunu buradan yönetebilirsiniz.
+        Instagram ve TikTok hesaplarınızı bağlayıp doğrulayın; YouTube hesabı isteğe bağlıdır. Durumu buradan
+        yönetebilirsiniz.
       </p>
 
       {loading && (

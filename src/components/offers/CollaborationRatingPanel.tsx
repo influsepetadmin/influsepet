@@ -2,10 +2,11 @@
 
 import type { OfferStatus } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import type {
-  CollaborationRatingGetResponse,
-  CollaborationRatingPostSuccessResponse,
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  COLLABORATION_RATING_REVIEW_TEXT_MAX,
+  type CollaborationRatingGetResponse,
+  type CollaborationRatingPostSuccessResponse,
 } from "@/lib/offers/collaborationRating";
 import { RatingStarsInput } from "./RatingStarsInput";
 import { RatingStarsReadonly } from "./RatingStarsReadonly";
@@ -20,18 +21,23 @@ type PostErrorJson = {
 export function CollaborationRatingPanel({
   offerId,
   offerStatus,
+  /** Incremented after each successful chat message load while completed — keeps "their" rating in sync. */
+  chatActivityEpoch,
 }: {
   offerId: string;
   offerStatus: OfferStatus;
+  chatActivityEpoch?: number;
 }) {
   const router = useRouter();
   const hasLoadedOnce = useRef(false);
+  const noteFieldId = useId();
 
   const [loadState, setLoadState] = useState<LoadState>("idle");
   const [data, setData] = useState<CollaborationRatingGetResponse | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [selected, setSelected] = useState<number | null>(null);
+  const [reviewNote, setReviewNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitErrorKind, setSubmitErrorKind] = useState<
@@ -95,6 +101,32 @@ export function CollaborationRatingPanel({
     void fetchRating();
   }, [offerStatus, offerId, fetchRating]);
 
+  /**
+   * Counterparty may submit after this panel loaded. Initial fetch only ran on mount / offer change,
+   * so without refetch the other side's rating stayed stale in React state until full page reload.
+   */
+  useEffect(() => {
+    if (offerStatus !== "COMPLETED") return;
+    const refetch = () => {
+      void fetchRating();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") refetch();
+    };
+    window.addEventListener("online", refetch);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("online", refetch);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [offerStatus, fetchRating]);
+
+  useEffect(() => {
+    if (offerStatus !== "COMPLETED") return;
+    if (chatActivityEpoch === undefined || chatActivityEpoch < 1) return;
+    void fetchRating();
+  }, [chatActivityEpoch, offerStatus, fetchRating]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (selected == null || submitting || !data?.eligible) return;
@@ -107,7 +139,7 @@ export function CollaborationRatingPanel({
       const res = await fetch(`/api/offers/${encodeURIComponent(offerId)}/rating`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rating: selected }),
+        body: JSON.stringify({ rating: selected, reviewText: reviewNote }),
       });
       const json = (await res.json().catch(() => ({}))) as
         | CollaborationRatingPostSuccessResponse
@@ -158,6 +190,7 @@ export function CollaborationRatingPanel({
       const ok = json as CollaborationRatingPostSuccessResponse;
       setSuccessMessage(ok.message ?? "Puanınız kaydedildi.");
       setSelected(null);
+      setReviewNote("");
       setSuccessFlash(true);
       window.setTimeout(() => {
         setSuccessFlash(false);
@@ -226,7 +259,8 @@ export function CollaborationRatingPanel({
         İş birliği puanı
       </h3>
       <p className="chat-panel__section-hint muted">
-        Tamamlanan iş birliğinde yalnızca karşı tarafa 1–5 yıldız verirsiniz (yorum bu adımda yok).
+        Tamamlanan iş birliğinde karşı tarafa 1–5 yıldız verirsiniz; isterseniz kısa bir not ekleyebilirsiniz (en
+        fazla {COLLABORATION_RATING_REVIEW_TEXT_MAX} karakter, zorunlu değil).
       </p>
 
       {successFlash && successMessage ? (
@@ -246,6 +280,12 @@ export function CollaborationRatingPanel({
             </div>
             <span className="collab-rating-panel__badge">Puan verildi</span>
           </div>
+          {mine.reviewText?.trim() ? (
+            <div className="collab-rating-panel__my-note">
+              <p className="collab-rating-panel__label muted">Notunuz</p>
+              <p className="collab-rating-panel__review-text-body">{mine.reviewText}</p>
+            </div>
+          ) : null}
         </div>
       ) : (
         <form
@@ -273,6 +313,31 @@ export function CollaborationRatingPanel({
               1–5 arası bir puan seçin.
             </p>
           )}
+          <div className="collab-rating-panel__optional-note">
+            <label className="collab-rating-panel__optional-note-label muted" htmlFor={noteFieldId}>
+              Kısa not (isteğe bağlı)
+            </label>
+            <textarea
+              id={noteFieldId}
+              className="collab-rating-panel__textarea"
+              value={reviewNote}
+              onChange={(e) =>
+                setReviewNote(e.target.value.slice(0, COLLABORATION_RATING_REVIEW_TEXT_MAX))
+              }
+              disabled={submitting}
+              rows={3}
+              maxLength={COLLABORATION_RATING_REVIEW_TEXT_MAX}
+              placeholder="İsterseniz birkaç cümle ekleyin…"
+              aria-describedby={`${noteFieldId}-count`}
+            />
+            <p
+              id={`${noteFieldId}-count`}
+              className="collab-rating-panel__char-count muted"
+              aria-live="polite"
+            >
+              {reviewNote.length} / {COLLABORATION_RATING_REVIEW_TEXT_MAX}
+            </p>
+          </div>
           <div className="collab-rating-panel__actions">
             <button
               type="submit"
@@ -293,6 +358,12 @@ export function CollaborationRatingPanel({
             </span>
             Karşı taraf size <strong>{theirs.rating}</strong> yıldız verdi.
           </p>
+          {theirs.reviewText?.trim() ? (
+            <div className="collab-rating-panel__theirs-note" role="note">
+              <span className="collab-rating-panel__theirs-note-label muted">Karşı tarafın notu</span>
+              <p className="collab-rating-panel__theirs-note-body">{theirs.reviewText}</p>
+            </div>
+          ) : null}
         </div>
       ) : null}
 

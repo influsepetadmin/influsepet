@@ -21,6 +21,14 @@ const DELIVERY_STATUS_TR: Record<DeliveryStatus, string> = {
   REVISION_REQUESTED: "Revize istendi",
 };
 
+function timelineItemClass(status: DeliveryStatus): string {
+  if (status === "APPROVED") return "chat-delivery-timeline__item chat-delivery-timeline__item--approved";
+  if (status === "REVISION_REQUESTED") {
+    return "chat-delivery-timeline__item chat-delivery-timeline__item--revision";
+  }
+  return "chat-delivery-timeline__item chat-delivery-timeline__item--submitted";
+}
+
 function preview(s: string | null, max = 72): string {
   if (!s?.trim()) return "—";
   const t = s.trim();
@@ -155,88 +163,102 @@ export function DeliveryPanel({
 
   return (
     <section className="chat-panel chat-panel--delivery" aria-labelledby="chat-delivery-heading">
-      <div className="chat-panel__context">
-        <span className="chat-panel__context-label muted">İş birliği</span>
+      <div className="chat-panel__context chat-delivery-context">
+        <span className="chat-panel__context-label">İş birliği</span>
         <div className="chat-panel__context-row">
           <strong className="chat-panel__context-title">{offerTitle}</strong>
           <StatusBadge status={offerStatus} />
         </div>
       </div>
 
-      <h3 id="chat-delivery-heading" className="chat-panel__section-title">
-        Teslim
-      </h3>
-      <p className="chat-panel__section-hint muted">
-        İçerik teslimlerinizi buradan gönderin veya marka olarak inceleyin.
-      </p>
+      <div className="chat-delivery-head">
+        <span className="chat-delivery-eyebrow">Teslimat</span>
+        <h3 id="chat-delivery-heading" className="chat-delivery-title">
+          Teslim
+        </h3>
+        <p className="chat-delivery-lede muted">
+          İçerik teslimlerinizi buradan gönderin veya marka olarak inceleyin.
+        </p>
+      </div>
 
       {loading && (
-        <div aria-hidden>
-          <div className="skeleton skeleton-line" style={{ marginBottom: 8 }} />
+        <div className="chat-delivery-skeleton" aria-hidden>
+          <div className="skeleton skeleton-line" />
           <div className="skeleton skeleton-line skeleton-line--short" />
         </div>
       )}
-      {error && <p className="alert-inline alert-inline--error">{error}</p>}
-      {feedback && <p className="alert-inline alert-inline--success">{feedback}</p>}
+      {error && <p className="alert-inline alert-inline--error chat-delivery-alert">{error}</p>}
+      {feedback && <p className="alert-inline alert-inline--success chat-delivery-alert">{feedback}</p>}
 
       {!loading && showSubmit && (
-        <form onSubmit={handleSubmit} style={{ marginTop: 8 }}>
-          <label htmlFor="delivery-url" style={{ display: "block", marginTop: 6 }}>
-            Teslim Bağlantısı
-          </label>
-          <input
-            id="delivery-url"
-            type="url"
-            value={deliveryUrl}
-            onChange={(e) => setDeliveryUrl(e.target.value)}
-            disabled={submitting}
-            placeholder="https://..."
-            style={{ maxWidth: "100%" }}
-          />
-          <label htmlFor="delivery-note" style={{ display: "block", marginTop: 8 }}>
-            Teslim Notu
-          </label>
-          <textarea
-            id="delivery-note"
-            value={deliveryText}
-            onChange={(e) => setDeliveryText(e.target.value)}
-            disabled={submitting}
-            rows={3}
-            placeholder="Kısa açıklama"
-            style={{ maxWidth: "100%", width: "100%" }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <button className="btn" type="submit" disabled={submitting}>
-              {submitting ? "Gönderiliyor…" : "Teslim Gönder"}
+        <form className="chat-delivery-form" onSubmit={handleSubmit}>
+          <div className="chat-delivery-field">
+            <label className="chat-delivery-label" htmlFor="delivery-url">
+              Teslim bağlantısı
+            </label>
+            <input
+              id="delivery-url"
+              className="chat-delivery-input"
+              type="text"
+              inputMode="url"
+              value={deliveryUrl}
+              onChange={(e) => setDeliveryUrl(e.target.value)}
+              disabled={submitting}
+              placeholder="https://..."
+              autoComplete="off"
+            />
+          </div>
+          <div className="chat-delivery-field">
+            <label className="chat-delivery-label" htmlFor="delivery-note">
+              Teslim notu
+            </label>
+            <textarea
+              id="delivery-note"
+              className="chat-delivery-textarea"
+              value={deliveryText}
+              onChange={(e) => setDeliveryText(e.target.value)}
+              disabled={submitting}
+              rows={3}
+              placeholder="Kısa açıklama"
+            />
+          </div>
+          <div className="chat-delivery-form-actions">
+            <button className="btn chat-delivery-submit" type="submit" disabled={submitting}>
+              {submitting ? "Gönderiliyor…" : "Teslim gönder"}
             </button>
           </div>
         </form>
       )}
 
       {!loading && !showSubmit && showReview && pendingReview && (
-        <div style={{ marginTop: 8 }}>
-          <h4 style={{ margin: "8px 0 6px", fontSize: "0.95rem" }}>Son Teslim</h4>
+        <div className="chat-delivery-review">
+          <h4 className="chat-delivery-review__title">Son teslim — inceleme</h4>
           {pendingReview.deliveryUrl && (
-            <p className="muted" style={{ margin: "4px 0", fontSize: "0.9rem" }}>
-              <strong>Bağlantı:</strong>{" "}
-              <a href={pendingReview.deliveryUrl} target="_blank" rel="noreferrer">
+            <p className="chat-delivery-review__line">
+              <span className="chat-delivery-review__k">Bağlantı</span>
+              <a
+                className="chat-delivery-review__link"
+                href={pendingReview.deliveryUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
                 {preview(pendingReview.deliveryUrl, 80)}
               </a>
             </p>
           )}
           {pendingReview.deliveryText && (
-            <p className="muted" style={{ margin: "4px 0", fontSize: "0.9rem" }}>
-              <strong>Not:</strong> {preview(pendingReview.deliveryText, 200)}
+            <p className="chat-delivery-review__line">
+              <span className="chat-delivery-review__k">Not</span>
+              <span className="chat-delivery-review__text">{preview(pendingReview.deliveryText, 200)}</span>
             </p>
           )}
-          <p className="muted" style={{ margin: "4px 0", fontSize: "0.85rem" }}>
-            Gönderen: {pendingReview.submittedBy.name} ·{" "}
-            {new Date(pendingReview.createdAt).toLocaleString("tr-TR")}
+          <p className="chat-delivery-review__meta muted">
+            {pendingReview.submittedBy.name} · {new Date(pendingReview.createdAt).toLocaleString("tr-TR")}
           </p>
-          <div className="btn-row" style={{ marginTop: 10 }}>
+          <div className="chat-delivery-actions">
             <button
               type="button"
-              className="btn"
+              className="btn chat-delivery-actions__primary"
               disabled={reviewBusy !== null}
               onClick={() => void handleReview("APPROVE")}
             >
@@ -244,50 +266,53 @@ export function DeliveryPanel({
             </button>
             <button
               type="button"
-              className="btn secondary"
+              className="btn secondary chat-delivery-actions__secondary"
               disabled={reviewBusy !== null}
               onClick={() => void handleReview("REQUEST_REVISION")}
             >
-              {reviewBusy === "REQUEST_REVISION" ? "…" : "Revize İste"}
+              {reviewBusy === "REQUEST_REVISION" ? "…" : "Revize iste"}
             </button>
           </div>
         </div>
       )}
 
       {!loading && !showSubmit && offerStatus === "DELIVERED" && isBrand && !pendingReview && (
-        <p className="muted" style={{ fontSize: "0.9rem", marginTop: 8 }}>
-          İncelenecek teslim kaydı yok.
-        </p>
+        <p className="chat-delivery-wait-hint muted">İncelenecek teslim kaydı yok.</p>
       )}
 
       {!loading &&
         deliveries.length === 0 &&
         !showSubmit &&
         !(offerStatus === "DELIVERED" && isBrand && !pendingReview) && (
-          <EmptyStateCard
-            title="Henüz teslim kaydı yok"
-            description="Teslim gönderildiğinde veya geçmiş oluştuğunda burada görünür."
-          />
+          <div className="chat-delivery-empty-wrap">
+            <EmptyStateCard
+              title="Henüz teslim kaydı yok"
+              description="Teslim gönderildiğinde veya geçmiş oluştuğunda burada görünür."
+            />
+          </div>
         )}
 
       {!loading && deliveries.length > 0 && (
-        <div style={{ marginTop: 14 }}>
-          <h4 style={{ margin: "0 0 6px", fontSize: "0.95rem" }}>Teslim Geçmişi</h4>
-          <ul style={{ margin: 0, paddingLeft: 18, fontSize: "0.88rem" }}>
+        <div className="chat-delivery-timeline">
+          <h4 className="chat-delivery-timeline__title">Teslim geçmişi</h4>
+          <ul className="chat-delivery-timeline__list" role="list">
             {deliveries.map((d) => (
-              <li key={d.id} style={{ marginBottom: 6 }}>
-                <strong>{DELIVERY_STATUS_TR[d.status] ?? d.status}</strong> ·{" "}
-                {new Date(d.createdAt).toLocaleString("tr-TR")}
-                {d.deliveryUrl ? (
-                  <>
-                    {" "}
-                    ·{" "}
-                    <a href={d.deliveryUrl} target="_blank" rel="noreferrer">
-                      Bağlantı
+              <li key={d.id} className={timelineItemClass(d.status)}>
+                <div className="chat-delivery-timeline__row">
+                  <span className="chat-delivery-timeline__status">{DELIVERY_STATUS_TR[d.status] ?? d.status}</span>
+                  <span className="chat-delivery-timeline__time muted">
+                    {new Date(d.createdAt).toLocaleString("tr-TR")}
+                  </span>
+                </div>
+                <div className="chat-delivery-timeline__body muted">
+                  {d.deliveryUrl ? (
+                    <a href={d.deliveryUrl} target="_blank" rel="noreferrer" className="chat-delivery-timeline__link">
+                      Bağlantıyı aç
                     </a>
-                  </>
-                ) : null}
-                {d.deliveryText ? <span className="muted"> · {preview(d.deliveryText, 48)}</span> : null}
+                  ) : null}
+                  {d.deliveryUrl && d.deliveryText ? <span aria-hidden> · </span> : null}
+                  {d.deliveryText ? <span>{preview(d.deliveryText, 48)}</span> : null}
+                </div>
               </li>
             ))}
           </ul>

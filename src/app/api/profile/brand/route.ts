@@ -1,31 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sameOriginRedirect } from "@/lib/sameOriginRedirect";
 import { getSessionPayload } from "@/lib/session";
 import { normalizeBrandUsername, validateBrandUsernameNormalized } from "@/lib/brandUsername";
 import { parseOptionalProfileImageUrl, parseOptionalWebsiteUrl } from "@/lib/safeUrl";
 
 const BIO_MAX = 2000;
 
-function getRequestOrigin(request: Request): string {
-  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
-  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
-
-  if (forwardedProto && forwardedHost) {
-    return `${forwardedProto}://${forwardedHost}`;
-  }
-
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (explicit) {
-    try {
-      return new URL(explicit).origin;
-    } catch {}
-  }
-
-  return new URL(request.url).origin;
-}
-
 export async function POST(request: Request) {
-  const origin = getRequestOrigin(request);
   const session = await getSessionPayload();
   if (!session) {
     return NextResponse.json({ error: "Oturum yok." }, { status: 401 });
@@ -55,23 +37,23 @@ export async function POST(request: Request) {
 
   const websiteCheck = parseOptionalWebsiteUrl(String(form.get("website") ?? "").trim() || null);
   if (websiteCheck.ok === false) {
-    return NextResponse.redirect(new URL("/marka?err=" + encodeURIComponent(websiteCheck.error), origin));
+    return sameOriginRedirect(request, "/marka?err=" + encodeURIComponent(websiteCheck.error));
   }
   const profileImageCheck = parseOptionalProfileImageUrl(String(form.get("profileImageUrl") ?? "").trim() || null);
   if (profileImageCheck.ok === false) {
-    return NextResponse.redirect(new URL("/marka?err=" + encodeURIComponent(profileImageCheck.error), origin));
+    return sameOriginRedirect(request, "/marka?err=" + encodeURIComponent(profileImageCheck.error));
   }
   const website = websiteCheck.value;
   const profileImageUrl = profileImageCheck.value;
 
   if (!companyName) {
-    return NextResponse.redirect(new URL("/marka?err=" + encodeURIComponent("Sirket adi gerekli"), origin));
+    return sameOriginRedirect(request, "/marka?err=" + encodeURIComponent("Sirket adi gerekli"));
   }
 
   const usernameNorm = normalizeBrandUsername(usernameRaw);
   const userNameCheck = validateBrandUsernameNormalized(usernameNorm);
   if (userNameCheck.ok === false) {
-    return NextResponse.redirect(new URL("/marka?err=" + encodeURIComponent(userNameCheck.message), origin));
+    return sameOriginRedirect(request, "/marka?err=" + encodeURIComponent(userNameCheck.message));
   }
 
   const usernameOrNull = usernameNorm.length > 0 ? usernameNorm : null;
@@ -85,8 +67,9 @@ export async function POST(request: Request) {
       select: { id: true },
     });
     if (taken) {
-      return NextResponse.redirect(
-        new URL("/marka?err=" + encodeURIComponent("Bu kullanici adi baska bir marka tarafindan kullaniliyor."), origin),
+      return sameOriginRedirect(
+        request,
+        "/marka?err=" + encodeURIComponent("Bu kullanici adi baska bir marka tarafindan kullaniliyor."),
       );
     }
   }
@@ -126,10 +109,8 @@ export async function POST(request: Request) {
       }
     });
   } catch {
-    return NextResponse.redirect(
-      new URL("/marka?err=" + encodeURIComponent("Profil kaydedilemedi. Tekrar deneyin."), origin),
-    );
+    return sameOriginRedirect(request, "/marka?err=" + encodeURIComponent("Profil kaydedilemedi. Tekrar deneyin."));
   }
 
-  return NextResponse.redirect(new URL("/marka", origin));
+  return sameOriginRedirect(request, "/marka");
 }

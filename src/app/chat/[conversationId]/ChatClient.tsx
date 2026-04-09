@@ -57,6 +57,43 @@ function uploadCollaborationMedia(
 const TICK_GRAY = "#64748b";
 const TICK_BLUE = "#2563eb";
 
+const CHAT_QUICK_EMOJIS = [
+  "😊",
+  "👍",
+  "❤️",
+  "😂",
+  "🙏",
+  "👏",
+  "🔥",
+  "✨",
+  "😉",
+  "🎉",
+  "💬",
+  "✅",
+  "❌",
+  "🤔",
+  "😍",
+  "🙌",
+  "💯",
+  "👋",
+  "🌟",
+] as const;
+
+function TickCheck({ stroke }: { stroke: string }) {
+  return (
+    <svg width="12" height="11" viewBox="0 0 14 12" className="chat-ticks-svg chat-ticks-svg--unit" aria-hidden>
+      <path
+        d="M1.5 6.2 L5.2 9.8 L12.5 2"
+        stroke={stroke}
+        strokeWidth="1.75"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function OutgoingMessageTicks({
   isDelivered,
   isSeen,
@@ -67,39 +104,14 @@ function OutgoingMessageTicks({
   const stroke = isSeen ? TICK_BLUE : TICK_GRAY;
 
   if (!isDelivered) {
-    return (
-      <svg width="18" height="12" viewBox="0 0 18 12" className="chat-ticks-svg" aria-hidden>
-        <path
-          d="M1.5 6.2 L5.2 9.8 L12.5 2"
-          stroke={TICK_GRAY}
-          strokeWidth="1.75"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
+    return <TickCheck stroke={TICK_GRAY} />;
   }
 
   return (
-    <svg width="26" height="12" viewBox="0 0 26 12" className="chat-ticks-svg" aria-hidden>
-      <path
-        d="M1.5 6.2 L5.2 9.8 L12.5 2"
-        stroke={stroke}
-        strokeWidth="1.75"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M5.5 6.2 L9.2 9.8 L16.5 2"
-        stroke={stroke}
-        strokeWidth="1.75"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <span className="chat-ticks-double" aria-hidden>
+      <TickCheck stroke={stroke} />
+      <TickCheck stroke={stroke} />
+    </span>
   );
 }
 
@@ -133,6 +145,8 @@ export default function ChatClient({
   chatContext: {
     otherSideName: string;
     otherSideRole: string;
+    otherSideAvatarSrc: string;
+    otherSideHandleLine: string | null;
     profileHref: string;
     offerTitle: string;
   };
@@ -143,8 +157,12 @@ export default function ChatClient({
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
   const [uploadErr, setUploadErr] = useState<string | null>(null);
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const [ratingChatEpoch, setRatingChatEpoch] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
+  const emojiPopoverRef = useRef<HTMLDivElement>(null);
   const seenInFlightRef = useRef(false);
+  const chatLoadsRef = useRef(0);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/chat/messages?conversationId=${encodeURIComponent(conversationId)}`);
@@ -152,6 +170,11 @@ export default function ChatClient({
     if (!data?.messages) return;
     const msgs = data.messages as Msg[];
     setMessages(msgs);
+    chatLoadsRef.current += 1;
+    /** After the first poll, bump epoch so CollaborationRatingPanel refetches (counterparty may have just rated). */
+    if (offer.status === "COMPLETED" && chatLoadsRef.current >= 2) {
+      setRatingChatEpoch((n) => n + 1);
+    }
 
     const needsSeen = msgs.some((m) => m.senderId !== meId && !m.isSeen);
     if (!needsSeen || seenInFlightRef.current) return;
@@ -171,13 +194,23 @@ export default function ChatClient({
     } finally {
       seenInFlightRef.current = false;
     }
-  }, [conversationId, meId]);
+  }, [conversationId, meId, offer.status]);
 
   useEffect(() => {
     void load();
     const t = setInterval(() => void load(), 5000);
     return () => clearInterval(t);
   }, [load]);
+
+  useEffect(() => {
+    if (!emojiOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      const el = emojiPopoverRef.current;
+      if (el && !el.contains(e.target as Node)) setEmojiOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [emojiOpen]);
 
   async function send() {
     const text = body.trim();
@@ -227,11 +260,25 @@ export default function ChatClient({
 
   return (
     <div className="chat-conversation">
-      <header className="chat-conversation__header">
-        <div className="chat-conversation__header-text">
-          <span className="chat-conversation__eyebrow">{chatContext.otherSideRole}</span>
-          <h2 className="chat-conversation__title">{chatContext.otherSideName}</h2>
-          <p className="chat-conversation__subtitle muted">{chatContext.offerTitle}</p>
+      <header className="chat-conversation__header chat-conversation__header--rich">
+        <div className="chat-conversation__header-identity">
+          <div className="chat-conversation__avatar-ring" aria-hidden>
+            <img
+              className="chat-conversation__avatar"
+              src={chatContext.otherSideAvatarSrc}
+              alt=""
+              width={44}
+              height={44}
+            />
+          </div>
+          <div className="chat-conversation__header-text">
+            <span className="chat-conversation__eyebrow">{chatContext.otherSideRole}</span>
+            <h2 className="chat-conversation__title">{chatContext.otherSideName}</h2>
+            {chatContext.otherSideHandleLine ? (
+              <p className="chat-conversation__handle muted">{chatContext.otherSideHandleLine}</p>
+            ) : null}
+            <p className="chat-conversation__subtitle muted">{chatContext.offerTitle}</p>
+          </div>
         </div>
         <div className="chat-conversation__header-aside">
           <StatusBadge status={offer.status} />
@@ -249,7 +296,11 @@ export default function ChatClient({
         meId={meId}
         offerTitle={offerTitle}
       />
-      <CollaborationRatingPanel offerId={offer.id} offerStatus={offer.status} />
+      <CollaborationRatingPanel
+        offerId={offer.id}
+        offerStatus={offer.status}
+        chatActivityEpoch={ratingChatEpoch}
+      />
 
       <div className="chat-thread chat-thread--premium">
         {messages.length === 0 ? (
@@ -270,11 +321,13 @@ export default function ChatClient({
                   >
                     {m.kind === "MEDIA" && m.media ? (
                       <div className="chat-media-card">
-                        {m.media.kind === "IMAGE" ? (
-                          <img src={m.media.url} alt="Paylaşılan görüntü" />
-                        ) : (
-                          <video src={m.media.url} controls playsInline />
-                        )}
+                        <div className="chat-media-card__surface">
+                          {m.media.kind === "IMAGE" ? (
+                            <img src={m.media.url} alt="Paylaşılan görüntü" loading="lazy" />
+                          ) : (
+                            <video src={m.media.url} controls playsInline preload="metadata" />
+                          )}
+                        </div>
                         <div className="chat-media-card__footer">
                           <a
                             className="chat-media-card__link"
@@ -348,14 +401,45 @@ export default function ChatClient({
       />
 
       <div className="chat-composer-shell">
-        <button
-          type="button"
-          className="btn secondary btn--sm chat-composer-attach"
-          disabled={uploading}
-          onClick={() => fileRef.current?.click()}
-        >
-          Dosya ekle
-        </button>
+        <div className="chat-composer-toolbar">
+          <button
+            type="button"
+            className="btn secondary btn--sm chat-composer-attach"
+            disabled={uploading}
+            onClick={() => fileRef.current?.click()}
+          >
+            Dosya ekle
+          </button>
+          <div className="chat-composer-emoji-wrap" ref={emojiPopoverRef}>
+            <button
+              type="button"
+              className="btn secondary btn--sm chat-composer-emoji-toggle"
+              aria-expanded={emojiOpen}
+              aria-haspopup="listbox"
+              aria-label="Emoji ekle"
+              onClick={() => setEmojiOpen((o) => !o)}
+            >
+              😊
+            </button>
+            {emojiOpen ? (
+              <div className="chat-emoji-picker" role="listbox" aria-label="Hızlı emoji">
+                {CHAT_QUICK_EMOJIS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    className="chat-emoji-picker__btn"
+                    onClick={() => {
+                      setBody((prev) => prev + emoji);
+                      setEmojiOpen(false);
+                    }}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </div>
         <div className="chat-composer-row">
           <input
             type="text"

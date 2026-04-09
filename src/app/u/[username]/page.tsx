@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import { PublicProfileHomeLink } from "@/components/profile/public/PublicProfileHomeLink";
-import { PublicProfileHeader } from "@/components/profile/public/PublicProfileHeader";
-import { PublicProfileStats } from "@/components/profile/public/PublicProfileStats";
-import { VerifiedSocialAccounts } from "@/components/profile/public/VerifiedSocialAccounts";
+import { PublicInfluencerProfileView } from "@/components/profile/public/PublicInfluencerProfileView";
 import { PublicProfileNotFound } from "@/components/profile/public/PublicProfileNotFound";
 import { getDashboardBackHref } from "@/lib/me";
 import { fetchPublicProfileByUsername } from "@/lib/publicProfile/fetchPublicProfileServer";
@@ -36,16 +33,5 @@ export default async function PublicProfilePage({ params }: Props) {
     );
   }
 
-  return (
-    <div className="public-profile-page">
-      <div className="public-profile-page__inner">
-        <div className="public-profile-shell">
-          <PublicProfileHomeLink href={homeHref} />
-          <PublicProfileHeader data={data} />
-          <PublicProfileStats data={data} />
-          <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
-        </div>
-      </div>
-    </div>
-  );
+  return <PublicInfluencerProfileView data={data} homeHref={homeHref} />;
 }

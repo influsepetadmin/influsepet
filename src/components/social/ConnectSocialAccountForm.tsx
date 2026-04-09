@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { SocialPlatform } from "@prisma/client";
 
-const PLATFORMS: { value: SocialPlatform; label: string }[] = [
+const PLATFORM_OPTIONS_PRIMARY: { value: SocialPlatform; label: string }[] = [
   { value: "INSTAGRAM", label: "Instagram" },
   { value: "TIKTOK", label: "TikTok" },
+];
+
+const PLATFORM_OPTIONS_SECONDARY: { value: SocialPlatform; label: string }[] = [
   { value: "YOUTUBE", label: "YouTube" },
 ];
 
@@ -56,7 +59,8 @@ export function ConnectSocialAccountForm({ onConnected }: { onConnected: () => v
       <div className="social-connect-toolbar__head">
         <p className="social-connect-toolbar__head-title">Yeni hesap bağla</p>
         <p className="social-connect-toolbar__head-hint muted">
-          Platform seçin; kullanıcı adını veya profil URL’sini girin.
+          Öncelikle Instagram veya TikTok bağlamanız önerilir; YouTube isteğe bağlıdır. Kullanıcı adı veya profil
+          URL’sini girin.
         </p>
       </div>
       <div className="social-connect-toolbar__inner">
@@ -69,11 +73,20 @@ export function ConnectSocialAccountForm({ onConnected }: { onConnected: () => v
             onChange={(e) => setPlatform(e.target.value as SocialPlatform)}
             disabled={loading}
           >
-            {PLATFORMS.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
-            ))}
+            <optgroup label="Önerilen">
+              {PLATFORM_OPTIONS_PRIMARY.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="İsteğe bağlı">
+              {PLATFORM_OPTIONS_SECONDARY.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </optgroup>
           </select>
         </div>
         <div className="social-connect-toolbar__field social-connect-toolbar__field--grow">

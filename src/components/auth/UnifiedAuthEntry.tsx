@@ -22,10 +22,12 @@ export function UnifiedAuthEntry({
   const router = useRouter();
   const [role, setRole] = useState<AuthRole>(initialRole);
   const [mode, setMode] = useState<AuthMode>(initialMode);
+  const [registerClientErr, setRegisterClientErr] = useState<string | null>(null);
 
   function syncUrl(nextRole: AuthRole, nextMode: AuthMode) {
     setRole(nextRole);
     setMode(nextMode);
+    if (nextMode !== "register") setRegisterClientErr(null);
     const p = new URLSearchParams();
     p.set("role", nextRole);
     p.set("mode", nextMode);
@@ -79,19 +81,25 @@ export function UnifiedAuthEntry({
 
       {errBox}
 
+      {mode === "register" && registerClientErr ? (
+        <p className="auth-alert" role="alert">
+          {registerClientErr}
+        </p>
+      ) : null}
+
       {mode === "login" ? (
         <>
           <form action="/api/auth/login" method="post" className="auth-form" autoComplete="on">
             <input type="hidden" name="roleHint" value={role} />
             <input type="hidden" name="authReturn" value={basePath} />
 
-            <label htmlFor="login-email">E-posta</label>
+            <label htmlFor="login-email">E-posta veya kullanıcı adı</label>
             <input
               id="login-email"
               name="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
+              type="text"
+              autoComplete="username"
+              placeholder="ornek@posta.com veya kullanici_adi"
               required
             />
 
@@ -103,6 +111,12 @@ export function UnifiedAuthEntry({
               autoComplete="current-password"
               required
             />
+
+            <p className="auth-forgot-wrap">
+              <Link href="/sifremi-unuttum" className="auth-forgot-link">
+                Şifremi unuttum
+              </Link>
+            </p>
 
             <div className="auth-primary-action">
               <button className="btn" type="submit">
@@ -121,7 +135,25 @@ export function UnifiedAuthEntry({
         </>
       ) : (
         <>
-          <form action="/api/auth/register" method="post" className="auth-form" autoComplete="on">
+          <form
+            action="/api/auth/register"
+            method="post"
+            className="auth-form"
+            autoComplete="on"
+            onSubmit={(e) => {
+              const form = e.currentTarget;
+              const pw = String((form.elements.namedItem("password") as HTMLInputElement | null)?.value ?? "");
+              const cpw = String(
+                (form.elements.namedItem("confirmPassword") as HTMLInputElement | null)?.value ?? "",
+              );
+              if (pw !== cpw) {
+                e.preventDefault();
+                setRegisterClientErr("Şifreler eşleşmiyor.");
+                return;
+              }
+              setRegisterClientErr(null);
+            }}
+          >
             <input type="hidden" name="role" value={role} />
             <input type="hidden" name="authReturn" value={basePath} />
 
@@ -169,6 +201,16 @@ export function UnifiedAuthEntry({
             <input
               id="reg-password"
               name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={6}
+            />
+
+            <label htmlFor="reg-password-confirm">Şifre tekrar</label>
+            <input
+              id="reg-password-confirm"
+              name="confirmPassword"
               type="password"
               autoComplete="new-password"
               required

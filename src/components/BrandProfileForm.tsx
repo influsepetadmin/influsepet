@@ -1,14 +1,11 @@
 import CitySelect from "@/components/CitySelect";
 import CategoryMultiSelect from "@/components/CategoryMultiSelect";
 import ProfileImageField from "@/components/ProfileImageField";
-import { getAvatarUrl } from "@/lib/avatar";
 
 export default function BrandProfileForm({
   initial,
   isExistingProfile,
-  userId,
 }: {
-  userId: string;
   initial: {
     companyName: string;
     city: string;
@@ -52,16 +49,19 @@ export default function BrandProfileForm({
       <CitySelect id="city" name="city" defaultValue={initial.city} />
 
       <label htmlFor="website">Web sitesi (opsiyonel)</label>
-      <input id="website" name="website" type="url" defaultValue={initial.website} />
+      <input
+        id="website"
+        name="website"
+        type="text"
+        inputMode="url"
+        autoComplete="url"
+        defaultValue={initial.website}
+      />
 
       <p style={{ marginTop: 12, marginBottom: 6 }}>Sektor / kategori (en fazla 3)</p>
       <CategoryMultiSelect initialSelected={initial.selectedCategoryKeys} inputName="brandCategoryKeys" />
 
-      <ProfileImageField
-        initialUrl={initial.profileImageUrl}
-        fallbackPreviewUrl={getAvatarUrl(userId)}
-        inputId="profileImageUrl"
-      />
+      <ProfileImageField initialUrl={initial.profileImageUrl} inputId="profileImageUrl" />
 
       <div style={{ marginTop: 12 }}>
         <button className="btn" type="submit">

@@ -8,6 +8,27 @@ import {
 
 export { parseRating };
 
+/** İsteğe bağlı kısa not — POST gövdesi ve DB ile uyumlu üst sınır. */
+export const COLLABORATION_RATING_REVIEW_TEXT_MAX = 160;
+
+export function parseOptionalReviewText(raw: unknown):
+  | { ok: true; text: string | null }
+  | { ok: false; error: string } {
+  if (raw === undefined || raw === null) return { ok: true, text: null };
+  if (typeof raw !== "string") {
+    return { ok: false, error: "Geçersiz not metni." };
+  }
+  const t = raw.trim();
+  if (t.length === 0) return { ok: true, text: null };
+  if (t.length > COLLABORATION_RATING_REVIEW_TEXT_MAX) {
+    return {
+      ok: false,
+      error: `Kısa not en fazla ${COLLABORATION_RATING_REVIEW_TEXT_MAX} karakter olabilir.`,
+    };
+  }
+  return { ok: true, text: t };
+}
+
 export type OfferForCollaborationRating = OfferForCollaborationReview;
 
 /** Chat / client için GET yanıtında kullanılan özet durum. */
@@ -72,11 +93,15 @@ export type CollaborationRatingGetResponse = {
     submitted: boolean;
     rating: number | null;
     rateeUserId: string | null;
+    /** Oturum kullanıcısının kaydettiği isteğe bağlı not (varsa). */
+    reviewText: string | null;
   };
   /** Karşı tarafın size verdiği puan (varsa). */
   theirs: {
     submitted: boolean;
     rating: number | null;
+    /** Karşı tarafın bıraktığı isteğe bağlı not (varsa). */
+    reviewText: string | null;
   };
   /** İki yönlü puan akışının özeti (chat UI için). */
   ratingState: CollaborationRatingFlowState;
@@ -89,6 +114,7 @@ export type CollaborationRatingCreatedSummary = {
   raterUserId: string;
   rateeUserId: string;
   rating: number;
+  reviewText: string | null;
 };
 
 export type CollaborationRatingPostSuccessResponse = {

@@ -1,69 +1,101 @@
-import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { normalizeBrandUsername } from "@/lib/brandUsername";
+import { sameOriginRedirect } from "@/lib/sameOriginRedirect";
 import { setSessionCookie } from "@/lib/session";
 
-function getRequestOrigin(request: Request): string {
-  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
-  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+const userLoginSelect = {
+  id: true,
+  email: true,
+  role: true,
+  passwordHash: true,
+} as const;
 
-  if (forwardedProto && forwardedHost) {
-    return `${forwardedProto}://${forwardedHost}`;
+/** @ içeriyorsa e-posta; aksi halde seçilen role göre influencer / marka kullanıcı adı. */
+async function findUserForLogin(rawIdentifier: string, roleHint: "BRAND" | "INFLUENCER") {
+  const trimmed = rawIdentifier.trim();
+  if (!trimmed) return null;
+
+  if (trimmed.includes("@")) {
+    const email = trimmed.toLowerCase();
+    return prisma.user.findUnique({
+      where: { email },
+      select: userLoginSelect,
+    });
   }
 
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (explicit) {
-    try {
-      return new URL(explicit).origin;
-    } catch {}
+  if (roleHint === "INFLUENCER") {
+    const username = trimmed.toLowerCase().replace(/[^a-z0-9_]/g, "");
+    if (username.length < 1) return null;
+    const profile = await prisma.influencerProfile.findUnique({
+      where: { username },
+      select: { userId: true },
+    });
+    if (!profile) return null;
+    return prisma.user.findUnique({
+      where: { id: profile.userId },
+      select: userLoginSelect,
+    });
   }
 
-  return new URL(request.url).origin;
+  const username = normalizeBrandUsername(trimmed);
+  if (!username) return null;
+  const profile = await prisma.brandProfile.findUnique({
+    where: { username },
+    select: { userId: true },
+  });
+  if (!profile) return null;
+  return prisma.user.findUnique({
+    where: { id: profile.userId },
+    select: userLoginSelect,
+  });
 }
 
 /** Tarayıcıda bu URL açılırsa (GET) form yok; ana sayfadaki girişe yönlendir. */
 export async function GET(request: Request) {
-  const origin = getRequestOrigin(request);
-  const u = new URL("/", origin);
-  u.searchParams.set("mode", "login");
-  return NextResponse.redirect(u);
+  return sameOriginRedirect(request, "/?mode=login");
 }
 
 export async function POST(request: Request) {
-  const origin = getRequestOrigin(request);
   const form = await request.formData();
-  const email = String(form.get("email") ?? "").trim().toLowerCase();
+  const identifierRaw = String(form.get("email") ?? "");
   const password = String(form.get("password") ?? "");
 
   const errUrl = (msg: string) => {
     const returnRaw = String(form.get("authReturn") ?? "").trim();
     const basePath = returnRaw === "/giris" ? "/giris" : "/";
-    const x = new URL(basePath, origin);
-    x.searchParams.set("err", msg);
-    x.searchParams.set("mode", "login");
+    const sp = new URLSearchParams();
+    sp.set("err", msg);
+    sp.set("mode", "login");
     const hint = String(form.get("roleHint") ?? "").toUpperCase();
     if (hint === "BRAND" || hint === "INFLUENCER") {
-      x.searchParams.set("role", hint);
+      sp.set("role", hint);
     }
-    return NextResponse.redirect(x);
+    return sameOriginRedirect(request, `${basePath}?${sp.toString()}`);
   };
 
-  if (!email || !password) return errUrl("E-posta ve sifre gerekli.");
-
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || !user.passwordHash) return errUrl("E-posta veya sifre hatali.");
-
-  const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok) return errUrl("E-posta veya sifre hatali.");
-
   const roleHint = String(form.get("roleHint") ?? "").toUpperCase();
-  if (roleHint !== "BRAND" && roleHint !== "INFLUENCER") {
+  const roleHintOk = roleHint === "BRAND" || roleHint === "INFLUENCER";
+
+  if (!identifierRaw.trim() || !password) {
+    return errUrl("E-posta veya kullanici adi ve sifre gerekli.");
+  }
+
+  if (!roleHintOk) {
     return errUrl("Giris icin influencer veya marka rolunu secin.");
   }
 
+  const user = await findUserForLogin(identifierRaw, roleHint);
+  if (!user || !user.passwordHash) {
+    return errUrl("E-posta veya kullanici adi veya sifre hatali.");
+  }
+
+  const ok = await bcrypt.compare(password, user.passwordHash);
+  if (!ok) return errUrl("E-posta veya kullanici adi veya sifre hatali.");
+
   if (user.role === "ADMIN") {
     await setSessionCookie(user.id);
-    return NextResponse.redirect(new URL("/", origin));
+    return sameOriginRedirect(request, "/");
   }
 
   if (user.role !== roleHint) {
@@ -79,10 +111,10 @@ export async function POST(request: Request) {
   await setSessionCookie(user.id);
 
   if (user.role === "BRAND") {
-    return NextResponse.redirect(new URL("/marka", origin));
+    return sameOriginRedirect(request, "/marka");
   }
   if (user.role === "INFLUENCER") {
-    return NextResponse.redirect(new URL("/influencer", origin));
+    return sameOriginRedirect(request, "/influencer");
   }
-  return NextResponse.redirect(new URL("/", origin));
+  return sameOriginRedirect(request, "/");
 }

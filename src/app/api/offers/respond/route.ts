@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSessionPayload } from "@/lib/session";
 import { canTransitionOffer, type OfferForTransition } from "@/lib/offers/transitions";
+import { sameOriginRedirect } from "@/lib/sameOriginRedirect";
+import { getSessionPayload } from "@/lib/session";
 
 export async function POST(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
   const wantsRedirect = !contentType.includes("application/json");
   const redirectWithErr = (path: string, message: string) => {
-    const u = new URL(path, request.url);
-    u.searchParams.set("err", message);
-    u.searchParams.set("mode", "login");
-    return NextResponse.redirect(u);
+    const sp = new URLSearchParams();
+    sp.set("err", message);
+    sp.set("mode", "login");
+    return sameOriginRedirect(request, `${path}?${sp.toString()}`);
   };
 
   const session = await getSessionPayload();
@@ -94,6 +95,6 @@ export async function POST(request: Request) {
     data: { status: nextStatus },
   });
 
-  if (wantsRedirect) return NextResponse.redirect(new URL(okPath, request.url));
+  if (wantsRedirect) return sameOriginRedirect(request, okPath);
   return NextResponse.json({ ok: true, status: nextStatus });
 }

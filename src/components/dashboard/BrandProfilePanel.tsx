@@ -7,7 +7,6 @@ import BrandProfileForm from "@/components/BrandProfileForm";
 export function BrandProfilePanel({
   err,
   profileComplete,
-  userId,
   displayName,
   initial,
   isExistingProfile,
@@ -15,7 +14,6 @@ export function BrandProfilePanel({
 }: {
   err: string | null | undefined;
   profileComplete: boolean;
-  userId: string;
   displayName: string;
   initial: {
     companyName: string;
@@ -103,7 +101,7 @@ export function BrandProfilePanel({
 
       {showForm ? (
         <div style={{ marginTop: profileComplete ? 14 : 0 }}>
-          <BrandProfileForm userId={userId} initial={initial} isExistingProfile={isExistingProfile} />
+          <BrandProfileForm initial={initial} isExistingProfile={isExistingProfile} />
         </div>
       ) : null}
     </>
