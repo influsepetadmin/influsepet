@@ -33,15 +33,15 @@ export async function POST(request: Request) {
 
   const profileImageUrlCheck = parseOptionalProfileImageUrl(profileImageUrlRaw);
   if (profileImageUrlCheck.ok === false) {
-    return sameOriginRedirect(request, "/influencer?err=" + encodeURIComponent(profileImageUrlCheck.error));
+    return sameOriginRedirect("/influencer?err=" + encodeURIComponent(profileImageUrlCheck.error));
   }
   const instagramCheck = parseOptionalHttpHttpsUrl(instagramUrlRaw);
   if (instagramCheck.ok === false) {
-    return sameOriginRedirect(request, "/influencer?err=" + encodeURIComponent(instagramCheck.error));
+    return sameOriginRedirect("/influencer?err=" + encodeURIComponent(instagramCheck.error));
   }
   const tiktokCheck = parseOptionalHttpHttpsUrl(tiktokUrlRaw);
   if (tiktokCheck.ok === false) {
-    return sameOriginRedirect(request, "/influencer?err=" + encodeURIComponent(tiktokCheck.error));
+    return sameOriginRedirect("/influencer?err=" + encodeURIComponent(tiktokCheck.error));
   }
 
   const profileImageUrl = profileImageUrlCheck.value;
@@ -57,13 +57,13 @@ export async function POST(request: Request) {
   const primaryCategory = categoryKeys[0] ?? user.influencer.category;
 
   if (username.length < 3) {
-    return sameOriginRedirect(request, "/influencer?err=" + encodeURIComponent("Kullanici adi gecersiz"));
+    return sameOriginRedirect("/influencer?err=" + encodeURIComponent("Kullanici adi gecersiz"));
   }
 
   if (username !== user.influencer.username) {
     const taken = await prisma.influencerProfile.findUnique({ where: { username } });
     if (taken) {
-      return sameOriginRedirect(request, "/influencer?err=" + encodeURIComponent("Kullanici adi alinmis"));
+      return sameOriginRedirect("/influencer?err=" + encodeURIComponent("Kullanici adi alinmis"));
     }
   }
 
@@ -95,5 +95,5 @@ export async function POST(request: Request) {
     }
   });
 
-  return sameOriginRedirect(request, "/influencer");
+  return sameOriginRedirect("/influencer");
 }

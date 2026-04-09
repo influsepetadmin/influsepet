@@ -11,7 +11,7 @@ function redirectErr(request: Request, form: FormData, message: string, role: st
   sp.set("err", message);
   sp.set("role", role === "BRAND" ? "BRAND" : "INFLUENCER");
   sp.set("mode", "register");
-  return sameOriginRedirect(request, `${basePath}?${sp.toString()}`);
+  return sameOriginRedirect(`${basePath}?${sp.toString()}`);
 }
 
 export async function POST(request: Request) {
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
         },
       });
       await setSessionCookie(user.id);
-      return sameOriginRedirect(request, "/marka");
+      return sameOriginRedirect("/marka");
     }
 
     const username = String(form.get("username") ?? "")
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
       },
     });
     await setSessionCookie(user.id);
-    return sameOriginRedirect(request, "/influencer");
+    return sameOriginRedirect("/influencer");
   } catch (e) {
     console.error(e);
     return redirectErr(request, form, "Kayit sirasinda hata olustu.", role);

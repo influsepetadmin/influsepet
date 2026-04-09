@@ -92,7 +92,7 @@ export async function POST(request: Request) {
     const sp = new URLSearchParams();
     sp.set("err", message);
     sp.set("mode", "login");
-    return sameOriginRedirect(request, `${path}?${sp.toString()}`);
+    return sameOriginRedirect(`${path}?${sp.toString()}`);
   };
 
   if (!session) {
@@ -190,7 +190,7 @@ export async function POST(request: Request) {
 
       const conversationId = offer.conversation?.id;
       if (wantsRedirect && conversationId) {
-        return sameOriginRedirect(request, `/chat/${conversationId}`);
+        return sameOriginRedirect(`/chat/${conversationId}`);
       }
 
       return NextResponse.json({ ok: true, offerId: offer.id, conversationId });
@@ -236,7 +236,7 @@ export async function POST(request: Request) {
 
     const conversationId = offer.conversation?.id;
     if (wantsRedirect && conversationId) {
-      return sameOriginRedirect(request, `/chat/${conversationId}`);
+      return sameOriginRedirect(`/chat/${conversationId}`);
     }
 
     return NextResponse.json({ ok: true, offerId: offer.id, conversationId });

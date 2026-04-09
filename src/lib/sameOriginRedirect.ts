@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 /**
- * Issue redirects with an absolute URL derived from the incoming request.
- * Ensures the `Location` header uses the same host/scheme as the client (avoids
- * wrong port / localhost leaking into production responses when relative URLs are resolved oddly).
+ * Issue redirects with an absolute URL using the canonical public site URL
+ * (see `getSiteUrl`) so `Location` is never built from internal proxy/runtime hosts.
  */
-export function sameOriginRedirect(request: Request, pathnameAndQuery: string): NextResponse {
+export function sameOriginRedirect(pathnameAndQuery: string): NextResponse {
   if (!pathnameAndQuery.startsWith("/")) {
     throw new Error(`sameOriginRedirect: expected path starting with /, got: ${pathnameAndQuery.slice(0, 32)}`);
   }
-  return NextResponse.redirect(new URL(pathnameAndQuery, request.url));
+  return NextResponse.redirect(new URL(pathnameAndQuery, getSiteUrl()));
 }

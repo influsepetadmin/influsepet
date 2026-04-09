@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const sp = new URLSearchParams();
     sp.set("err", message);
     sp.set("mode", "login");
-    return sameOriginRedirect(request, `${path}?${sp.toString()}`);
+    return sameOriginRedirect(`${path}?${sp.toString()}`);
   };
 
   const session = await getSessionPayload();
@@ -95,6 +95,6 @@ export async function POST(request: Request) {
     data: { status: nextStatus },
   });
 
-  if (wantsRedirect) return sameOriginRedirect(request, okPath);
+  if (wantsRedirect) return sameOriginRedirect(okPath);
   return NextResponse.json({ ok: true, status: nextStatus });
 }

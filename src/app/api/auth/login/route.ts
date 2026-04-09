@@ -53,7 +53,7 @@ async function findUserForLogin(rawIdentifier: string, roleHint: "BRAND" | "INFL
 
 /** Tarayıcıda bu URL açılırsa (GET) form yok; ana sayfadaki girişe yönlendir. */
 export async function GET(request: Request) {
-  return sameOriginRedirect(request, "/?mode=login");
+  return sameOriginRedirect("/?mode=login");
 }
 
 export async function POST(request: Request) {
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     if (hint === "BRAND" || hint === "INFLUENCER") {
       sp.set("role", hint);
     }
-    return sameOriginRedirect(request, `${basePath}?${sp.toString()}`);
+    return sameOriginRedirect(`${basePath}?${sp.toString()}`);
   };
 
   const roleHint = String(form.get("roleHint") ?? "").toUpperCase();
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
 
   if (user.role === "ADMIN") {
     await setSessionCookie(user.id);
-    return sameOriginRedirect(request, "/");
+    return sameOriginRedirect("/");
   }
 
   if (user.role !== roleHint) {
@@ -111,10 +111,10 @@ export async function POST(request: Request) {
   await setSessionCookie(user.id);
 
   if (user.role === "BRAND") {
-    return sameOriginRedirect(request, "/marka");
+    return sameOriginRedirect("/marka");
   }
   if (user.role === "INFLUENCER") {
-    return sameOriginRedirect(request, "/influencer");
+    return sameOriginRedirect("/influencer");
   }
-  return sameOriginRedirect(request, "/");
+  return sameOriginRedirect("/");
 }

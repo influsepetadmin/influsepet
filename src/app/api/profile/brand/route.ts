@@ -37,23 +37,23 @@ export async function POST(request: Request) {
 
   const websiteCheck = parseOptionalWebsiteUrl(String(form.get("website") ?? "").trim() || null);
   if (websiteCheck.ok === false) {
-    return sameOriginRedirect(request, "/marka?err=" + encodeURIComponent(websiteCheck.error));
+    return sameOriginRedirect("/marka?err=" + encodeURIComponent(websiteCheck.error));
   }
   const profileImageCheck = parseOptionalProfileImageUrl(String(form.get("profileImageUrl") ?? "").trim() || null);
   if (profileImageCheck.ok === false) {
-    return sameOriginRedirect(request, "/marka?err=" + encodeURIComponent(profileImageCheck.error));
+    return sameOriginRedirect("/marka?err=" + encodeURIComponent(profileImageCheck.error));
   }
   const website = websiteCheck.value;
   const profileImageUrl = profileImageCheck.value;
 
   if (!companyName) {
-    return sameOriginRedirect(request, "/marka?err=" + encodeURIComponent("Sirket adi gerekli"));
+    return sameOriginRedirect("/marka?err=" + encodeURIComponent("Sirket adi gerekli"));
   }
 
   const usernameNorm = normalizeBrandUsername(usernameRaw);
   const userNameCheck = validateBrandUsernameNormalized(usernameNorm);
   if (userNameCheck.ok === false) {
-    return sameOriginRedirect(request, "/marka?err=" + encodeURIComponent(userNameCheck.message));
+    return sameOriginRedirect("/marka?err=" + encodeURIComponent(userNameCheck.message));
   }
 
   const usernameOrNull = usernameNorm.length > 0 ? usernameNorm : null;
@@ -68,7 +68,6 @@ export async function POST(request: Request) {
     });
     if (taken) {
       return sameOriginRedirect(
-        request,
         "/marka?err=" + encodeURIComponent("Bu kullanici adi baska bir marka tarafindan kullaniliyor."),
       );
     }
@@ -109,8 +108,8 @@ export async function POST(request: Request) {
       }
     });
   } catch {
-    return sameOriginRedirect(request, "/marka?err=" + encodeURIComponent("Profil kaydedilemedi. Tekrar deneyin."));
+    return sameOriginRedirect("/marka?err=" + encodeURIComponent("Profil kaydedilemedi. Tekrar deneyin."));
   }
 
-  return sameOriginRedirect(request, "/marka");
+  return sameOriginRedirect("/marka");
 }
