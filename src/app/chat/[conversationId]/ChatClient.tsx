@@ -132,6 +132,7 @@ export default function ChatClient({
   conversationId,
   meId,
   offer,
+  workflowMeta,
   chatContext,
 }: {
   conversationId: string;
@@ -143,6 +144,10 @@ export default function ChatClient({
     influencerId: string;
     title: string | null;
     campaignName: string | null;
+  };
+  workflowMeta: {
+    budgetLabel: string;
+    createdAtLabel: string;
   };
   chatContext: {
     otherSideName: string;
@@ -251,8 +256,6 @@ export default function ChatClient({
     await load();
   }
 
-  const offerTitle = chatContext.offerTitle;
-
   const lastOutgoingMessageId = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i--) {
       if (messages[i].senderId === meId) return messages[i].id;
@@ -262,29 +265,54 @@ export default function ChatClient({
 
   return (
     <div className="chat-conversation">
-      <header className="chat-conversation__header chat-conversation__header--rich">
-        <div className="chat-conversation__header-identity">
-          <div className="chat-conversation__avatar-ring" aria-hidden>
-            <img
-              className="chat-conversation__avatar"
-              src={chatContext.otherSideAvatarSrc}
-              alt=""
-              width={48}
-              height={48}
-            />
+      <header className="chat-workflow-card">
+        <div className="chat-workflow-card__title-row">
+          <div className="chat-workflow-card__title-block">
+            <span className="chat-workflow-card__kicker">İş birliği</span>
+            <h2 className="chat-workflow-card__title">{chatContext.offerTitle}</h2>
           </div>
-          <div className="chat-conversation__header-text">
-            <span className="chat-conversation__eyebrow">{chatContext.otherSideRole}</span>
-            <h2 className="chat-conversation__title">{chatContext.otherSideName}</h2>
-            {chatContext.otherSideHandleLine ? (
-              <p className="chat-conversation__handle muted">{chatContext.otherSideHandleLine}</p>
-            ) : null}
-            <p className="chat-conversation__subtitle muted">{chatContext.offerTitle}</p>
+          <div className="chat-workflow-card__title-aside">
+            <StatusBadge status={offer.status} />
           </div>
         </div>
-        <div className="chat-conversation__header-aside">
-          <StatusBadge status={offer.status} />
-          <Link className="btn secondary btn--sm" href={chatContext.profileHref}>
+
+        <dl className="chat-workflow-card__metrics" aria-label="İş birliği özeti">
+          <div className="chat-workflow-metric">
+            <dt className="chat-workflow-metric__label">Bütçe</dt>
+            <dd className="chat-workflow-metric__value">{workflowMeta.budgetLabel}</dd>
+          </div>
+          <div className="chat-workflow-metric">
+            <dt className="chat-workflow-metric__label">Oluşturulma</dt>
+            <dd className="chat-workflow-metric__value chat-workflow-metric__value--muted">
+              {workflowMeta.createdAtLabel}
+            </dd>
+          </div>
+          <div className="chat-workflow-metric">
+            <dt className="chat-workflow-metric__label">Karşı taraf</dt>
+            <dd className="chat-workflow-metric__value">{chatContext.otherSideName}</dd>
+          </div>
+        </dl>
+
+        <div className="chat-workflow-card__identity">
+          <div className="chat-workflow-card__avatar-wrap" aria-hidden>
+            <div className="chat-workflow-card__avatar-ring">
+              <img
+                className="chat-workflow-card__avatar"
+                src={chatContext.otherSideAvatarSrc}
+                alt=""
+                width={44}
+                height={44}
+              />
+            </div>
+          </div>
+          <div className="chat-workflow-card__identity-main">
+            <span className="chat-workflow-card__identity-role">{chatContext.otherSideRole}</span>
+            <span className="chat-workflow-card__identity-name">{chatContext.otherSideName}</span>
+            {chatContext.otherSideHandleLine ? (
+              <span className="chat-workflow-card__identity-handle muted">{chatContext.otherSideHandleLine}</span>
+            ) : null}
+          </div>
+          <Link className="btn secondary btn--sm chat-workflow-card__profile-btn" href={chatContext.profileHref}>
             Profili görüntüle
           </Link>
         </div>
@@ -296,7 +324,6 @@ export default function ChatClient({
         brandId={offer.brandId}
         influencerId={offer.influencerId}
         meId={meId}
-        offerTitle={offerTitle}
       />
       <CollaborationRatingPanel
         offerId={offer.id}

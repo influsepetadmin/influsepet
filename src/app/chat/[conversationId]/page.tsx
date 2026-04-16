@@ -52,6 +52,9 @@ export default async function ChatConversationPage({
             influencerId: true,
             title: true,
             campaignName: true,
+            createdAt: true,
+            budgetTRY: true,
+            offerAmountTRY: true,
             brand: {
               select: {
                 name: true,
@@ -127,16 +130,34 @@ export default async function ChatConversationPage({
     if (bu) otherSideHandleLine = `@${bu}`;
   }
 
+  const budgetTry = o.budgetTRY ?? o.offerAmountTRY;
+  const budgetLabel = new Intl.NumberFormat("tr-TR", {
+    style: "currency",
+    currency: "TRY",
+    maximumFractionDigits: 0,
+  }).format(budgetTry);
+  const createdAtLabel = o.createdAt.toLocaleString("tr-TR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
   return (
     <div className="chat-layout chat-layout--conversation">
-      <div className="chat-page-toolbar">
-        <Link className="btn secondary btn--sm chat-page-toolbar__back" href="/chat">
-          ← Sohbetler
-        </Link>
-        <Link className="btn secondary chat-page-toolbar__panel" href={homeHref}>
-          Panele dön
-        </Link>
-      </div>
+      <nav className="chat-workflow-nav" aria-label="Sohbet gezintisi">
+        <div className="chat-workflow-nav__start">
+          <Link className="chat-workflow-nav__back" href="/chat">
+            <span className="chat-workflow-nav__back-icon" aria-hidden>
+              ←
+            </span>
+            <span className="chat-workflow-nav__back-text">Sohbetler</span>
+          </Link>
+        </div>
+        <div className="chat-workflow-nav__end">
+          <Link className="chat-workflow-nav__panel btn secondary btn--sm" href={homeHref}>
+            Panele dön
+          </Link>
+        </div>
+      </nav>
       <ChatClient
         conversationId={conversationId}
         meId={session.uid}
@@ -147,6 +168,10 @@ export default async function ChatConversationPage({
           influencerId: o.influencerId,
           title: o.title,
           campaignName: o.campaignName,
+        }}
+        workflowMeta={{
+          budgetLabel,
+          createdAtLabel,
         }}
         chatContext={{
           otherSideName,
