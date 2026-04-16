@@ -5,6 +5,7 @@ import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import { getCurrentUser } from "@/lib/me";
 import CitySelect from "@/components/CitySelect";
 import CategoryMultiSelect from "@/components/CategoryMultiSelect";
+import { DiscoverySearchQueryField } from "@/components/marketplace/DiscoverySearchQueryField";
 import { prisma } from "@/lib/prisma";
 import { getCategoryLabel } from "@/lib/categories";
 import { truncateText } from "@/lib/dashboardProfileCompletion";
@@ -282,47 +283,89 @@ export default async function BrandPage({
       )}
 
       {canUseMarketplace && (
-        <section className="dash-card dash-card--section dash-card--emphasis" id="marka-influencer-ara">
-          <h2 className="dash-section__title">Influencer ara</h2>
-          <p className="dash-section__lede muted">
-            Şehir ve kategori ile filtreleyerek uygun içerik üreticilerini bulun.
-          </p>
-          <form className="influencer-search-form" method="get" action="/marka">
-            <div className="influencer-search-form__city">
-              <CitySelect id="city" name="city" defaultValue={city} required={false} />
-            </div>
-            <div className="influencer-search-form__categories">
-              <CategoryMultiSelect initialSelected={selectedCategoryKeys} inputName="categories" />
-            </div>
-            <div className="influencer-search-form__actions">
-              <button className="btn" type="submit">
-                Ara
-              </button>
-              <a className="btn secondary" href="/marka">
-                Filtreyi temizle
-              </a>
-            </div>
-          </form>
-        </section>
-      )}
+        <section
+          className="dash-card dash-card--section dash-card--emphasis discovery-search-card"
+          id="marka-influencer-ara"
+        >
+          <header className="discovery-search-card__intro">
+            <h2 className="dash-section__title discovery-search-card__title">İçerik üreticisi bul</h2>
+            <p className="dash-section__lede muted discovery-search-card__lede">
+              Şehir, kategori, kullanıcı adı veya görünen ad ile arayın. Gelişmiş eşleştirme yakında.
+            </p>
+          </header>
 
-      {canUseMarketplace && (
-        <section className="dash-card dash-card--section">
-          <h2 className="dash-section__title">Sonuçlar listesi</h2>
-          {!hasActiveSearch ? (
-            <EmptyStateCard
-              icon={<EmptyGlyphMagnifyingGlass />}
-              title="Arama yapın"
-              description="Şehir veya kategori seçerek influencer listesini görüntüleyebilirsiniz."
-            />
-          ) : influencerResults.length === 0 ? (
-            <EmptyStateCard
-              icon={<EmptyGlyphMagnifyingGlass />}
-              title="Sonuç bulunamadı"
-              description="Farklı filtreler deneyebilir veya aramayı sıfırlayabilirsiniz."
-            />
-          ) : (
-            <div className="influencer-results-stack">
+          <div className="discovery-search-panel">
+            <form className="influencer-search-form discovery-search-form" method="get" action="/marka">
+              <div className="discovery-search-field discovery-search-field--query">
+                <label className="discovery-search-field__label" htmlFor="discovery-query-marka">
+                  İsim veya kullanıcı adı ara
+                </label>
+                <DiscoverySearchQueryField id="discovery-query-marka" />
+              </div>
+
+              <div className="discovery-search-field">
+                <label className="discovery-search-field__label" htmlFor="city">
+                  Şehir
+                </label>
+                <div className="influencer-search-form__city discovery-search-field__control--city">
+                  <CitySelect id="city" name="city" defaultValue={city} required={false} />
+                </div>
+              </div>
+
+              <div className="discovery-search-field discovery-search-field--categories">
+                <span className="discovery-search-field__label" id="marka-categories-label">
+                  Kategori
+                </span>
+                <div className="discovery-search-field__control" aria-labelledby="marka-categories-label">
+                  <CategoryMultiSelect initialSelected={selectedCategoryKeys} inputName="categories" />
+                </div>
+              </div>
+
+              <div className="discovery-search-field discovery-search-field--sort">
+                <label className="discovery-search-field__label" htmlFor="discovery-sort-marka">
+                  Sıralama
+                </label>
+                <select
+                  id="discovery-sort-marka"
+                  className="discovery-search-sort"
+                  disabled
+                  aria-disabled="true"
+                  title="Yakında"
+                >
+                  <option>Sıralama seçenekleri yakında</option>
+                </select>
+                <p className="discovery-search-field__hint muted">
+                  Önerilen ve alfabetik sıralama üzerinde çalışıyoruz.
+                </p>
+              </div>
+
+              <div className="influencer-search-form__actions discovery-search-actions">
+                <button className="btn discovery-search-actions__submit" type="submit">
+                  Sonuçları göster
+                </button>
+                <a className="btn secondary discovery-search-actions__reset" href="/marka">
+                  Sıfırla
+                </a>
+              </div>
+            </form>
+          </div>
+
+          <div className="discovery-search-results">
+            <h3 className="discovery-search-results__title">Sonuçlar</h3>
+            {!hasActiveSearch ? (
+              <EmptyStateCard
+                icon={<EmptyGlyphMagnifyingGlass />}
+                title="Henüz sonuç yok"
+                description="Şehir, kategori veya isim girerek arama yapabilirsiniz. Keşfet alanı yakında burada görünecek."
+              />
+            ) : influencerResults.length === 0 ? (
+              <EmptyStateCard
+                icon={<EmptyGlyphMagnifyingGlass />}
+                title="Henüz sonuç yok"
+                description="Bu filtrelere uygun içerik üreticisi bulunamadı. Farklı şehir veya kategori deneyebilir veya sıfırlayabilirsiniz."
+              />
+            ) : (
+              <div className="influencer-results-stack">
               {influencerResults.map((p) => {
                 const categories = p.selectedCategories.map((c) => getCategoryLabel(c.categoryKey)).join(", ");
                 return (
@@ -383,7 +426,8 @@ export default async function BrandPage({
                 );
               })}
             </div>
-          )}
+            )}
+          </div>
         </section>
       )}
 

@@ -13,6 +13,17 @@ export function PublicProfileIconMapPin(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Web / harici bağlantı — marka profili meta satırı */
+export function PublicProfileIconArrowTopRightOnSquare(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <path d="M15 3h6v6" />
+      <path d="m10 14 11-11" />
+    </svg>
+  );
+}
+
 export function PublicProfileIconShieldCheck(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...stroke} {...props}>

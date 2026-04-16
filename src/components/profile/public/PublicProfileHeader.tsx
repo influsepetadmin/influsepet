@@ -64,7 +64,11 @@ export function PublicProfileHeader({
 
         {data.bio?.trim() ? (
           <p className="public-profile-hero__bio public-profile-hero__bio--prose">{data.bio.trim()}</p>
-        ) : null}
+        ) : (
+          <p className="public-profile-hero__bio-placeholder muted">
+            Henüz kısa bir biyografi eklenmemiş.
+          </p>
+        )}
 
         {cta != null ? (
           <div className="public-profile-hero__cta public-profile-hero__cta--brand-panel">{cta}</div>

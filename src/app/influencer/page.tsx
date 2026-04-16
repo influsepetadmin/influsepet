@@ -13,6 +13,7 @@ import {
 import { InfluencerProfilePanel } from "@/components/dashboard/InfluencerProfilePanel";
 import InfluencerPortfolioManager from "@/components/InfluencerPortfolioManager";
 import CitySelect from "@/components/CitySelect";
+import { DiscoverySearchQueryField } from "@/components/marketplace/DiscoverySearchQueryField";
 import { CollaborationCard } from "@/components/offers/CollaborationCard";
 import { toCollaborationCardOffer } from "@/components/offers/collaborationCardOffer";
 import { getRateeReputationByUserIds } from "@/lib/offers/rateeReputation";
@@ -286,39 +287,80 @@ export default async function InfluencerPage({
       <SocialAccountsSection />
 
       {profile && (
-        <section className="dash-card dash-card--section dash-card--emphasis" id="influencer-marka-ara">
-          <h2 className="dash-section__title">Marka ara</h2>
-          <p className="dash-section__lede muted">
-            Şehre göre kayıtlı markaları bulun ve iş birliği teklifi gönderin.
-          </p>
-          <form className="influencer-search-form" method="get" action="/influencer">
-            <div className="influencer-search-form__city">
-              <CitySelect id="brand-city" name="city" defaultValue={city} required={false} />
-            </div>
-            <div className="influencer-search-form__actions">
-              <button className="btn" type="submit">
-                Ara
-              </button>
-              <a className="btn secondary" href="/influencer">
-                Filtreyi temizle
-              </a>
-            </div>
-          </form>
+        <section
+          className="dash-card dash-card--section dash-card--emphasis discovery-search-card"
+          id="influencer-marka-ara"
+        >
+          <header className="discovery-search-card__intro">
+            <h2 className="dash-section__title discovery-search-card__title">Marka bul</h2>
+            <p className="dash-section__lede muted discovery-search-card__lede">
+              Şehir, firma adı veya kullanıcı adı ile kayıtlı markaları keşfedin. Metin araması yakında.
+            </p>
+          </header>
 
-          {!hasBrandSearch ? (
-            <EmptyStateCard
-              icon={<EmptyGlyphBuildingOffice />}
-              title="Marka listesi için arama yapın"
-              description="Şehir seçerek kayıtlı markaları listeleyebilir ve iş birliği isteği gönderebilirsiniz."
-            />
-          ) : brandResults.length === 0 ? (
-            <EmptyStateCard
-              icon={<EmptyGlyphMapPin />}
-              title="Bu şehirde marka bulunamadı"
-              description="Farklı bir şehir deneyebilir veya filtreyi temizleyebilirsiniz."
-            />
-          ) : (
-            <div className="influencer-results-stack brand-results-stack">
+          <div className="discovery-search-panel">
+            <form className="influencer-search-form discovery-search-form" method="get" action="/influencer">
+              <div className="discovery-search-field discovery-search-field--query">
+                <label className="discovery-search-field__label" htmlFor="discovery-query-influencer">
+                  İsim veya kullanıcı adı ara
+                </label>
+                <DiscoverySearchQueryField id="discovery-query-influencer" />
+              </div>
+
+              <div className="discovery-search-field">
+                <label className="discovery-search-field__label" htmlFor="brand-city">
+                  Şehir
+                </label>
+                <div className="influencer-search-form__city discovery-search-field__control--city">
+                  <CitySelect id="brand-city" name="city" defaultValue={city} required={false} />
+                </div>
+              </div>
+
+              <div className="discovery-search-field discovery-search-field--sort">
+                <label className="discovery-search-field__label" htmlFor="discovery-sort-influencer">
+                  Sıralama
+                </label>
+                <select
+                  id="discovery-sort-influencer"
+                  className="discovery-search-sort"
+                  disabled
+                  aria-disabled="true"
+                  title="Yakında"
+                >
+                  <option>Sıralama seçenekleri yakında</option>
+                </select>
+                <p className="discovery-search-field__hint muted">
+                  Önerilen ve alfabetik sıralama üzerinde çalışıyoruz.
+                </p>
+              </div>
+
+              <div className="influencer-search-form__actions discovery-search-actions">
+                <button className="btn discovery-search-actions__submit" type="submit">
+                  Sonuçları göster
+                </button>
+                <a className="btn secondary discovery-search-actions__reset" href="/influencer">
+                  Sıfırla
+                </a>
+              </div>
+            </form>
+          </div>
+
+          <div className="discovery-search-results">
+            <h3 className="discovery-search-results__title">Sonuçlar</h3>
+            {!hasBrandSearch ? (
+              <EmptyStateCard
+                icon={<EmptyGlyphBuildingOffice />}
+                title="Henüz sonuç yok"
+                description="Şehir veya isim girerek arama yapabilirsiniz. Keşfet alanı yakında burada görünecek."
+              />
+            ) : brandResults.length === 0 ? (
+              <EmptyStateCard
+                icon={<EmptyGlyphMapPin />}
+                title="Henüz sonuç yok"
+                description="Bu şehirde eşleşen marka bulunamadı. Farklı bir şehir deneyebilir veya sıfırlayabilirsiniz."
+              />
+            ) : (
+              <div className="influencer-results-stack brand-results-stack">
               {brandResults.map((b) => (
                 <article key={b.id} className="brand-result-card">
                   <div className="brand-result-card__head">
@@ -363,7 +405,8 @@ export default async function InfluencerPage({
                 </article>
               ))}
             </div>
-          )}
+            )}
+          </div>
         </section>
       )}
 

@@ -32,10 +32,8 @@ export function PublicBrandProfileView({
         <div className="public-profile-shell public-profile-shell--brand">
           <PublicProfileHomeLink href={homeHref} label={homeLinkLabel} />
           <PublicBrandProfileHeader data={data} cta={headerCta} />
-          <div className="public-profile-brand-secondary">
-            <PublicBrandProfileStats data={data} />
-            <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
-          </div>
+          <PublicBrandProfileStats data={data} />
+          <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
         </div>
       </div>
     </div>

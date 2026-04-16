@@ -209,6 +209,7 @@ export default function ChatClient({
   workflowMeta: {
     budgetLabel: string;
     createdAtLabel: string;
+    statusLabel: string;
   };
   chatContext: {
     otherSideName: string;
@@ -332,15 +333,39 @@ export default function ChatClient({
 
   return (
     <div className="chat-conversation">
-      <header className="chat-workflow-card">
+      <header className="chat-workflow-card chat-workflow-card--workspace">
         <div className="chat-workflow-card__title-row">
           <div className="chat-workflow-card__title-block">
-            <span className="chat-workflow-card__kicker">İş birliği</span>
+            <span className="chat-workflow-card__kicker">İş birliği sohbeti</span>
             <h2 className="chat-workflow-card__title">{chatContext.offerTitle}</h2>
           </div>
           <div className="chat-workflow-card__title-aside">
             <StatusBadge status={offer.status} />
           </div>
+        </div>
+
+        <div className="chat-workflow-card__identity">
+          <div className="chat-workflow-card__avatar-wrap" aria-hidden>
+            <div className="chat-workflow-card__avatar-ring">
+              <img
+                className="chat-workflow-card__avatar"
+                src={chatContext.otherSideAvatarSrc}
+                alt=""
+                width={48}
+                height={48}
+              />
+            </div>
+          </div>
+          <div className="chat-workflow-card__identity-main">
+            <span className="chat-workflow-card__identity-role">{chatContext.otherSideRole}</span>
+            <span className="chat-workflow-card__identity-name">{chatContext.otherSideName}</span>
+            {chatContext.otherSideHandleLine ? (
+              <span className="chat-workflow-card__identity-handle muted">{chatContext.otherSideHandleLine}</span>
+            ) : null}
+          </div>
+          <Link className="btn secondary btn--sm chat-workflow-card__profile-btn" href={chatContext.profileHref}>
+            Profili görüntüle
+          </Link>
         </div>
 
         <dl className="chat-workflow-card__metrics" aria-label="İş birliği özeti">
@@ -355,33 +380,17 @@ export default function ChatClient({
             </dd>
           </div>
           <div className="chat-workflow-metric">
-            <dt className="chat-workflow-metric__label">Karşı taraf</dt>
-            <dd className="chat-workflow-metric__value">{chatContext.otherSideName}</dd>
+            <dt className="chat-workflow-metric__label">Durum</dt>
+            <dd className="chat-workflow-metric__value chat-workflow-metric__value--status">
+              {workflowMeta.statusLabel}
+            </dd>
           </div>
         </dl>
 
-        <div className="chat-workflow-card__identity">
-          <div className="chat-workflow-card__avatar-wrap" aria-hidden>
-            <div className="chat-workflow-card__avatar-ring">
-              <img
-                className="chat-workflow-card__avatar"
-                src={chatContext.otherSideAvatarSrc}
-                alt=""
-                width={44}
-                height={44}
-              />
-            </div>
-          </div>
-          <div className="chat-workflow-card__identity-main">
-            <span className="chat-workflow-card__identity-role">{chatContext.otherSideRole}</span>
-            <span className="chat-workflow-card__identity-name">{chatContext.otherSideName}</span>
-            {chatContext.otherSideHandleLine ? (
-              <span className="chat-workflow-card__identity-handle muted">{chatContext.otherSideHandleLine}</span>
-            ) : null}
-          </div>
-          <Link className="btn secondary btn--sm chat-workflow-card__profile-btn" href={chatContext.profileHref}>
-            Profili görüntüle
-          </Link>
+        <div className="chat-workflow-card__workspace-foot">
+          <p className="chat-workflow-card__workspace-hint muted">
+            Aşağıda teslim, revize ve tamamlama panelleri — teklif kısayolları ileride bu özetle birleştirilebilir.
+          </p>
         </div>
       </header>
 

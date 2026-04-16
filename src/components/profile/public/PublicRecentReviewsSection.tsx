@@ -42,9 +42,12 @@ export function PublicRecentReviewsSection({ reviews }: Props) {
       </h2>
 
       {reviews.length === 0 ? (
-        <p className="public-profile-recent-reviews__empty muted">
-          Henüz public değerlendirme yok
-        </p>
+        <div className="public-profile-recent-reviews__empty-panel">
+          <p className="public-profile-recent-reviews__empty muted">
+            Henüz herkese açık değerlendirme yok. Tamamlanan iş birlikleri sonrası puanlar burada
+            görünecek.
+          </p>
+        </div>
       ) : (
         <ul className="public-profile-recent-reviews__list">
           {reviews.map((item, index) => {

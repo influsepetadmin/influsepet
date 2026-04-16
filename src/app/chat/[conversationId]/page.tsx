@@ -6,6 +6,7 @@ import { getAvatarUrl } from "@/lib/avatar";
 import { prisma } from "@/lib/prisma";
 import { getSessionPayload } from "@/lib/session";
 import { EmptyGlyphLockClosed } from "@/components/icons/emptyStateGlyphs";
+import { statusBadgeLabel } from "@/components/offers/StatusBadge";
 import ChatClient from "./ChatClient";
 
 function offerTitle(title: string | null, campaignName: string | null): string {
@@ -172,6 +173,7 @@ export default async function ChatConversationPage({
         workflowMeta={{
           budgetLabel,
           createdAtLabel,
+          statusLabel: statusBadgeLabel(o.status),
         }}
         chatContext={{
           otherSideName,
