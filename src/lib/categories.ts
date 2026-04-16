@@ -65,3 +65,48 @@ export function normalizeCategoryKeysForForm(storedKeys: string[], primaryFallba
   }
   return [...new Set(out)].slice(0, 3);
 }
+
+/**
+ * Category keys whose label or key partially matches the search (case-insensitive, spacing-tolerant).
+ * Used for Prisma `categoryKey: { in: [...] }` — no DB extension required.
+ */
+export function matchCategoryKeysForSearch(raw: string): string[] {
+  const primary = raw.trim().toLowerCase();
+  if (!primary) return [];
+  const compact = primary.replace(/\s+/g, "");
+  const keys = new Set<string>();
+
+  for (const def of CATEGORY_DEFINITIONS) {
+    const label = def.label.toLowerCase();
+    const key = def.key.toLowerCase();
+    const labelCompact = label.replace(/\s+/g, "");
+    if (
+      label.includes(primary) ||
+      primary.includes(label) ||
+      key.includes(primary) ||
+      primary.includes(key) ||
+      labelCompact.includes(compact) ||
+      compact.includes(labelCompact)
+    ) {
+      keys.add(def.key);
+    }
+  }
+
+  for (const legacy of Object.keys(LEGACY_LABELS)) {
+    const lk = legacy.toLowerCase();
+    const legacyLabel = (LEGACY_LABELS[legacy] ?? "").toLowerCase();
+    const legacyLabelCompact = legacyLabel.replace(/\s+/g, "");
+    if (
+      lk.includes(primary) ||
+      primary.includes(lk) ||
+      legacyLabel.includes(primary) ||
+      primary.includes(legacyLabel) ||
+      legacyLabelCompact.includes(compact) ||
+      compact.includes(legacyLabelCompact)
+    ) {
+      keys.add(LEGACY_KEY_TO_CURRENT[legacy] ?? legacy);
+    }
+  }
+
+  return [...keys];
+}

@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/me";
 import CitySelect from "@/components/CitySelect";
 import CategoryMultiSelect from "@/components/CategoryMultiSelect";
 import { DiscoverySearchQueryField } from "@/components/marketplace/DiscoverySearchQueryField";
+import { MarketplaceDiscoverInfluencers } from "@/components/marketplace/MarketplaceDiscoverInfluencers";
 import { prisma } from "@/lib/prisma";
 import { getCategoryLabel } from "@/lib/categories";
 import { truncateText } from "@/lib/dashboardProfileCompletion";
@@ -16,6 +17,11 @@ import { CollaborationCard } from "@/components/offers/CollaborationCard";
 import { toCollaborationCardOffer } from "@/components/offers/collaborationCardOffer";
 import { getRateeReputationByUserIds } from "@/lib/offers/rateeReputation";
 import { getAvailableOfferTransitions } from "@/lib/offers/transitions";
+import {
+  buildInfluencerMarketplaceWhere,
+  buildInfluencerProfileTextWhere,
+  parseMarketplaceSearchQuery,
+} from "@/lib/marketplaceTextSearch";
 import { SocialAccountsSection } from "@/components/social/SocialAccountsSection";
 import {
   EmptyGlyphInbox,
@@ -50,7 +56,12 @@ const offerDashboardSelect = {
 export default async function BrandPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ city?: string; categories?: string | string[]; err?: string }>;
+  searchParams?: Promise<{
+    city?: string;
+    categories?: string | string[];
+    err?: string;
+    q?: string;
+  }>;
 }) {
   const user = await getCurrentUser();
   const params = searchParams ? await searchParams : undefined;
@@ -83,6 +94,7 @@ export default async function BrandPage({
   const profile = user.brand;
   const profileComplete = isBrandDashboardProfileComplete(profile);
   const city = params?.city ?? "";
+  const q = parseMarketplaceSearchQuery(params?.q);
   const categoriesParam = params?.categories;
   const categoriesArray =
     typeof categoriesParam === "string"
@@ -91,7 +103,8 @@ export default async function BrandPage({
         ? categoriesParam
         : [];
   const selectedCategoryKeys = categoriesArray.filter(Boolean).slice(0, 3);
-  const hasActiveSearch = Boolean(city) || selectedCategoryKeys.length > 0;
+  const hasActiveSearch =
+    Boolean(city.trim()) || selectedCategoryKeys.length > 0 || Boolean(q);
 
   const canUseMarketplace = Boolean(profile);
 
@@ -155,35 +168,41 @@ export default async function BrandPage({
   ];
   const rateeReputationByUserId = await getRateeReputationByUserIds(completedInfluencerIds);
 
-  const influencerResults = canUseMarketplace
-    ? hasActiveSearch
-      ? await prisma.influencerProfile.findMany({
-          where: {
-            ...(city ? { city } : {}),
-            selectedCategories: selectedCategoryKeys.length
-              ? {
-                  some: {
-                    categoryKey: { in: selectedCategoryKeys },
-                  },
-                }
-              : undefined,
-          },
-          select: {
-            id: true,
-            userId: true,
-            username: true,
-            profileImageUrl: true,
-            city: true,
-            followerCount: true,
-            basePriceTRY: true,
-            selectedCategories: { select: { categoryKey: true } },
-            nicheText: true,
-          },
+  const discoverSelect = {
+    id: true,
+    userId: true,
+    username: true,
+    profileImageUrl: true,
+    city: true,
+    followerCount: true,
+    basePriceTRY: true,
+    selectedCategories: { select: { categoryKey: true } },
+    nicheText: true,
+  } as const;
+
+  const influencerSearchWhere = buildInfluencerMarketplaceWhere({
+    city: city.trim(),
+    selectedCategoryKeys: selectedCategoryKeys,
+    textWhere: buildInfluencerProfileTextWhere(q),
+  });
+
+  const [influencerResults, discoverInfluencers] = await Promise.all([
+    canUseMarketplace && hasActiveSearch
+      ? prisma.influencerProfile.findMany({
+          where: influencerSearchWhere,
+          select: discoverSelect,
           take: 30,
           orderBy: { followerCount: "desc" },
         })
-      : []
-    : [];
+      : Promise.resolve([]),
+    canUseMarketplace
+      ? prisma.influencerProfile.findMany({
+          select: discoverSelect,
+          take: 6,
+          orderBy: { followerCount: "desc" },
+        })
+      : Promise.resolve([]),
+  ]);
 
   return (
     <div className="dashboard-page">
@@ -290,9 +309,12 @@ export default async function BrandPage({
           <header className="discovery-search-card__intro">
             <h2 className="dash-section__title discovery-search-card__title">İçerik üreticisi bul</h2>
             <p className="dash-section__lede muted discovery-search-card__lede">
-              Şehir, kategori, kullanıcı adı veya görünen ad ile arayın. Gelişmiş eşleştirme yakında.
+              Şehir, kategori, kullanıcı adı, görünen ad, niş veya kategori metni ile arayın; kısmi eşleşmeler
+              desteklenir.
             </p>
           </header>
+
+          <MarketplaceDiscoverInfluencers items={discoverInfluencers} />
 
           <div className="discovery-search-panel">
             <form className="influencer-search-form discovery-search-form" method="get" action="/marka">
@@ -300,7 +322,7 @@ export default async function BrandPage({
                 <label className="discovery-search-field__label" htmlFor="discovery-query-marka">
                   İsim veya kullanıcı adı ara
                 </label>
-                <DiscoverySearchQueryField id="discovery-query-marka" />
+                <DiscoverySearchQueryField id="discovery-query-marka" defaultValue={q} />
               </div>
 
               <div className="discovery-search-field">
@@ -353,16 +375,16 @@ export default async function BrandPage({
           <div className="discovery-search-results">
             <h3 className="discovery-search-results__title">Sonuçlar</h3>
             {!hasActiveSearch ? (
-              <EmptyStateCard
+                <EmptyStateCard
                 icon={<EmptyGlyphMagnifyingGlass />}
                 title="Henüz sonuç yok"
-                description="Şehir, kategori veya isim girerek arama yapabilirsiniz. Keşfet alanı yakında burada görünecek."
+                description="Şehir, kategori veya arama kutusuna metin girerek arama yapabilirsiniz. Yukarıdaki Keşfet bölümünden de örnek profillere göz atabilirsiniz."
               />
             ) : influencerResults.length === 0 ? (
               <EmptyStateCard
                 icon={<EmptyGlyphMagnifyingGlass />}
-                title="Henüz sonuç yok"
-                description="Bu filtrelere uygun içerik üreticisi bulunamadı. Farklı şehir veya kategori deneyebilir veya sıfırlayabilirsiniz."
+                title="Sonuç bulunamadı"
+                description="Bu filtrelere uygun içerik üreticisi bulunamadı. Arama metnini, kullanıcı adını, kategori veya şehir seçimini değiştirip yeniden deneyebilir veya sıfırlayabilirsiniz."
               />
             ) : (
               <div className="influencer-results-stack">

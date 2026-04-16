@@ -14,11 +14,17 @@ import { InfluencerProfilePanel } from "@/components/dashboard/InfluencerProfile
 import InfluencerPortfolioManager from "@/components/InfluencerPortfolioManager";
 import CitySelect from "@/components/CitySelect";
 import { DiscoverySearchQueryField } from "@/components/marketplace/DiscoverySearchQueryField";
+import { MarketplaceDiscoverBrands } from "@/components/marketplace/MarketplaceDiscoverBrands";
 import { CollaborationCard } from "@/components/offers/CollaborationCard";
 import { toCollaborationCardOffer } from "@/components/offers/collaborationCardOffer";
 import { getRateeReputationByUserIds } from "@/lib/offers/rateeReputation";
 import { getAvailableOfferTransitions } from "@/lib/offers/transitions";
 import { SocialAccountsSection } from "@/components/social/SocialAccountsSection";
+import {
+  buildBrandMarketplaceWhere,
+  buildBrandProfileTextWhere,
+  parseMarketplaceSearchQuery,
+} from "@/lib/marketplaceTextSearch";
 import {
   EmptyGlyphBuildingOffice,
   EmptyGlyphInbox,
@@ -53,13 +59,14 @@ const offerDashboardSelect = {
 export default async function InfluencerPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ err?: string; city?: string }>;
+  searchParams?: Promise<{ err?: string; city?: string; q?: string }>;
 }) {
   const user = await getCurrentUser();
   const params = searchParams ? await searchParams : undefined;
   const err = params?.err;
   const city = (params?.city ?? "").trim();
-  const hasBrandSearch = Boolean(city);
+  const q = parseMarketplaceSearchQuery(params?.q);
+  const hasBrandSearch = Boolean(city) || Boolean(q);
 
   if (!user) {
     redirect("/?role=INFLUENCER&mode=login");
@@ -169,21 +176,36 @@ export default async function InfluencerPage({
   ];
   const rateeReputationByUserId = await getRateeReputationByUserIds(completedBrandIds);
 
-  const brandResults =
+  const brandSelect = {
+    id: true,
+    userId: true,
+    companyName: true,
+    profileImageUrl: true,
+    city: true,
+  } as const;
+
+  const brandSearchWhere = buildBrandMarketplaceWhere({
+    city,
+    textWhere: buildBrandProfileTextWhere(q),
+  });
+
+  const [brandResults, discoverBrands] = await Promise.all([
     profile && hasBrandSearch
-      ? await prisma.brandProfile.findMany({
-          where: { city },
-          select: {
-            id: true,
-            userId: true,
-            companyName: true,
-            profileImageUrl: true,
-            city: true,
-          },
+      ? prisma.brandProfile.findMany({
+          where: brandSearchWhere,
+          select: brandSelect,
           take: 30,
           orderBy: { companyName: "asc" },
         })
-      : [];
+      : Promise.resolve([]),
+    profile
+      ? prisma.brandProfile.findMany({
+          select: brandSelect,
+          take: 6,
+          orderBy: { updatedAt: "desc" },
+        })
+      : Promise.resolve([]),
+  ]);
 
   const portfolioItems =
     profile
@@ -294,9 +316,17 @@ export default async function InfluencerPage({
           <header className="discovery-search-card__intro">
             <h2 className="dash-section__title discovery-search-card__title">Marka bul</h2>
             <p className="dash-section__lede muted discovery-search-card__lede">
-              Şehir, firma adı veya kullanıcı adı ile kayıtlı markaları keşfedin. Metin araması yakında.
+              Şehir, firma adı, kullanıcı adı veya kategori metni ile kayıtlı markaları keşfedin; kısmi eşleşmeler
+              desteklenir.
             </p>
           </header>
+
+          {profile ? (
+            <MarketplaceDiscoverBrands
+              items={discoverBrands}
+              influencerBasePriceTRY={profile.basePriceTRY}
+            />
+          ) : null}
 
           <div className="discovery-search-panel">
             <form className="influencer-search-form discovery-search-form" method="get" action="/influencer">
@@ -304,7 +334,7 @@ export default async function InfluencerPage({
                 <label className="discovery-search-field__label" htmlFor="discovery-query-influencer">
                   İsim veya kullanıcı adı ara
                 </label>
-                <DiscoverySearchQueryField id="discovery-query-influencer" />
+                <DiscoverySearchQueryField id="discovery-query-influencer" defaultValue={q} />
               </div>
 
               <div className="discovery-search-field">
@@ -351,13 +381,13 @@ export default async function InfluencerPage({
               <EmptyStateCard
                 icon={<EmptyGlyphBuildingOffice />}
                 title="Henüz sonuç yok"
-                description="Şehir veya isim girerek arama yapabilirsiniz. Keşfet alanı yakında burada görünecek."
+                description="Şehir veya arama kutusuna metin girerek arama yapabilirsiniz. Yukarıdaki Keşfet bölümünden de örnek markalara göz atabilirsiniz."
               />
             ) : brandResults.length === 0 ? (
               <EmptyStateCard
                 icon={<EmptyGlyphMapPin />}
-                title="Henüz sonuç yok"
-                description="Bu şehirde eşleşen marka bulunamadı. Farklı bir şehir deneyebilir veya sıfırlayabilirsiniz."
+                title="Sonuç bulunamadı"
+                description="Bu kriterlere uygun marka bulunamadı. Arama metnini, firma veya kullanıcı adını değiştirip yeniden deneyebilir, farklı bir şehir seçebilir veya sıfırlayabilirsiniz."
               />
             ) : (
               <div className="influencer-results-stack brand-results-stack">

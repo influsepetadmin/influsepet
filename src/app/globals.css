@@ -4074,6 +4074,60 @@ main:has(.dashboard-page) {
   cursor: not-allowed;
 }
 
+/* Keşfet — arama öncesi örnek profiller (marka / influencer panelleri) */
+.dashboard-page .marketplace-discover {
+  margin: 0 0 4px;
+  padding: 4px 0 22px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.95);
+}
+
+.dashboard-page .marketplace-discover__intro {
+  margin-bottom: 16px;
+}
+
+.dashboard-page .marketplace-discover__title {
+  margin: 0 0 8px;
+  font-size: 1.06rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+.dashboard-page .marketplace-discover__lede {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  max-width: 62ch;
+}
+
+.dashboard-page .marketplace-discover__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 268px), 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+.dashboard-page .marketplace-discover__grid--brands {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 288px), 1fr));
+}
+
+.dashboard-page .influencer-result-card--discover,
+.dashboard-page .brand-result-card--discover {
+  padding: 14px 16px 16px;
+}
+
+.dashboard-page .influencer-result-card--discover .influencer-result-card__form textarea {
+  min-height: 64px;
+}
+
+.dashboard-page .marketplace-discover .empty-state-card {
+  margin: 0;
+  border-radius: var(--radius-app-card);
+  border: 1px dashed rgba(199, 210, 254, 0.55);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.97) 0%, #f8fafc 100%);
+  box-shadow: var(--shadow-premium-sm);
+}
+
 .dashboard-page .discovery-search-results {
   margin-top: 24px;
   padding-top: 22px;
