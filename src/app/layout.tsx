@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { SiteFooter } from "@/components/SiteFooter";
+import { SiteFooterGate } from "@/components/SiteFooterGate";
 import { getSiteOrigin } from "@/lib/siteUrl";
 
 const siteDescription =
@@ -15,11 +15,7 @@ export const metadata: Metadata = {
   description: siteDescription,
   applicationName: "InfluSepet",
   authors: [{ name: "InfluSepet" }],
-  /** Tab + home-screen: purple basket mark only (`logo-primary` stays for OG / full wordmark UI). */
-  icons: {
-    icon: [{ url: "/branding/influsepet-logo-icon.png", type: "image/png" }],
-    apple: [{ url: "/branding/influsepet-logo-icon.png", type: "image/png" }],
-  },
+  /** Favicons: `src/app/icon.png` + `apple-icon.png` (file convention; purple basket mark). Do not duplicate via `icons` here. */
   openGraph: {
     type: "website",
     locale: "tr_TR",
@@ -51,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="tr">
       <body>
         <main>{children}</main>
-        <SiteFooter />
+        <SiteFooterGate />
       </body>
     </html>
   );

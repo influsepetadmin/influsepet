@@ -11,5 +11,5 @@ export function PublicBrandProfileStats({ data }: { data: PublicBrandProfileResp
     { label: "Puanlama sayısı", value: String(data.ratingCount) },
   ];
 
-  return <PublicProfileStatCards items={items} />;
+  return <PublicProfileStatCards items={items} iconTreatment="line" />;
 }

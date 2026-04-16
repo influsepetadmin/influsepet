@@ -48,6 +48,7 @@ export function InfluencerProfilePanel({
 
       {profileComplete ? (
         <div className="dashboard-profile-summary dashboard-profile-summary--influencer">
+          <div className="dashboard-profile-summary__card">
           <div className="profile-public-hero">
             <img className="profile-public-avatar" src={summary.imageSrc} alt="" />
             <div className="influencer-profile-meta">
@@ -83,6 +84,7 @@ export function InfluencerProfilePanel({
                 <p className="influencer-profile-meta__bio">{summary.bioPreview}</p>
               ) : null}
             </div>
+          </div>
           </div>
           <p className="dashboard-profile-summary__hint muted">
             Profil bilgileriniz kayıtlı. İsterseniz düzenleyebilirsiniz.

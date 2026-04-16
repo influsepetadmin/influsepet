@@ -44,6 +44,7 @@ export function BrandProfilePanel({
 
       {profileComplete ? (
         <div className="dashboard-profile-summary dashboard-profile-summary--brand">
+          <div className="dashboard-profile-summary__card">
           <div className="profile-public-hero">
             <img
               className="profile-public-avatar profile-public-avatar--brand"
@@ -83,6 +84,7 @@ export function BrandProfilePanel({
                 </p>
               )}
             </div>
+          </div>
           </div>
           <p className="dashboard-profile-summary__hint muted">
             Profil bilgileriniz tamamlandı. İsterseniz düzenleyebilirsiniz.

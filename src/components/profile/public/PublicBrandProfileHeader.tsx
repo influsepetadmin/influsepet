@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { PublicBrandProfileResponse } from "@/lib/publicProfile/publicBrandProfileByUsername";
 import { getAvatarUrl } from "@/lib/avatar";
 import { CategoryBadgeGroup } from "./CategoryBadgeGroup";
@@ -10,7 +11,14 @@ function safeWebsiteHref(url: string): string | null {
   return `https://${t}`;
 }
 
-export function PublicBrandProfileHeader({ data }: { data: PublicBrandProfileResponse }) {
+export function PublicBrandProfileHeader({
+  data,
+  cta,
+}: {
+  data: PublicBrandProfileResponse;
+  /** Dahili profil vb.: varsayılan “yakında” CTA yerine özel aksiyonlar. */
+  cta?: ReactNode;
+}) {
   const avatarSrc = data.avatarUrl?.trim() || getAvatarUrl(data.id);
   const socialVerifiedCount = data.verifiedSocialAccounts.length;
   const webHref = data.website ? safeWebsiteHref(data.website) : null;
@@ -80,12 +88,16 @@ export function PublicBrandProfileHeader({ data }: { data: PublicBrandProfileRes
 
             <PublicRecentReviewsSection reviews={data.recentPublicReviews} />
 
-            <div className="public-profile-hero__cta">
-              <button type="button" className="btn public-profile-hero__cta-btn" disabled>
-                İş birliği teklifi gönder
-              </button>
-              <p className="public-profile-hero__cta-hint">Bu özellik yakında etkinleşecek.</p>
-            </div>
+            {cta != null ? (
+              <div className="public-profile-hero__cta public-profile-hero__cta--brand-panel">{cta}</div>
+            ) : (
+              <div className="public-profile-hero__cta">
+                <button type="button" className="btn public-profile-hero__cta-btn" disabled>
+                  İş birliği teklifi gönder
+                </button>
+                <p className="public-profile-hero__cta-hint">Bu özellik yakında etkinleşecek.</p>
+              </div>
+            )}
           </div>
         </div>
       </header>

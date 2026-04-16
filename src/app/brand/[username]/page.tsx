@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import { PublicProfileHomeLink } from "@/components/profile/public/PublicProfileHomeLink";
-import { PublicBrandProfileHeader } from "@/components/profile/public/PublicBrandProfileHeader";
-import { PublicBrandProfileStats } from "@/components/profile/public/PublicBrandProfileStats";
-import { VerifiedSocialAccounts } from "@/components/profile/public/VerifiedSocialAccounts";
+import { PublicBrandProfileView } from "@/components/profile/public/PublicBrandProfileView";
 import { PublicProfileNotFound } from "@/components/profile/public/PublicProfileNotFound";
 import { getDashboardBackHref } from "@/lib/me";
 import { fetchPublicBrandProfileByUsername } from "@/lib/publicProfile/fetchPublicBrandProfileServer";
@@ -39,18 +36,5 @@ export default async function PublicBrandProfilePage({ params }: Props) {
     );
   }
 
-  return (
-    <div className="public-profile-page public-profile-page--brand">
-      <div className="public-profile-page__inner public-profile-page__inner--brand">
-        <div className="public-profile-shell public-profile-shell--brand">
-          <PublicProfileHomeLink href={homeHref} />
-          <PublicBrandProfileHeader data={data} />
-          <div className="public-profile-brand-secondary">
-            <PublicBrandProfileStats data={data} />
-            <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <PublicBrandProfileView data={data} homeHref={homeHref} />;
 }

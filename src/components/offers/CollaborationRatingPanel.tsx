@@ -259,8 +259,8 @@ export function CollaborationRatingPanel({
         İş birliği puanı
       </h3>
       <p className="chat-panel__section-hint muted">
-        Tamamlanan iş birliğinde karşı tarafa 1–5 yıldız verirsiniz; isterseniz kısa bir not ekleyebilirsiniz (en
-        fazla {COLLABORATION_RATING_REVIEW_TEXT_MAX} karakter, zorunlu değil).
+        Tamamlanan iş birliğinde karşı tarafa 1–5 yıldız verin. İsterseniz en fazla{" "}
+        {COLLABORATION_RATING_REVIEW_TEXT_MAX} karakterlik isteğe bağlı kısa yorum da ekleyebilirsiniz.
       </p>
 
       {successFlash && successMessage ? (
@@ -282,7 +282,7 @@ export function CollaborationRatingPanel({
           </div>
           {mine.reviewText?.trim() ? (
             <div className="collab-rating-panel__my-note">
-              <p className="collab-rating-panel__label muted">Notunuz</p>
+              <p className="collab-rating-panel__label muted">Yorumunuz</p>
               <p className="collab-rating-panel__review-text-body">{mine.reviewText}</p>
             </div>
           ) : null}
@@ -315,7 +315,7 @@ export function CollaborationRatingPanel({
           )}
           <div className="collab-rating-panel__optional-note">
             <label className="collab-rating-panel__optional-note-label muted" htmlFor={noteFieldId}>
-              Kısa not (isteğe bağlı)
+              Kısa yorum (isteğe bağlı)
             </label>
             <textarea
               id={noteFieldId}
@@ -325,9 +325,10 @@ export function CollaborationRatingPanel({
                 setReviewNote(e.target.value.slice(0, COLLABORATION_RATING_REVIEW_TEXT_MAX))
               }
               disabled={submitting}
-              rows={3}
+              rows={2}
               maxLength={COLLABORATION_RATING_REVIEW_TEXT_MAX}
-              placeholder="İsterseniz birkaç cümle ekleyin…"
+              placeholder="Örn. iletişim, teslim veya iş birliği süreci hakkında birkaç kelime…"
+              autoComplete="off"
               aria-describedby={`${noteFieldId}-count`}
             />
             <p
@@ -360,7 +361,7 @@ export function CollaborationRatingPanel({
           </p>
           {theirs.reviewText?.trim() ? (
             <div className="collab-rating-panel__theirs-note" role="note">
-              <span className="collab-rating-panel__theirs-note-label muted">Karşı tarafın notu</span>
+              <span className="collab-rating-panel__theirs-note-label muted">Karşı tarafın yorumu</span>
               <p className="collab-rating-panel__theirs-note-body">{theirs.reviewText}</p>
             </div>
           ) : null}

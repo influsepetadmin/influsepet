@@ -106,6 +106,9 @@ export function CollaborationCard({
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busyRef = useRef(false);
+  const cancelDialogVazgecRef = useRef<HTMLButtonElement | null>(null);
+  const elementFocusedBeforeCancelDialogRef = useRef<HTMLElement | null>(null);
+  const cancelDialogWasOpenRef = useRef(false);
 
   useEffect(() => {
     if (!cancelConfirmOpen) return;
@@ -114,6 +117,21 @@ export function CollaborationCard({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, [cancelConfirmOpen]);
+
+  useEffect(() => {
+    if (cancelConfirmOpen) {
+      cancelDialogWasOpenRef.current = true;
+      cancelDialogVazgecRef.current?.focus();
+      return;
+    }
+    if (!cancelDialogWasOpenRef.current) return;
+    cancelDialogWasOpenRef.current = false;
+    const el = elementFocusedBeforeCancelDialogRef.current;
+    elementFocusedBeforeCancelDialogRef.current = null;
+    if (el && el.isConnected && typeof el.focus === "function") {
+      requestAnimationFrame(() => el.focus());
+    }
   }, [cancelConfirmOpen]);
 
   const displayName =
@@ -215,8 +233,16 @@ export function CollaborationCard({
 
   const confirmCancelCollaboration = useCallback(() => {
     setCancelConfirmOpen(false);
+    elementFocusedBeforeCancelDialogRef.current = null;
     void runTransition("CANCELLED");
   }, [runTransition]);
+
+  const openCancelConfirmation = useCallback(() => {
+    const ae = document.activeElement;
+    elementFocusedBeforeCancelDialogRef.current =
+      ae instanceof HTMLElement ? ae : null;
+    setCancelConfirmOpen(true);
+  }, []);
 
   const hasBrief = Boolean(offer.brief.trim());
   const ratingBadge = counterpartyRatingBadge(offer.status, counterpartyRating ?? null);
@@ -308,7 +334,7 @@ export function CollaborationCard({
                 disabled={disabled}
                 onClick={() => {
                   if (next === "CANCELLED") {
-                    setCancelConfirmOpen(true);
+                    openCancelConfirmation();
                     return;
                   }
                   void runTransition(next);
@@ -332,23 +358,28 @@ export function CollaborationCard({
             className="confirm-dialog-panel"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="collab-cancel-title"
-            aria-describedby="collab-cancel-desc"
+            aria-labelledby={`collab-cancel-title-${offer.id}`}
+            aria-describedby={`collab-cancel-desc-${offer.id}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="collab-cancel-title" className="confirm-dialog-panel__title">
+            <h2 id={`collab-cancel-title-${offer.id}`} className="confirm-dialog-panel__title">
               İş birliğini iptal et
             </h2>
-            <div id="collab-cancel-desc" className="confirm-dialog-panel__body-stack">
+            <div id={`collab-cancel-desc-${offer.id}`} className="confirm-dialog-panel__body-stack">
               <p className="confirm-dialog-panel__body">İptal etmek istediğinize emin misiniz?</p>
               <p className="confirm-dialog-panel__body-note muted">Bu işlem geri alınamaz.</p>
             </div>
             <div className="confirm-dialog-panel__actions">
-              <button type="button" className="btn secondary" onClick={() => setCancelConfirmOpen(false)}>
+              <button
+                ref={cancelDialogVazgecRef}
+                type="button"
+                className="btn secondary"
+                onClick={() => setCancelConfirmOpen(false)}
+              >
                 Vazgeç
               </button>
               <button type="button" className="btn btn--danger" onClick={confirmCancelCollaboration}>
-                İptal et
+                Evet, iptal et
               </button>
             </div>
           </div>
