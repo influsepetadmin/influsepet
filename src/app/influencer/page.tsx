@@ -18,6 +18,12 @@ import { toCollaborationCardOffer } from "@/components/offers/collaborationCardO
 import { getRateeReputationByUserIds } from "@/lib/offers/rateeReputation";
 import { getAvailableOfferTransitions } from "@/lib/offers/transitions";
 import { SocialAccountsSection } from "@/components/social/SocialAccountsSection";
+import {
+  EmptyGlyphBuildingOffice,
+  EmptyGlyphInbox,
+  EmptyGlyphMapPin,
+  EmptyGlyphPaperAirplane,
+} from "@/components/icons/emptyStateGlyphs";
 
 const offerDashboardSelect = {
   id: true,
@@ -301,13 +307,13 @@ export default async function InfluencerPage({
 
           {!hasBrandSearch ? (
             <EmptyStateCard
-              icon="🏢"
+              icon={<EmptyGlyphBuildingOffice />}
               title="Marka listesi için arama yapın"
               description="Şehir seçerek kayıtlı markaları listeleyebilir ve iş birliği isteği gönderebilirsiniz."
             />
           ) : brandResults.length === 0 ? (
             <EmptyStateCard
-              icon="📍"
+              icon={<EmptyGlyphMapPin />}
               title="Bu şehirde marka bulunamadı"
               description="Farklı bir şehir deneyebilir veya filtreyi temizleyebilirsiniz."
             />
@@ -366,7 +372,7 @@ export default async function InfluencerPage({
           <h2 className="dash-section__title">Markalardan gelen iş birliği istekleri</h2>
           {receivedOffers.length === 0 ? (
             <EmptyStateCard
-              icon="📨"
+              icon={<EmptyGlyphInbox />}
               title="Henüz gelen istek yok"
               description="Markalardan iş birliği teklifi geldiğinde burada listelenir."
             >
@@ -407,7 +413,7 @@ export default async function InfluencerPage({
           <h2 className="dash-section__title">Markaya gönderdiğin iş birliği istekleri</h2>
           {sentOffersToBrands.length === 0 ? (
             <EmptyStateCard
-              icon="📤"
+              icon={<EmptyGlyphPaperAirplane />}
               title="Henüz gönderdiğiniz istek yok"
               description="Uygun markaları bularak kendi teklifinizi gönderebilirsiniz."
             >

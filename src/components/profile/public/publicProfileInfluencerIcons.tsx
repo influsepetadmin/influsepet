@@ -1,16 +1,7 @@
 import type { SVGProps } from "react";
+import { outlineIconBase } from "@/components/icons/iconStroke";
 
-const stroke: SVGProps<SVGSVGElement> = {
-  width: 16,
-  height: 16,
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.5,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  "aria-hidden": true,
-};
+const stroke = outlineIconBase;
 
 /** Tek stroke ailesi — küçük, sade (24 outline tarzı). */
 export function PublicProfileIconMapPin(props: SVGProps<SVGSVGElement>) {
@@ -66,6 +57,119 @@ export function PublicProfileIconBanknote(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...stroke} {...props}>
       <path d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M2.25 5.25a60.07 60.07 0 0 0 15.797 2.101c.727.198 1.453-.342 1.453-1.096v-1.036m0-3.102a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096M2.25 5.25v13.5m0-13.5a60.07 60.07 0 0 1 15.797-2.101c.727-.198 1.453.342 1.453 1.096m-17.25 0a60.07 60.07 0 0 0-15.797 2.101c-.727.198-1.453-.342-1.453-1.096" />
+    </svg>
+  );
+}
+
+/** Komisyon / oran (basit % işareti — aynı stroke ailesi) */
+export function PublicProfileIconPercent(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M4.5 19.5 19.5 4.5M9.75 9.75a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm9 9a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconCalendar(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconClock(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconArrowPath(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M16.023 9.348h4.992v-4.992m0 4.992-4.804-4.804a4.5 4.5 0 0 0-6.404 0M7.977 14.652h-4.992v4.992m0-4.992 4.804 4.804a4.5 4.5 0 0 0 6.404 0" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconDocumentText(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V16.5a3.75 3.75 0 0 0-3.75-3.75H10.5Z" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconInbox(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M2.25 13.5h3.86a2.25 2.25 0 0 0 2.012-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.218a2.25 2.25 0 0 1 2.013 1.244l.256.512a2.25 2.25 0 0 0 2.012 1.244h3.862M4.5 19.5h15M4.5 4.5h15m-15 0a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h15a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25Z" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconChatBubbleLeftRight(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V4.934c0-1.035-.845-1.898-1.976-1.192a48.624 48.624 0 0 0-8.048 0c-1.131-.706-1.976.157-1.976 1.192v6.286c0 1.035.845 1.898 1.976 1.192a48.624 48.624 0 0 0 8.048 0c1.131.706 1.976-.157 1.976-1.192v-4.286Z" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconLockClosed(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconMagnifyingGlass(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconPaperAirplane(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconBuildingOffice2(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M2.25 21h19.5m-18-9v3.75m0-12h18v12h-18V3.75m0 12.75h18M6.75 6.75h.008v.008H6.75V6.75Zm0 3h.008v.008H6.75V9.75Zm0 3h.008v.008H6.75V12.75Zm0 3h.008v.008H6.75V15.75Zm3.75-9h.008v.008h-.008V6.75Zm0 3h.008v.008h-.008V9.75Zm0 3h.008v.008h-.008V12.75Zm0 3h.008v.008h-.008V15.75Zm3.75-9h.008v.008H15V6.75Zm0 3h.008v.008H15V9.75Zm0 3h.008v.008H15V12.75Zm0 3h.008v.008H15V15.75Z" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconPhoto(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008H12V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconDevicePhoneMobile(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+    </svg>
+  );
+}
+
+export function PublicProfileIconExclamationTriangle(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
     </svg>
   );
 }

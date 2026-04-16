@@ -4,6 +4,7 @@ import type { OfferStatus } from "@prisma/client";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
+import { EmptyGlyphChatBubble } from "@/components/icons/emptyStateGlyphs";
 import { CollaborationRatingPanel } from "@/components/offers/CollaborationRatingPanel";
 import { DeliveryPanel } from "@/components/offers/DeliveryPanel";
 import { StatusBadge } from "@/components/offers/StatusBadge";
@@ -55,7 +56,8 @@ function uploadCollaborationMedia(
 }
 
 const TICK_GRAY = "#64748b";
-const TICK_BLUE = "#2563eb";
+/** Seen state — matches premium purple accent (presentation only). */
+const TICK_BLUE = "#4f46e5";
 
 const CHAT_QUICK_EMOJIS = [
   "😊",
@@ -267,8 +269,8 @@ export default function ChatClient({
               className="chat-conversation__avatar"
               src={chatContext.otherSideAvatarSrc}
               alt=""
-              width={44}
-              height={44}
+              width={48}
+              height={48}
             />
           </div>
           <div className="chat-conversation__header-text">
@@ -305,7 +307,7 @@ export default function ChatClient({
       <div className="chat-thread chat-thread--premium">
         {messages.length === 0 ? (
           <EmptyStateCard
-            icon="✉️"
+            icon={<EmptyGlyphChatBubble />}
             title="Henüz mesaj yok"
             description="İlk mesajı veya dosyayı göndererek görüşmeyi başlatabilirsiniz."
           />

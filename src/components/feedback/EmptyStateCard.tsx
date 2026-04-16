@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 /**
  * Inline empty state for cards and sections (not full-page).
  */
@@ -9,9 +11,9 @@ export function EmptyStateCard({
 }: {
   title: string;
   description: string;
-  children?: React.ReactNode;
-  /** Optional single emoji or short glyph for visual hierarchy */
-  icon?: string;
+  children?: ReactNode;
+  /** Outline glyph (preferred) or short text — same stroke family as metadata icons */
+  icon?: ReactNode;
 }) {
   return (
     <div className="empty-state-card">

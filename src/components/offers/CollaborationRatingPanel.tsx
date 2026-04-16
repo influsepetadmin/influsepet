@@ -217,7 +217,7 @@ export function CollaborationRatingPanel({
         aria-labelledby="chat-collab-rating-heading"
       >
         <h3 id="chat-collab-rating-heading" className="chat-panel__section-title">
-          İş birliği puanı
+          Değerlendirme
         </h3>
         <div aria-hidden className="collab-rating-panel__skeleton">
           <div className="skeleton skeleton-line" style={{ maxWidth: "60%" }} />
@@ -234,7 +234,7 @@ export function CollaborationRatingPanel({
         aria-labelledby="chat-collab-rating-heading"
       >
         <h3 id="chat-collab-rating-heading" className="chat-panel__section-title">
-          İş birliği puanı
+          Değerlendirme
         </h3>
         <p className="alert-inline alert-inline--error" role="alert">
           {loadError}
@@ -256,10 +256,10 @@ export function CollaborationRatingPanel({
       aria-labelledby="chat-collab-rating-heading"
     >
       <h3 id="chat-collab-rating-heading" className="chat-panel__section-title">
-        İş birliği puanı
+        Değerlendirme
       </h3>
       <p className="chat-panel__section-hint muted">
-        Tamamlanan iş birliğinde karşı tarafa 1–5 yıldız verin. İsterseniz en fazla{" "}
+        Tamamlanan iş birliğinde karşı tarafı 1–5 yıldız ile puanlayın. İsterseniz en fazla{" "}
         {COLLABORATION_RATING_REVIEW_TEXT_MAX} karakterlik isteğe bağlı kısa yorum da ekleyebilirsiniz.
       </p>
 

@@ -26,7 +26,7 @@ const STAT_LINE: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
 
 export function PublicProfileStatCards({
   items,
-  iconTreatment = "emoji",
+  iconTreatment = "line",
 }: {
   items: { label: string; value: string }[];
   iconTreatment?: "emoji" | "line";

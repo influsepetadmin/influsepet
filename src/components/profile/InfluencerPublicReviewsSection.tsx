@@ -1,4 +1,5 @@
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
+import { EmptyGlyphListBullet } from "@/components/icons/emptyStateGlyphs";
 import {
   PUBLIC_INFLUENCER_PROFILE_REVIEWS_LIMIT,
   formatAverageRating,
@@ -67,6 +68,7 @@ export function InfluencerPublicReviewsSection({
           Değerlendirmeler
         </h3>
         <EmptyStateCard
+          icon={<EmptyGlyphListBullet />}
           title="Herkese açık değerlendirme yok"
           description="Tamamlanan iş birlikleri sonrası bırakılan yorumlar burada görünecek."
         />

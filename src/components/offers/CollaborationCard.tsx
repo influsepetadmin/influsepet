@@ -5,7 +5,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { OfferStatus } from "@prisma/client";
 import { formatCommissionPercentTr } from "@/lib/platformCommission";
 import type { RateeReputationStats } from "@/lib/offers/rateeReputation";
+import { PublicProfileIconStar } from "@/components/profile/public/publicProfileInfluencerIcons";
 import type { CollaborationCardOffer } from "./collaborationCardOffer";
+import { CollabMetaChipIcon } from "./collabMetaChipIcon";
 import { StatusBadge } from "./StatusBadge";
 
 export type { CollaborationCardOffer } from "./collaborationCardOffer";
@@ -248,7 +250,10 @@ export function CollaborationCard({
   const ratingBadge = counterpartyRatingBadge(offer.status, counterpartyRating ?? null);
 
   return (
-    <article className="collab-card collab-card--surface">
+    <article
+      className="collab-card collab-card--surface"
+      data-offer-status={offer.status}
+    >
       <header className="collab-card__head">
         <h3 className="collab-card__campaign">{displayName}</h3>
         <StatusBadge status={offer.status} />
@@ -264,7 +269,7 @@ export function CollaborationCard({
             aria-label={`Karşı tarafın ortalama puanı ${ratingBadge.averageRating.toFixed(1)}, ${ratingBadge.ratingCount} puanlama`}
           >
             <span className="collab-card__rating-badge-star" aria-hidden>
-              ★
+              <PublicProfileIconStar className="collab-card__rating-star-icon" />
             </span>
             <span className="collab-card__rating-badge-score">
               {ratingBadge.averageRating.toFixed(1)}
@@ -278,15 +283,25 @@ export function CollaborationCard({
 
       <div className="collab-card__budget-block">
         <span className="collab-card__budget-label">Bütçe</span>
-        <span className="collab-card__budget-value">{budget.toLocaleString("tr-TR")} TRY</span>
+        <span className="collab-card__budget-value">
+          <span className="collab-card__budget-amount">
+            {budget.toLocaleString("tr-TR")}
+          </span>
+          <span className="collab-card__budget-currency">TRY</span>
+        </span>
       </div>
 
       {metaChips.length > 0 ? (
         <ul className="collab-card__meta-chips" aria-label="Teklif detayları">
           {metaChips.map((c) => (
             <li key={c.key} className="collab-meta-chip">
-              <span className="collab-meta-chip__label">{c.label}</span>
-              <span className="collab-meta-chip__value">{c.value}</span>
+              <span className="collab-meta-chip__icon-wrap" aria-hidden>
+                <CollabMetaChipIcon chipKey={c.key} />
+              </span>
+              <div className="collab-meta-chip__body">
+                <span className="collab-meta-chip__label">{c.label}</span>
+                <span className="collab-meta-chip__value">{c.value}</span>
+              </div>
             </li>
           ))}
         </ul>

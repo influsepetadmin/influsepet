@@ -16,6 +16,11 @@ import { toCollaborationCardOffer } from "@/components/offers/collaborationCardO
 import { getRateeReputationByUserIds } from "@/lib/offers/rateeReputation";
 import { getAvailableOfferTransitions } from "@/lib/offers/transitions";
 import { SocialAccountsSection } from "@/components/social/SocialAccountsSection";
+import {
+  EmptyGlyphInbox,
+  EmptyGlyphMagnifyingGlass,
+  EmptyGlyphPaperAirplane,
+} from "@/components/icons/emptyStateGlyphs";
 
 const offerDashboardSelect = {
   id: true,
@@ -240,7 +245,7 @@ export default async function BrandPage({
           <h2 className="dash-section__title">Influencer&apos;dan gelen iş birliği istekleri</h2>
           {offersFromInfluencers.length === 0 ? (
             <EmptyStateCard
-              icon="📥"
+              icon={<EmptyGlyphInbox />}
               title="Influencer’dan gelen istek yok"
               description="Influencer’lar size teklif gönderdiğinde burada listelenir."
             >
@@ -306,13 +311,13 @@ export default async function BrandPage({
           <h2 className="dash-section__title">Sonuçlar listesi</h2>
           {!hasActiveSearch ? (
             <EmptyStateCard
-              icon="🔎"
+              icon={<EmptyGlyphMagnifyingGlass />}
               title="Arama yapın"
               description="Şehir veya kategori seçerek influencer listesini görüntüleyebilirsiniz."
             />
           ) : influencerResults.length === 0 ? (
             <EmptyStateCard
-              icon="∅"
+              icon={<EmptyGlyphMagnifyingGlass />}
               title="Sonuç bulunamadı"
               description="Farklı filtreler deneyebilir veya aramayı sıfırlayabilirsiniz."
             />
@@ -387,7 +392,7 @@ export default async function BrandPage({
           <h2 className="dash-section__title">Influencer&apos;lara gönderdiğin iş birliği istekleri</h2>
           {sentOffers.length === 0 ? (
             <EmptyStateCard
-              icon="📤"
+              icon={<EmptyGlyphPaperAirplane />}
               title="Henüz gönderdiğiniz istek yok"
               description="Influencer araması yaparak iş birliği teklifi oluşturabilirsiniz."
             >

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { DeliveryStatus, OfferStatus } from "@prisma/client";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
+import { EmptyGlyphInbox } from "@/components/icons/emptyStateGlyphs";
 import { StatusBadge } from "./StatusBadge";
 
 type DeliveryRow = {
@@ -172,12 +173,12 @@ export function DeliveryPanel({
       </div>
 
       <div className="chat-delivery-head">
-        <span className="chat-delivery-eyebrow">Teslimat</span>
+        <span className="chat-delivery-eyebrow">Sohbet · teslim akışı</span>
         <h3 id="chat-delivery-heading" className="chat-delivery-title">
-          Teslim
+          İş teslimi
         </h3>
         <p className="chat-delivery-lede muted">
-          İçerik teslimlerinizi buradan gönderin veya marka olarak inceleyin.
+          İçerik tesliminizi buradan paylaşın; marka son teslimi inceler, onaylar veya revize ister.
         </p>
       </div>
 
@@ -224,7 +225,7 @@ export function DeliveryPanel({
           </div>
           <div className="chat-delivery-form-actions">
             <button className="btn chat-delivery-submit" type="submit" disabled={submitting}>
-              {submitting ? "Gönderiliyor…" : "Teslim gönder"}
+              {submitting ? "Gönderiliyor…" : "Teslimi gönder"}
             </button>
           </div>
         </form>
@@ -232,7 +233,7 @@ export function DeliveryPanel({
 
       {!loading && !showSubmit && showReview && pendingReview && (
         <div className="chat-delivery-review">
-          <h4 className="chat-delivery-review__title">Son teslim — inceleme</h4>
+          <h4 className="chat-delivery-review__title">Son teslim — marka incelemesi</h4>
           {pendingReview.deliveryUrl && (
             <p className="chat-delivery-review__line">
               <span className="chat-delivery-review__k">Bağlantı</span>
@@ -262,7 +263,7 @@ export function DeliveryPanel({
               disabled={reviewBusy !== null}
               onClick={() => void handleReview("APPROVE")}
             >
-              {reviewBusy === "APPROVE" ? "…" : "Onayla"}
+              {reviewBusy === "APPROVE" ? "…" : "Teslimi onayla"}
             </button>
             <button
               type="button"
@@ -286,6 +287,7 @@ export function DeliveryPanel({
         !(offerStatus === "DELIVERED" && isBrand && !pendingReview) && (
           <div className="chat-delivery-empty-wrap">
             <EmptyStateCard
+              icon={<EmptyGlyphInbox />}
               title="Henüz teslim kaydı yok"
               description="Teslim gönderildiğinde veya geçmiş oluştuğunda burada görünür."
             />

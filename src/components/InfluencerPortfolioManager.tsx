@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
+import { EmptyGlyphPhoto } from "@/components/icons/emptyStateGlyphs";
 
 type Item = { id: string; title: string | null; url: string; platform: string };
 
@@ -105,7 +106,7 @@ export default function InfluencerPortfolioManager({ initialItems }: { initialIt
 
       {items.length === 0 ? (
         <EmptyStateCard
-          icon="🖼️"
+          icon={<EmptyGlyphPhoto />}
           title="Portföyde henüz öğe yok"
           description="Örnek içeriklerinizin bağlantılarını ekleyerek profilinizi güçlendirin."
         />

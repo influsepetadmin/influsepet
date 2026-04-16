@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
+import { EmptyGlyphDevicePhone } from "@/components/icons/emptyStateGlyphs";
 import { SocialAccountCard, type SocialAccountCardData } from "./SocialAccountCard";
 import { ConnectSocialAccountForm } from "./ConnectSocialAccountForm";
 import { VerifySocialAccountForm } from "./VerifySocialAccountForm";
@@ -74,7 +75,7 @@ export function SocialAccountsSection() {
         <>
           {accounts.length === 0 && (
             <EmptyStateCard
-              icon="📱"
+              icon={<EmptyGlyphDevicePhone />}
               title="Bağlı sosyal hesap yok"
               description="Aşağıdaki formdan hesap ekleyerek doğrulama adımına geçebilirsiniz."
             />

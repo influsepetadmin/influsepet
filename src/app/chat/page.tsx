@@ -3,6 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { getSessionPayload } from "@/lib/session";
 import { StatusBadge } from "@/components/offers/StatusBadge";
+import {
+  EmptyGlyphChatBubble,
+  EmptyGlyphExclamationTriangle,
+  EmptyGlyphLockClosed,
+} from "@/components/icons/emptyStateGlyphs";
 
 function offerTitle(title: string | null, campaignName: string | null): string {
   const t = title?.trim() || campaignName?.trim();
@@ -42,7 +47,7 @@ export default async function ChatIndexPage() {
         <section className="dash-card dash-card--section">
           <h1 className="dash-section__title">Sohbetler</h1>
           <EmptyStateCard
-            icon="🔐"
+            icon={<EmptyGlyphLockClosed />}
             title="Oturum gerekli"
             description="İş birliği sohbetlerinizi görmek için giriş yapın."
           >
@@ -66,7 +71,7 @@ export default async function ChatIndexPage() {
         <section className="dash-card dash-card--section">
           <h1 className="dash-section__title">Sohbetler</h1>
           <EmptyStateCard
-            icon="⚠️"
+            icon={<EmptyGlyphExclamationTriangle />}
             title="Oturum geçersiz"
             description="Hesabınıza erişilemedi. Lütfen yeniden giriş yapın."
           >
@@ -136,7 +141,7 @@ export default async function ChatIndexPage() {
       {conversations.length === 0 ? (
         <section className="dash-card dash-card--section">
           <EmptyStateCard
-            icon="💬"
+            icon={<EmptyGlyphChatBubble />}
             title="Henüz sohbet yok"
             description="Sohbetler, kabul edilmiş iş birlikleri üzerinden açılır. Önce bir teklif oluşturun veya gelen teklifi kabul edin."
           >
