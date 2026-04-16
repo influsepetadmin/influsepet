@@ -3,18 +3,22 @@
 import { usePathname } from "next/navigation";
 import { SiteFooter } from "@/components/SiteFooter";
 
-/** Dashboard / chat / profile-edit surfaces — no global marketing footer. */
-function shouldHideFooter(pathname: string | null): boolean {
+/** Global marketing footer — only on auth entry routes. */
+const FOOTER_PATHS = new Set(["/giris", "/kayit"]);
+
+function normalizedPath(pathname: string): string {
+  const t = pathname.trim();
+  if (t === "" || t === "/") return "/";
+  return t.replace(/\/+$/, "") || "/";
+}
+
+function shouldShowFooter(pathname: string | null): boolean {
   if (!pathname) return false;
-  if (pathname.startsWith("/marka")) return true;
-  if (pathname.startsWith("/influencer")) return true;
-  if (pathname.startsWith("/chat")) return true;
-  if (pathname.startsWith("/profil")) return true;
-  return false;
+  return FOOTER_PATHS.has(normalizedPath(pathname));
 }
 
 export function SiteFooterGate() {
   const pathname = usePathname();
-  if (shouldHideFooter(pathname)) return null;
+  if (!shouldShowFooter(pathname)) return null;
   return <SiteFooter />;
 }

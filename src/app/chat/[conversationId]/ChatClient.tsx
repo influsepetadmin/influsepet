@@ -8,6 +8,11 @@ import { EmptyGlyphChatBubble } from "@/components/icons/emptyStateGlyphs";
 import { CollaborationRatingPanel } from "@/components/offers/CollaborationRatingPanel";
 import { DeliveryPanel } from "@/components/offers/DeliveryPanel";
 import { StatusBadge } from "@/components/offers/StatusBadge";
+import { AlertCircle, CheckCircle2, Info } from "lucide-react";
+import { formatWorkflowEventBody, getChatThreadPresentation } from "@/lib/chat/chatThreadMessagePresentation";
+
+const WORKFLOW_EVENT_ICON_PX = 12;
+const WORKFLOW_EVENT_ICON_STROKE = 1.65;
 
 type Msg = {
   id: string;
@@ -55,10 +60,6 @@ function uploadCollaborationMedia(
   });
 }
 
-const TICK_GRAY = "#64748b";
-/** Seen state — matches premium purple accent (presentation only). */
-const TICK_BLUE = "#4f46e5";
-
 const CHAT_QUICK_EMOJIS = [
   "😊",
   "👍",
@@ -81,12 +82,12 @@ const CHAT_QUICK_EMOJIS = [
   "🌟",
 ] as const;
 
-function TickCheck({ stroke }: { stroke: string }) {
+function TickCheck() {
   return (
     <svg width="12" height="11" viewBox="0 0 14 12" className="chat-ticks-svg chat-ticks-svg--unit" aria-hidden>
       <path
         d="M1.5 6.2 L5.2 9.8 L12.5 2"
-        stroke={stroke}
+        stroke="currentColor"
         strokeWidth="1.75"
         fill="none"
         strokeLinecap="round"
@@ -103,16 +104,23 @@ function OutgoingMessageTicks({
   isDelivered: boolean;
   isSeen: boolean;
 }) {
-  const stroke = isSeen ? TICK_BLUE : TICK_GRAY;
-
   if (!isDelivered) {
-    return <TickCheck stroke={TICK_GRAY} />;
+    return (
+      <span className="chat-ticks-pair chat-ticks-pair--pending" aria-hidden>
+        <TickCheck />
+      </span>
+    );
   }
 
   return (
-    <span className="chat-ticks-double" aria-hidden>
-      <TickCheck stroke={stroke} />
-      <TickCheck stroke={stroke} />
+    <span
+      className={`chat-ticks-pair ${isSeen ? "chat-ticks-pair--seen" : "chat-ticks-pair--delivered"}`}
+      aria-hidden
+    >
+      <span className="chat-ticks-double">
+        <TickCheck />
+        <TickCheck />
+      </span>
     </span>
   );
 }
@@ -126,6 +134,59 @@ function formatMsgTime(iso: string): string {
   } catch {
     return "";
   }
+}
+
+function sameCalendarDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+  );
+}
+
+function dayBucketKey(iso: string): string {
+  try {
+    const d = new Date(iso);
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  } catch {
+    return "";
+  }
+}
+
+function formatDaySeparatorLabel(iso: string): string {
+  try {
+    const d = new Date(iso);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (sameCalendarDay(d, today)) return "Bugün";
+    if (sameCalendarDay(d, yesterday)) return "Dün";
+    return d.toLocaleDateString("tr-TR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return "";
+  }
+}
+
+type ThreadItem =
+  | { kind: "day"; key: string; label: string }
+  | { kind: "message"; message: Msg };
+
+function buildThreadItems(messages: Msg[]): ThreadItem[] {
+  const out: ThreadItem[] = [];
+  let lastKey = "";
+  for (const m of messages) {
+    const dk = dayBucketKey(m.createdAt);
+    if (dk && dk !== lastKey) {
+      lastKey = dk;
+      const label = formatDaySeparatorLabel(m.createdAt);
+      if (label) out.push({ kind: "day", key: dk, label });
+    }
+    out.push({ kind: "message", message: m });
+  }
+  return out;
 }
 
 export default function ChatClient({
@@ -258,10 +319,16 @@ export default function ChatClient({
 
   const lastOutgoingMessageId = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].senderId === meId) return messages[i].id;
+      const m = messages[i];
+      if (m.senderId !== meId) continue;
+      const pres = getChatThreadPresentation(m);
+      if (pres.mode === "workflow-event" || pres.mode === "system-error") continue;
+      return m.id;
     }
     return null;
   }, [messages, meId]);
+
+  const threadItems = useMemo(() => buildThreadItems(messages), [messages]);
 
   return (
     <div className="chat-conversation">
@@ -333,23 +400,70 @@ export default function ChatClient({
 
       <div className="chat-thread chat-thread--premium">
         {messages.length === 0 ? (
-          <EmptyStateCard
-            icon={<EmptyGlyphChatBubble />}
-            title="Henüz mesaj yok"
-            description="İlk mesajı veya dosyayı göndererek görüşmeyi başlatabilirsiniz."
-          />
+          <div className="chat-thread-empty">
+            <EmptyStateCard
+              icon={<EmptyGlyphChatBubble />}
+              title="Henüz mesaj yok"
+              description="İlk mesajı veya dosyayı göndererek görüşmeyi başlatabilirsiniz."
+            />
+          </div>
         ) : (
-          messages.map((m) => {
+          threadItems.map((item) => {
+            if (item.kind === "day") {
+              return (
+                <div key={`day-${item.key}`} className="chat-day-separator" role="separator">
+                  <span className="chat-day-separator__line" aria-hidden />
+                  <span className="chat-day-separator__label">{item.label}</span>
+                  <span className="chat-day-separator__line" aria-hidden />
+                </div>
+              );
+            }
+
+            const m = item.message;
             const mine = m.senderId === meId;
             const hasCaption = Boolean(m.body?.trim());
+            const pres = getChatThreadPresentation(m);
+            const isSystemPlaceholder = pres.mode === "system-error";
+            const showTicks = mine && m.id === lastOutgoingMessageId;
+
+            if (pres.mode === "workflow-event") {
+              const tone = pres.tone;
+              const Icon =
+                tone === "positive" ? CheckCircle2 : tone === "warning" ? AlertCircle : Info;
+              return (
+                <div key={m.id} className="chat-msg chat-msg--workflow-event" role="status">
+                  <div className="chat-msg__inner chat-msg__inner--workflow-event">
+                    <div
+                      className={`chat-bubble chat-bubble--system chat-event-pill chat-event-pill--${tone}`}
+                    >
+                      <span className="chat-event-pill__glyph" aria-hidden>
+                        <Icon size={WORKFLOW_EVENT_ICON_PX} strokeWidth={WORKFLOW_EVENT_ICON_STROKE} />
+                      </span>
+                      <p className="chat-event-pill__text">{formatWorkflowEventBody(m.body)}</p>
+                    </div>
+                    <div className="chat-msg__meta chat-msg__meta--workflow-event">
+                      <time className="chat-msg__time chat-msg__time--workflow-event" dateTime={m.createdAt}>
+                        {formatMsgTime(m.createdAt)}
+                      </time>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
             return (
-              <div key={m.id} className={`chat-msg ${mine ? "chat-msg--mine" : "chat-msg--them"}`}>
+              <div
+                key={m.id}
+                className={`chat-msg ${mine ? "chat-msg--mine" : "chat-msg--them"}${isSystemPlaceholder ? " chat-msg--system" : ""}`}
+              >
                 <div className="chat-msg__inner">
                   <div
-                    className={`chat-bubble ${mine ? "chat-bubble--mine" : "chat-bubble--them"}`}
+                    className={`chat-bubble ${mine ? "chat-bubble--mine" : "chat-bubble--them"}${isSystemPlaceholder ? " chat-bubble--system" : ""}`}
                   >
                     {m.kind === "MEDIA" && m.media ? (
-                      <div className="chat-media-card">
+                      <div
+                        className={`chat-media-card ${mine ? "chat-media-card--mine" : "chat-media-card--them"}`}
+                      >
                         <div className="chat-media-card__surface">
                           {m.media.kind === "IMAGE" ? (
                             <img src={m.media.url} alt="Paylaşılan görüntü" loading="lazy" />
@@ -384,11 +498,18 @@ export default function ChatClient({
                     ) : m.kind === "TEXT" ? (
                       <p className="chat-bubble__body">{m.body}</p>
                     ) : m.kind === "MEDIA" && !m.media ? (
-                      <p className="chat-bubble__system muted">Medya</p>
+                      <p className="chat-bubble__system">Medya yüklenemedi veya bulunamadı.</p>
                     ) : null}
-                    {mine && m.id === lastOutgoingMessageId && (
+                  </div>
+                  <div
+                    className={`chat-msg__meta ${mine ? "chat-msg__meta--mine" : "chat-msg__meta--them"}`}
+                  >
+                    <time className="chat-msg__time" dateTime={m.createdAt}>
+                      {formatMsgTime(m.createdAt)}
+                    </time>
+                    {mine && showTicks ? (
                       <span
-                        className="chat-ticks-row"
+                        className="chat-msg__ticks"
                         aria-label={
                           !m.isDelivered
                             ? "Gönderiliyor"
@@ -399,11 +520,8 @@ export default function ChatClient({
                       >
                         <OutgoingMessageTicks isDelivered={m.isDelivered} isSeen={m.isSeen} />
                       </span>
-                    )}
+                    ) : null}
                   </div>
-                  <time className="chat-msg__time muted" dateTime={m.createdAt}>
-                    {formatMsgTime(m.createdAt)}
-                  </time>
                 </div>
               </div>
             );
