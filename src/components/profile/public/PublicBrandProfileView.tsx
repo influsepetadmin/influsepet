@@ -14,15 +14,20 @@ export function PublicBrandProfileView({
   homeHref,
   homeLinkLabel,
   headerCta,
+  appShell,
 }: {
   data: PublicBrandProfileResponse;
   homeHref: string;
   homeLinkLabel?: string;
   /** Dahili profil: herkese açık URL; herkese açık sayfa: verilmez (varsayılan “yakında” CTA). */
   headerCta?: ReactNode;
+  /** `/profil/...` önizlemesi: logged-in shell + indigo primary (herkese açık `/brand` mavi kalır). */
+  appShell?: boolean;
 }) {
   return (
-    <div className="public-profile-page public-profile-page--brand">
+    <div
+      className={`public-profile-page public-profile-page--brand${appShell ? " public-profile-page--app" : ""}`}
+    >
       <div className="public-profile-page__inner public-profile-page__inner--brand">
         <div className="public-profile-shell public-profile-shell--brand">
           <PublicProfileHomeLink href={homeHref} label={homeLinkLabel} />

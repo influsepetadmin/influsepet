@@ -259,7 +259,7 @@ export function DeliveryPanel({
           <div className="chat-delivery-actions">
             <button
               type="button"
-              className="btn chat-delivery-actions__primary"
+              className="btn btn--success chat-delivery-actions__primary"
               disabled={reviewBusy !== null}
               onClick={() => void handleReview("APPROVE")}
             >

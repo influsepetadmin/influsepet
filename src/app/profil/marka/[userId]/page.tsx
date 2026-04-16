@@ -39,6 +39,7 @@ export default async function InfluencerPanelBrandProfilePage({
       data={data}
       homeHref={backHref}
       homeLinkLabel="Panele dön"
+      appShell
       headerCta={
         <>
           <div className="public-profile-hero__cta-actions">

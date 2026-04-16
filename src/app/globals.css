@@ -19,6 +19,57 @@
   --text-small: 0.85rem;
   --text-label: 0.82rem;
   --line-prose: 1.55;
+
+  /* Phase 1 — shell widths */
+  --app-main-max-width: 1100px;
+  --dashboard-main-max-width: 1120px;
+  --chat-main-max-width: min(1180px, 100%);
+
+  /* Phase 1 — spacing scale (logged-in app) */
+  --app-section-gap: 20px;
+  --app-section-gap-lg: 24px;
+  --app-shell-padding-y-top: 22px;
+  --app-shell-padding-y-bottom: 48px;
+  --app-shell-padding-x: 18px;
+  --app-shell-padding-x-narrow: 16px;
+
+  /* Phase 1 — surfaces */
+  --card-padding-y: 18px;
+  --card-padding-x: 20px;
+  --dash-card-padding-x: 26px;
+  --dash-card-padding-y: 28px;
+  --dash-card-padding-y-top: 24px;
+  --radius-app-card: 18px;
+  --radius-app-card-lg: 20px;
+  --radius-btn: 12px;
+
+  /* Phase 1 — elevation */
+  --shadow-premium-sm: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 1px 2px rgba(15, 23, 42, 0.05),
+    0 8px 22px rgba(15, 23, 42, 0.06);
+  --shadow-premium-md: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 1px 2px rgba(15, 23, 42, 0.05),
+    0 10px 28px rgba(15, 23, 42, 0.07);
+  --shadow-premium-lg: 0 1px 0 rgba(255, 255, 255, 0.88) inset, 0 1px 3px rgba(15, 23, 42, 0.05),
+    0 10px 32px rgba(15, 23, 42, 0.06);
+  --shadow-premium-xl: 0 1px 0 rgba(255, 255, 255, 0.92) inset, 0 2px 8px rgba(15, 23, 42, 0.04),
+    0 12px 36px rgba(79, 70, 229, 0.08);
+  --shadow-premium-chat-composer: 0 1px 0 rgba(255, 255, 255, 0.95) inset, 0 6px 22px rgba(15, 23, 42, 0.07),
+    0 14px 40px rgba(79, 70, 229, 0.07);
+
+  /* Phase 1 — logged-in primary (indigo) */
+  --app-primary: #4f46e5;
+  --app-primary-hover: #4338ca;
+  --app-primary-light: #6366f1;
+  --app-indigo-muted-bg: rgba(238, 242, 255, 0.55);
+  --app-indigo-muted-border: rgba(199, 210, 254, 0.55);
+  --app-outline-border: rgba(203, 213, 225, 0.95);
+
+  /* Phase 1 — semantic */
+  --app-success: #16a34a;
+  --app-success-hover: #15803d;
+  --app-success-light: #22c55e;
+  --app-danger: #b91c1c;
+  --app-danger-light: #ef4444;
+
   /* Premium dashboard — purple / slate accents (Bubble-inspired, app stays light overall) */
   --dash-hero-bg: linear-gradient(155deg, #1e1b4b 0%, #312e81 38%, #4338ca 78%, #4c1d95 100%);
   --dash-hero-border: rgba(165, 180, 252, 0.38);
@@ -64,9 +115,9 @@ a:hover {
 }
 
 main {
-  max-width: 1100px;
+  max-width: var(--app-main-max-width);
   margin: 0 auto;
-  padding: 22px 16px 40px;
+  padding: var(--app-shell-padding-y-top) var(--app-shell-padding-x-narrow) 40px;
 }
 
 main:has(.auth-landing-wrap) {
@@ -77,10 +128,10 @@ main:has(.auth-landing-wrap) {
 .card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 18px 20px;
-  margin-bottom: var(--section-gap);
-  box-shadow: var(--shadow);
+  border-radius: var(--radius-app-card);
+  padding: var(--card-padding-y) var(--card-padding-x);
+  margin-bottom: var(--app-section-gap);
+  box-shadow: var(--shadow-premium-md);
 }
 
 .card.card--nested {
@@ -156,6 +207,10 @@ main:has(.auth-landing-wrap) {
   cursor: pointer;
 }
 
+main:has(.dashboard-page) .category-multi-select__input {
+  accent-color: var(--app-primary);
+}
+
 .category-multi-select__text {
   flex: 1;
   min-width: 0;
@@ -209,6 +264,65 @@ main:has(.auth-landing-wrap) {
 
 .btn.secondary:hover {
   background: #f8fafc;
+}
+
+/* Logged-in app surfaces: indigo primary CTA (public / auth keep default blue above) */
+main:has(.dashboard-page) .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle),
+main:has(.chat-layout) .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle),
+main:has(.public-profile-page--app) .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle) {
+  border-color: var(--app-primary);
+  background: linear-gradient(180deg, var(--app-primary-light) 0%, var(--app-primary) 100%);
+  color: #fff;
+}
+
+main:has(.dashboard-page) .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle):hover,
+main:has(.chat-layout) .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle):hover,
+main:has(.public-profile-page--app) .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle):hover {
+  border-color: var(--app-primary-hover);
+  background: linear-gradient(180deg, var(--app-primary) 0%, var(--app-primary-hover) 100%);
+  color: #fff;
+}
+
+main:has(.dashboard-page) .btn.secondary,
+main:has(.chat-layout) .btn.secondary,
+main:has(.public-profile-page--app) .btn.secondary {
+  border-color: var(--app-outline-border);
+  color: var(--text);
+  background: #fff;
+}
+
+main:has(.dashboard-page) .btn.secondary:hover,
+main:has(.chat-layout) .btn.secondary:hover,
+main:has(.public-profile-page--app) .btn.secondary:hover {
+  border-color: #c7d2fe;
+  background: #f8fafc;
+}
+
+.btn.btn--success {
+  border-color: var(--app-success);
+  background: linear-gradient(180deg, var(--app-success-light) 0%, var(--app-success) 100%);
+  color: #fff;
+}
+
+.btn.btn--success:hover {
+  border-color: var(--app-success-hover);
+  background: linear-gradient(180deg, var(--app-success) 0%, var(--app-success-hover) 100%);
+  color: #fff;
+}
+
+.btn.btn--ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+  font-weight: 500;
+}
+
+.btn.btn--ghost:hover {
+  background: rgba(15, 23, 42, 0.05);
+  border-color: rgba(203, 213, 225, 0.6);
+  color: var(--text);
+  transform: none;
 }
 
 label {
@@ -359,12 +473,12 @@ section.card > h2:first-child {
 }
 
 .btn.btn--danger {
-  border-color: #b91c1c;
-  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+  border-color: var(--app-danger);
+  background: linear-gradient(180deg, var(--app-danger-light) 0%, var(--app-danger) 100%);
 }
 
 .btn.btn--danger:hover {
-  background: #b91c1c;
+  background: var(--app-danger);
   border-color: #991b1b;
 }
 
@@ -453,14 +567,21 @@ section.card > h2:first-child {
 
 /* Chat (inbox + conversation) */
 main:has(.chat-layout) {
-  max-width: min(1180px, 100%);
-  padding: 22px 16px 48px;
+  max-width: var(--chat-main-max-width);
+  padding: var(--app-shell-padding-y-top) var(--app-shell-padding-x-narrow) var(--app-shell-padding-y-bottom);
   background: linear-gradient(
     180deg,
-    rgba(238, 242, 255, 0.55) 0%,
+    var(--app-indigo-muted-bg) 0%,
     rgba(241, 245, 249, 0.85) 38%,
     rgba(248, 250, 252, 0.98) 100%
   );
+}
+
+/* Logged-in profile preview (/profil/...) — same shell rhythm as dashboards */
+main:has(.public-profile-page--app) {
+  max-width: var(--app-main-max-width);
+  padding: var(--app-shell-padding-y-top) var(--app-shell-padding-x) var(--app-shell-padding-y-bottom);
+  background: var(--dash-page-tint);
 }
 
 .chat-layout {
@@ -762,13 +883,11 @@ main:has(.chat-layout) {
 
 .chat-panel {
   margin-bottom: 14px;
-  padding: 18px 20px;
-  border-radius: 18px;
+  padding: var(--card-padding-y) var(--card-padding-x);
+  border-radius: var(--radius-app-card);
   border: 1px solid rgba(226, 232, 240, 0.95);
   background: #fff;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 1px 3px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--shadow-premium-sm);
 }
 
 .chat-conversation > .chat-panel,
@@ -777,14 +896,11 @@ main:has(.chat-layout) {
 }
 
 .chat-panel--delivery {
-  padding: 22px 24px;
-  border-radius: 20px;
+  padding: var(--dash-card-padding-y-top) var(--dash-card-padding-x);
+  border-radius: var(--radius-app-card-lg);
   background: linear-gradient(165deg, #ffffff 0%, #fafbff 40%, #f1f5f9 100%);
   border-color: rgba(165, 180, 252, 0.65);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.92) inset,
-    0 2px 8px rgba(15, 23, 42, 0.04),
-    0 12px 36px rgba(79, 70, 229, 0.08);
+  box-shadow: var(--shadow-premium-xl);
 }
 
 .chat-panel--delivery .chat-panel__context {
@@ -914,18 +1030,18 @@ main:has(.chat-layout) {
   min-width: 180px;
   min-height: 46px;
   font-weight: 700;
-  border-radius: 12px;
+  border-radius: var(--radius-btn);
   padding: 12px 22px;
-  border-color: #4f46e5;
-  background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+  border-color: var(--app-primary);
+  background: linear-gradient(180deg, var(--app-primary-light) 0%, var(--app-primary) 100%);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.2) inset,
     0 4px 16px rgba(79, 70, 229, 0.28);
 }
 
 .chat-delivery-submit:hover:not(:disabled) {
-  border-color: #4338ca;
-  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+  border-color: var(--app-primary-hover);
+  background: linear-gradient(180deg, var(--app-primary) 0%, var(--app-primary-hover) 100%);
 }
 
 .chat-delivery-review {
@@ -992,20 +1108,20 @@ main:has(.chat-layout) {
   min-width: 140px;
   min-height: 46px;
   font-weight: 700;
-  border-radius: 12px;
+  border-radius: var(--radius-btn);
   padding: 12px 18px;
-  border-color: #16a34a;
-  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
-  color: #fff;
+}
+
+.chat-delivery-actions__primary.btn--success {
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.2) inset,
     0 4px 14px rgba(22, 163, 74, 0.28);
 }
 
-.chat-delivery-actions__primary:hover:not(:disabled) {
-  border-color: #15803d;
-  background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
-  color: #fff;
+.chat-delivery-actions__primary.btn--success:hover:not(:disabled) {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 4px 14px rgba(22, 163, 74, 0.32);
 }
 
 .chat-delivery-actions__secondary {
@@ -1368,18 +1484,18 @@ main:has(.chat-layout) {
 .chat-panel--collaboration-rating .collab-rating-panel__actions .btn {
   min-height: 44px;
   padding: 10px 22px;
-  border-radius: 12px;
+  border-radius: var(--radius-btn);
   font-weight: 700;
-  border-color: #4f46e5;
-  background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+  border-color: var(--app-primary);
+  background: linear-gradient(180deg, var(--app-primary-light) 0%, var(--app-primary) 100%);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.2) inset,
     0 4px 14px rgba(79, 70, 229, 0.22);
 }
 
 .chat-panel--collaboration-rating .collab-rating-panel__actions .btn:hover:not(:disabled) {
-  border-color: #4338ca;
-  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+  border-color: var(--app-primary-hover);
+  background: linear-gradient(180deg, var(--app-primary) 0%, var(--app-primary-hover) 100%);
 }
 
 .collab-rating-panel__optional-note {
@@ -1823,13 +1939,10 @@ main:has(.chat-layout) {
 .chat-composer-shell {
   margin-top: 0;
   padding: 14px 16px 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(199, 210, 254, 0.55);
+  border-radius: var(--radius-app-card);
+  border: 1px solid var(--app-indigo-muted-border);
   background: linear-gradient(180deg, #ffffff 0%, #fafbff 48%, #f8fafc 100%);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.95) inset,
-    0 6px 22px rgba(15, 23, 42, 0.07),
-    0 14px 40px rgba(79, 70, 229, 0.07);
+  box-shadow: var(--shadow-premium-chat-composer);
 }
 
 .chat-composer-toolbar {
@@ -1920,16 +2033,16 @@ main:has(.chat-layout) {
   padding-right: 22px;
   border-radius: 14px;
   font-weight: 700;
-  border-color: #4f46e5;
-  background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+  border-color: var(--app-primary);
+  background: linear-gradient(180deg, var(--app-primary-light) 0%, var(--app-primary) 100%);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.2) inset,
     0 4px 14px rgba(79, 70, 229, 0.25);
 }
 
 .chat-composer-send:hover:not(:disabled) {
-  border-color: #4338ca;
-  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+  border-color: var(--app-primary-hover);
+  background: linear-gradient(180deg, var(--app-primary) 0%, var(--app-primary-hover) 100%);
 }
 
 @media (max-width: 520px) {
@@ -3052,8 +3165,8 @@ main:has(.chat-layout) {
 
 /* App dashboards (marka + influencer panels) */
 main:has(.dashboard-page) {
-  max-width: 1120px;
-  padding: 22px 18px 48px;
+  max-width: var(--dashboard-main-max-width);
+  padding: var(--app-shell-padding-y-top) var(--app-shell-padding-x) var(--app-shell-padding-y-bottom);
   background: var(--dash-page-tint);
   border-radius: 0;
 }
@@ -3061,7 +3174,7 @@ main:has(.dashboard-page) {
 .dashboard-page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--app-section-gap);
   padding-bottom: 8px;
 }
 
@@ -3185,22 +3298,19 @@ main:has(.dashboard-page) {
 .dash-card--section {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: var(--radius-app-card);
   padding: 22px 24px 24px;
-  margin-bottom: 22px;
-  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--app-section-gap);
+  box-shadow: var(--shadow-premium-sm);
 }
 
 .dashboard-page .dash-card--section {
   margin-bottom: 0;
-  border-radius: 20px;
-  padding: 24px 26px 28px;
-  border: 1px solid rgba(203, 213, 225, 0.95);
+  border-radius: var(--radius-app-card-lg);
+  padding: var(--dash-card-padding-y-top) var(--dash-card-padding-x) var(--dash-card-padding-y);
+  border: 1px solid var(--app-outline-border);
   background: linear-gradient(180deg, #ffffff 0%, #fafbff 48%, #f8fafc 100%);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 1px 2px rgba(15, 23, 42, 0.05),
-    0 10px 28px rgba(15, 23, 42, 0.07);
+  box-shadow: var(--shadow-premium-md);
 }
 
 .dashboard-page > .dash-card--section:last-of-type {
@@ -3368,12 +3478,12 @@ main:has(.dashboard-page) {
 .dashboard-page .influencer-search-form__actions .btn[type="submit"] {
   min-height: 46px;
   padding: 12px 28px;
-  border-radius: 12px;
+  border-radius: var(--radius-btn);
   font-weight: 700;
   letter-spacing: -0.01em;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.25) inset,
-    0 4px 16px rgba(37, 99, 235, 0.22);
+    0 4px 16px rgba(79, 70, 229, 0.22);
 }
 
 .dashboard-page .influencer-search-form__actions a.btn.secondary {
@@ -3512,7 +3622,7 @@ main:has(.dashboard-page) {
   }
 
   .dashboard-page {
-    gap: 18px;
+    gap: var(--app-section-gap);
   }
 
   .dashboard-page__header {
@@ -3621,15 +3731,12 @@ main:has(.dashboard-page) {
   display: flex;
   flex-direction: column;
   gap: 0;
-  border: 1px solid rgba(203, 213, 225, 0.95);
-  border-radius: 18px;
+  border: 1px solid var(--app-outline-border);
+  border-radius: var(--radius-app-card);
   padding: 0;
   overflow: hidden;
   background: linear-gradient(165deg, #ffffff 0%, #f8fafc 42%, #f1f5f9 100%);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.88) inset,
-    0 1px 3px rgba(15, 23, 42, 0.05),
-    0 10px 32px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-premium-lg);
   transition:
     border-color 0.18s ease,
     box-shadow 0.18s ease,
@@ -4017,16 +4124,16 @@ main:has(.dashboard-page) {
 }
 
 .collab-card__actions--transitions .btn:not(.secondary) {
-  border-color: #4f46e5;
-  background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+  border-color: var(--app-primary);
+  background: linear-gradient(180deg, var(--app-primary-light) 0%, var(--app-primary) 100%);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.2) inset,
     0 4px 14px rgba(79, 70, 229, 0.28);
 }
 
 .collab-card__actions--transitions .btn:not(.secondary):hover {
-  border-color: #4338ca;
-  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+  border-color: var(--app-primary-hover);
+  background: linear-gradient(180deg, var(--app-primary) 0%, var(--app-primary-hover) 100%);
 }
 
 .collab-card__actions--transitions .btn.secondary {
@@ -4823,11 +4930,11 @@ main:has(.dashboard-page) {
 .public-profile-shell {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--app-section-gap-lg);
 }
 
 .public-profile-shell--brand {
-  gap: 24px;
+  gap: var(--app-section-gap-lg);
 }
 
 /* Influencer — /u/[username] + /profil/influencer/[userId] (ortak PublicInfluencerProfileView) */
@@ -4844,7 +4951,7 @@ main:has(.dashboard-page) {
 .public-profile-shell--influencer {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--app-section-gap-lg);
 }
 
 .public-profile-brand-secondary {
@@ -5617,6 +5724,10 @@ main:has(.dashboard-page) {
   min-width: min(100%, 280px);
   opacity: 0.88;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+}
+
+main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary) {
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.18);
 }
 
 .public-profile-hero__cta-btn:disabled {

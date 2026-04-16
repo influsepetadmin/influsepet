@@ -14,15 +14,20 @@ export function PublicInfluencerProfileView({
   homeHref,
   homeLinkLabel,
   headerCta,
+  appShell,
 }: {
   data: PublicProfileByUsernameResponse;
   homeHref: string;
   homeLinkLabel?: string;
   /** Örn. marka: herkese açık profil linki; `/u` için verilmez (varsayılan “yakında” CTA). */
   headerCta?: ReactNode;
+  /** `/profil/...` önizlemesi: logged-in shell + indigo primary (herkese açık `/u` mavi kalır). */
+  appShell?: boolean;
 }) {
   return (
-    <div className="public-profile-page public-profile-page--influencer">
+    <div
+      className={`public-profile-page public-profile-page--influencer${appShell ? " public-profile-page--app" : ""}`}
+    >
       <div className="public-profile-page__inner public-profile-page__inner--influencer">
         <div className="public-profile-shell public-profile-shell--influencer">
           <PublicProfileHomeLink href={homeHref} label={homeLinkLabel} />
