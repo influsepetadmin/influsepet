@@ -18,6 +18,26 @@ type PostErrorJson = {
   code?: string;
 };
 
+function isCollaborationRatingGetPayload(
+  json: unknown,
+): json is CollaborationRatingGetResponse {
+  if (!json || typeof json !== "object") return false;
+  const o = json as Record<string, unknown>;
+  if (o.ok !== true) return false;
+  if (typeof o.offerId !== "string") return false;
+  if (!o.mine || typeof o.mine !== "object") return false;
+  if (!o.theirs || typeof o.theirs !== "object") return false;
+  return true;
+}
+
+function errorMessageFromJson(json: unknown, fallback: string): string {
+  if (!json || typeof json !== "object") return fallback;
+  const o = json as Record<string, unknown>;
+  if (typeof o.error === "string" && o.error.trim()) return o.error;
+  if (typeof o.message === "string" && o.message.trim()) return o.message;
+  return fallback;
+}
+
 export function CollaborationRatingPanel({
   offerId,
   offerStatus,
@@ -30,6 +50,8 @@ export function CollaborationRatingPanel({
 }) {
   const router = useRouter();
   const hasLoadedOnce = useRef(false);
+  /** Supersedes in-flight fetches so an older request cannot overwrite a newer successful response. */
+  const fetchGenerationRef = useRef(0);
   const noteFieldId = useId();
 
   const [loadState, setLoadState] = useState<LoadState>("idle");
@@ -47,16 +69,22 @@ export function CollaborationRatingPanel({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const fetchRating = useCallback(async () => {
+    const gen = ++fetchGenerationRef.current;
     setLoadError(null);
     if (!hasLoadedOnce.current) {
       setLoadState("loading");
     }
     try {
-      const res = await fetch(`/api/offers/${encodeURIComponent(offerId)}/rating`, { cache: "no-store" });
+      const res = await fetch(`/api/offers/${encodeURIComponent(offerId)}/rating`, {
+        cache: "no-store",
+        credentials: "include",
+      });
       const json = (await res.json().catch(() => null)) as
         | CollaborationRatingGetResponse
-        | { error?: string }
+        | { error?: string; message?: string }
         | null;
+
+      if (gen !== fetchGenerationRef.current) return;
 
       if (res.status === 401) {
         setLoadError("Oturum bulunamadı. Sayfayı yenileyip tekrar giriş yapın.");
@@ -70,21 +98,20 @@ export function CollaborationRatingPanel({
         setLoadState("error");
         return;
       }
-      if (!res.ok || !json || !("ok" in json) || json.ok !== true) {
-        const msg =
-          json && typeof json === "object" && "error" in json && typeof json.error === "string"
-            ? json.error
-            : "Puan bilgisi alınamadı.";
-        setLoadError(msg);
-        setData(null);
-        setLoadState("error");
+
+      if (res.ok && isCollaborationRatingGetPayload(json)) {
+        setData(json);
+        hasLoadedOnce.current = true;
+        setLoadState("idle");
         return;
       }
 
-      setData(json);
-      hasLoadedOnce.current = true;
-      setLoadState("idle");
+      const msg = errorMessageFromJson(json, "Puan bilgisi alınamadı.");
+      setLoadError(msg);
+      setData(null);
+      setLoadState("error");
     } catch {
+      if (gen !== fetchGenerationRef.current) return;
       setLoadError("Bağlantı hatası.");
       setData(null);
       setLoadState("error");
@@ -138,6 +165,7 @@ export function CollaborationRatingPanel({
     try {
       const res = await fetch(`/api/offers/${encodeURIComponent(offerId)}/rating`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rating: selected, reviewText: reviewNote }),
       });

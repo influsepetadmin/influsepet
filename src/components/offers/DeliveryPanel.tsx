@@ -177,7 +177,7 @@ export function DeliveryPanel({
           <span className="chat-delivery-intro__eyebrow">Teslimat</span>
           <div className="chat-delivery-intro__title-row">
             <h3 id="chat-delivery-heading" className="chat-delivery-intro__title">
-              Teslim akışı
+              Teslimat ve inceleme
             </h3>
             <StatusBadge status={offerStatus} />
           </div>
@@ -187,6 +187,16 @@ export function DeliveryPanel({
           aşağıda listelenir.
         </p>
       </div>
+
+      {!loading && offerStatus === "REVISION_REQUESTED" && isInfluencer && (
+        <div className="chat-revision-callout" role="status">
+          <p className="chat-revision-callout__title">Revize istendi</p>
+          <p className="chat-revision-callout__body muted">
+            Marka son teslimi inceledi ve yeni bir sürüm bekliyor. Aşağıdan güncellenmiş bağlantı veya not
+            gönderin. Sohbetteki sistem mesajlarını da kontrol edin.
+          </p>
+        </div>
+      )}
 
       {!loading && latestDelivery && (
         <div className="chat-delivery-snapshot" aria-live="polite">

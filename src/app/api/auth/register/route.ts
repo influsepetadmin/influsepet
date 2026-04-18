@@ -57,7 +57,7 @@ export async function POST(request: Request) {
         },
       });
       await setSessionCookie(user.id);
-      return sameOriginRedirect("/marka");
+      return sameOriginRedirect("/marka/overview");
     }
 
     const username = String(form.get("username") ?? "")
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
       },
     });
     await setSessionCookie(user.id);
-    return sameOriginRedirect("/influencer");
+    return sameOriginRedirect("/influencer/overview");
   } catch (e) {
     console.error(e);
     return redirectErr(request, form, "Kayit sirasinda hata olustu.", role);

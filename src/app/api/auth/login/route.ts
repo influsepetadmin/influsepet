@@ -111,10 +111,10 @@ export async function POST(request: Request) {
   await setSessionCookie(user.id);
 
   if (user.role === "BRAND") {
-    return sameOriginRedirect("/marka");
+    return sameOriginRedirect("/marka/overview");
   }
   if (user.role === "INFLUENCER") {
-    return sameOriginRedirect("/influencer");
+    return sameOriginRedirect("/influencer/overview");
   }
   return sameOriginRedirect("/");
 }

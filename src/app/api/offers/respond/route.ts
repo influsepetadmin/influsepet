@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   }
 
   if (!offerId || (action !== "ACCEPT" && action !== "REJECT")) {
-    if (wantsRedirect) return redirectWithErr("/influencer", "Eksik veya hatali parametre.");
+    if (wantsRedirect) return redirectWithErr("/influencer/offers", "Eksik veya hatali parametre.");
     return NextResponse.json({ error: "Eksik veya hatali parametre." }, { status: 400 });
   }
 
@@ -52,20 +52,21 @@ export async function POST(request: Request) {
   });
 
   if (!offer) {
-    if (wantsRedirect) return redirectWithErr("/influencer", "Teklif bulunamadi.");
+    if (wantsRedirect) return redirectWithErr("/influencer/offers", "Teklif bulunamadi.");
     return NextResponse.json({ error: "Teklif bulunamadi." }, { status: 404 });
   }
 
-  const okPath = offer.initiatedBy === "BRAND" ? "/influencer" : "/marka";
+  const okPath =
+    offer.initiatedBy === "BRAND" ? "/influencer/offers?tab=gelen" : "/marka/offers?tab=gelen";
 
   if (offer.initiatedBy === "BRAND") {
     if (user.role !== "INFLUENCER" || offer.influencerId !== user.id) {
-      if (wantsRedirect) return redirectWithErr("/influencer", "Yetkisiz.");
+      if (wantsRedirect) return redirectWithErr("/influencer/offers", "Yetkisiz.");
       return NextResponse.json({ error: "Yetkisiz." }, { status: 403 });
     }
   } else {
     if (user.role !== "BRAND" || offer.brandId !== user.id) {
-      if (wantsRedirect) return redirectWithErr("/marka", "Yetkisiz.");
+      if (wantsRedirect) return redirectWithErr("/marka/offers", "Yetkisiz.");
       return NextResponse.json({ error: "Yetkisiz." }, { status: 403 });
     }
   }

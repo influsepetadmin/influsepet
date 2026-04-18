@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
   const websiteCheck = parseOptionalWebsiteUrl(String(form.get("website") ?? "").trim() || null);
   if (websiteCheck.ok === false) {
-    return sameOriginRedirect("/marka?err=" + encodeURIComponent(websiteCheck.error));
+    return sameOriginRedirect("/marka/profile?err=" + encodeURIComponent(websiteCheck.error));
   }
   const profileImageCheck = parseOptionalProfileImageUrl(String(form.get("profileImageUrl") ?? "").trim() || null);
   if (profileImageCheck.ok === false) {
@@ -47,13 +47,13 @@ export async function POST(request: Request) {
   const profileImageUrl = profileImageCheck.value;
 
   if (!companyName) {
-    return sameOriginRedirect("/marka?err=" + encodeURIComponent("Sirket adi gerekli"));
+    return sameOriginRedirect("/marka/profile?err=" + encodeURIComponent("Sirket adi gerekli"));
   }
 
   const usernameNorm = normalizeBrandUsername(usernameRaw);
   const userNameCheck = validateBrandUsernameNormalized(usernameNorm);
   if (userNameCheck.ok === false) {
-    return sameOriginRedirect("/marka?err=" + encodeURIComponent(userNameCheck.message));
+    return sameOriginRedirect("/marka/profile?err=" + encodeURIComponent(userNameCheck.message));
   }
 
   const usernameOrNull = usernameNorm.length > 0 ? usernameNorm : null;
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     });
     if (taken) {
       return sameOriginRedirect(
-        "/marka?err=" + encodeURIComponent("Bu kullanici adi baska bir marka tarafindan kullaniliyor."),
+        "/marka/profile?err=" + encodeURIComponent("Bu kullanici adi baska bir marka tarafindan kullaniliyor."),
       );
     }
   }
@@ -108,8 +108,8 @@ export async function POST(request: Request) {
       }
     });
   } catch {
-    return sameOriginRedirect("/marka?err=" + encodeURIComponent("Profil kaydedilemedi. Tekrar deneyin."));
+    return sameOriginRedirect("/marka/profile?err=" + encodeURIComponent("Profil kaydedilemedi. Tekrar deneyin."));
   }
 
-  return sameOriginRedirect("/marka");
+  return sameOriginRedirect("/marka/profile");
 }

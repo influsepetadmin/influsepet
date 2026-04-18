@@ -1,0 +1,157 @@
+/**
+ * Shell-native panel controls (tabs + filters) — premium minimal, app-shell uyumlu
+ */
+.shell-panel-page {
+  padding-bottom: 8px;
+}
+
+.shell-control-bar {
+  border-radius: var(--radius-app-card-lg);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  padding: 12px 14px 14px;
+  margin-bottom: 16px;
+}
+
+.shell-control-bar__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.shell-control-bar__filters {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(226, 232, 240, 0.88);
+}
+
+.shell-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.shell-filter-row__label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+@media (min-width: 640px) {
+  .shell-filter-row__label {
+    width: auto;
+    margin-bottom: 0;
+    margin-right: 6px;
+  }
+}
+
+.shell-filter-row__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.shell-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-decoration: none !important;
+  border: 1px solid transparent;
+  background: rgba(248, 250, 252, 0.65);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.shell-tab:hover {
+  color: #3730a3;
+  background: rgba(238, 242, 255, 0.75);
+  border-color: rgba(199, 210, 254, 0.45);
+}
+
+.shell-tab--active {
+  color: #312e81;
+  background: #fff;
+  border-color: rgba(165, 180, 252, 0.65);
+  box-shadow: 0 1px 3px rgba(79, 70, 229, 0.08);
+}
+
+.shell-tab__label {
+  white-space: nowrap;
+}
+
+.shell-tab__count {
+  font-size: 0.72rem;
+  font-weight: 800;
+  min-width: 1.35rem;
+  text-align: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(226, 232, 240, 0.65);
+  color: var(--muted);
+}
+
+.shell-tab--active .shell-tab__count {
+  background: rgba(99, 102, 241, 0.14);
+  color: #4338ca;
+}
+
+.shell-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-decoration: none !important;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.85);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.shell-chip:hover {
+  border-color: rgba(199, 210, 254, 0.75);
+  color: #4338ca;
+}
+
+.shell-chip--active {
+  color: #312e81;
+  background: rgba(238, 242, 255, 0.95);
+  border-color: rgba(165, 180, 252, 0.55);
+}
+
+.shell-chip__count {
+  font-size: 0.68rem;
+  font-weight: 800;
+  opacity: 0.85;
+}
+
+.shell-panel-hint {
+  margin: 0 0 14px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  max-width: 62ch;
+}
+
+.shell-list-stack.dash-collab-list {
+  gap: 20px;
+}

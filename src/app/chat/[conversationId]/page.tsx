@@ -4,6 +4,7 @@ import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import { getAvatarUrl } from "@/lib/avatar";
 import { prisma } from "@/lib/prisma";
+import { getAvailableOfferTransitions, type OfferForTransition } from "@/lib/offers/transitions";
 import { getSessionPayload } from "@/lib/session";
 import { EmptyGlyphLockClosed } from "@/components/icons/emptyStateGlyphs";
 import { statusBadgeLabel } from "@/components/offers/StatusBadge";
@@ -51,6 +52,8 @@ export default async function ChatConversationPage({
             status: true,
             brandId: true,
             influencerId: true,
+            initiatedBy: true,
+            brief: true,
             title: true,
             campaignName: true,
             createdAt: true,
@@ -86,7 +89,7 @@ export default async function ChatConversationPage({
     conversation.offer.brandId === session.uid || conversation.offer.influencerId === session.uid;
   if (!isParticipant) {
     const panelHref =
-      me.role === "BRAND" ? "/marka" : me.role === "INFLUENCER" ? "/influencer" : "/";
+      me.role === "BRAND" ? "/marka/overview" : me.role === "INFLUENCER" ? "/influencer/overview" : "/";
     const panelLabel =
       me.role === "BRAND"
         ? "Marka paneline git"
@@ -104,7 +107,9 @@ export default async function ChatConversationPage({
   }
 
   const homeHref =
-    me.role === "BRAND" ? "/marka" : me.role === "INFLUENCER" ? "/influencer" : "/";
+    me.role === "BRAND" ? "/marka/overview" : me.role === "INFLUENCER" ? "/influencer/overview" : "/";
+  const discoverHref = me.role === "BRAND" ? "/marka/discover" : "/influencer/discover";
+  const offersPanelHref = me.role === "BRAND" ? "/marka/offers" : "/influencer/offers";
 
   const o = conversation.offer;
   const isBrandViewer = o.brandId === session.uid;
@@ -142,6 +147,22 @@ export default async function ChatConversationPage({
     timeStyle: "short",
   });
 
+  const forTransition: OfferForTransition = {
+    id: o.id,
+    status: o.status,
+    brandId: o.brandId,
+    influencerId: o.influencerId,
+    initiatedBy: o.initiatedBy,
+  };
+  const availableNextTransitions = getAvailableOfferTransitions({
+    offer: forTransition,
+    sessionUser: { id: session.uid, role: me.role },
+  });
+
+  const briefPreview = o.brief?.trim() ?? "";
+  const briefForClient =
+    briefPreview.length > 280 ? `${briefPreview.slice(0, 280).trim()}…` : briefPreview;
+
   return (
     <div className="chat-layout chat-layout--conversation">
       <nav className="chat-workflow-nav" aria-label="Sohbet gezintisi">
@@ -154,8 +175,11 @@ export default async function ChatConversationPage({
           </Link>
         </div>
         <div className="chat-workflow-nav__end">
-          <Link className="chat-workflow-nav__panel btn secondary btn--sm" href={homeHref}>
-            Panele dön
+          <Link className="btn secondary btn--sm" href={discoverHref}>
+            {me.role === "BRAND" ? "Influencer keşfet" : "Keşfet"}
+          </Link>
+          <Link className="btn secondary btn--sm" href={offersPanelHref}>
+            Teklifler
           </Link>
         </div>
       </nav>
@@ -182,7 +206,10 @@ export default async function ChatConversationPage({
           otherSideHandleLine,
           profileHref,
           offerTitle: offerTitle(o.title, o.campaignName),
+          brief: briefForClient,
         }}
+        offersPanelHref={offersPanelHref}
+        availableNextTransitions={availableNextTransitions}
       />
     </div>
   );

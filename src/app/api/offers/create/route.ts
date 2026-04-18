@@ -151,12 +151,12 @@ export async function POST(request: Request) {
         !Number.isFinite(p.offerAmountTRY) ||
         p.offerAmountTRY <= 0
       ) {
-        if (wantsRedirect) return redirectWithErr("/marka", "Eksik veya hatali alan.");
+        if (wantsRedirect) return redirectWithErr("/marka/discover", "Eksik veya hatali alan.");
         return NextResponse.json({ error: "Eksik veya hatali alan." }, { status: 400 });
       }
 
       if (p.influencerId === user.id) {
-        if (wantsRedirect) return redirectWithErr("/marka", "Kendi hesabiniza teklif olusturamazsiniz.");
+        if (wantsRedirect) return redirectWithErr("/marka/discover", "Kendi hesabiniza teklif olusturamazsiniz.");
         return NextResponse.json({ error: "Kendi hesabiniza teklif olusturamazsiniz." }, { status: 400 });
       }
 
@@ -166,7 +166,7 @@ export async function POST(request: Request) {
       });
 
       if (!targetInfluencer || targetInfluencer.role !== "INFLUENCER" || !targetInfluencer.influencer) {
-        if (wantsRedirect) return redirectWithErr("/marka", "Gecersiz influencer hedefi.");
+        if (wantsRedirect) return redirectWithErr("/marka/discover", "Gecersiz influencer hedefi.");
         return NextResponse.json({ error: "Gecersiz influencer hedefi." }, { status: 400 });
       }
 
@@ -197,7 +197,7 @@ export async function POST(request: Request) {
     }
 
     if (!p.brandId || !p.title || !p.brief || !Number.isFinite(p.offerAmountTRY) || p.offerAmountTRY <= 0) {
-      if (wantsRedirect) return redirectWithErr("/influencer", "Eksik veya hatali alan.");
+      if (wantsRedirect) return redirectWithErr("/influencer/discover", "Eksik veya hatali alan.");
       return NextResponse.json({ error: "Eksik veya hatali alan." }, { status: 400 });
     }
 
@@ -212,7 +212,7 @@ export async function POST(request: Request) {
     }
 
     if (targetBrand.id === user.id) {
-      if (wantsRedirect) return redirectWithErr("/influencer", "Gecersiz hedef.");
+      if (wantsRedirect) return redirectWithErr("/influencer/discover", "Gecersiz hedef.");
       return NextResponse.json({ error: "Gecersiz hedef." }, { status: 400 });
     }
 
@@ -241,7 +241,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, offerId: offer.id, conversationId });
   } catch {
-    const path = user.role === "BRAND" ? "/marka" : "/influencer";
+    const path = user.role === "BRAND" ? "/marka/discover" : "/influencer/discover";
     if (wantsRedirect) return redirectWithErr(path, "Teklif gonderilirken hata olustu.");
     return NextResponse.json({ error: "Teklif gonderilirken hata olustu." }, { status: 500 });
   }

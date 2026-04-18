@@ -20,6 +20,22 @@ export function isInfluencerDashboardProfileComplete(
   return true;
 }
 
+/** Panel özet kartı için 0–100; kullanıcı adı, şehir, fiyat, kategori ve profil fotoğrafı ağırlıklı. */
+export function computeInfluencerProfileCompletionPercent(
+  profile: InfluencerWithCategories | null | undefined,
+  selectedCategoryKeys: string[],
+): number {
+  if (!profile) return 0;
+  let n = 0;
+  const parts = 5;
+  if (profile.username?.trim()) n++;
+  if (profile.city?.trim()) n++;
+  if (profile.basePriceTRY >= 1) n++;
+  if (selectedCategoryKeys.length > 0) n++;
+  if (profile.profileImageUrl?.trim()) n++;
+  return Math.round((n / parts) * 100);
+}
+
 export function isBrandDashboardProfileComplete(profile: BrandProfile | null | undefined): boolean {
   if (!profile) return false;
   if (!profile.companyName?.trim()) return false;

@@ -12,6 +12,18 @@ import {
 } from "@/lib/offers/collaborationRating";
 import { isOfferParticipant, type OfferForCollaborationReview } from "@/lib/offers/reviews";
 
+/** Next.js may pass `params` as optional or segment values as `string | string[]`. */
+async function resolveOfferIdFromContext(context: {
+  params?: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<string> {
+  const raw = context.params ? await context.params : {};
+  const v = raw.offerId;
+  const id = Array.isArray(v) ? v[0] : v;
+  return typeof id === "string" ? id : "";
+}
+
+export const dynamic = "force-dynamic";
+
 async function loadOfferForRating(offerId: string) {
   return prisma.offer.findUnique({
     where: { id: offerId },
@@ -26,89 +38,92 @@ async function loadOfferForRating(offerId: string) {
 
 export async function GET(
   _request: Request,
-  context: { params: Promise<{ offerId: string }> },
+  context: { params?: Promise<Record<string, string | string[] | undefined>> },
 ) {
-  const session = await getSessionPayload();
-  if (!session) {
-    return NextResponse.json({ error: "Oturum bulunamadı." }, { status: 401 });
-  }
+  try {
+    const session = await getSessionPayload();
+    if (!session) {
+      return NextResponse.json({ error: "Oturum bulunamadı." }, { status: 401 });
+    }
 
-  const { offerId } = await context.params;
-  if (!offerId?.trim()) {
-    return NextResponse.json({ error: "Teklif ID gerekli." }, { status: 400 });
-  }
+    const offerId = (await resolveOfferIdFromContext(context)).trim();
+    if (!offerId) {
+      return NextResponse.json({ error: "Teklif ID gerekli." }, { status: 400 });
+    }
 
-  const offer = await loadOfferForRating(offerId);
-  if (!offer) {
-    return NextResponse.json({ error: "Teklif bulunamadı." }, { status: 404 });
-  }
+    const offer = await loadOfferForRating(offerId);
+    if (!offer) {
+      return NextResponse.json({ error: "Teklif bulunamadı." }, { status: 404 });
+    }
 
-  const forOffer: OfferForCollaborationReview = offer;
-  if (!isOfferParticipant(forOffer, session.uid)) {
-    return NextResponse.json({ error: "Bu teklifin tarafı değilsiniz." }, { status: 403 });
-  }
+    const forOffer: OfferForCollaborationReview = offer;
+    if (!isOfferParticipant(forOffer, session.uid)) {
+      return NextResponse.json({ error: "Bu teklifin tarafı değilsiniz." }, { status: 403 });
+    }
 
-  const counterpartyUserId =
-    offer.brandId === session.uid ? offer.influencerId : offer.brandId;
+    const counterpartyUserId =
+      offer.brandId === session.uid ? offer.influencerId : offer.brandId;
 
-  /** Rating I gave (rater = me). */
-  const [myRow, theirRow] = await Promise.all([
-    prisma.collaborationRating.findFirst({
-      where: { offerId, raterUserId: session.uid },
-      select: { rating: true, rateeUserId: true, reviewText: true },
-    }),
-    /**
-     * Rating I received on this offer: ratee = me, rater = the other participant.
-     * Equivalent to filtering by counterparty as rater, but avoids relying on a separate
-     * counterparty id for matching (two-party offer ⇒ at most one such row).
-     */
-    prisma.collaborationRating.findFirst({
-      where: {
-        offerId,
-        rateeUserId: session.uid,
-        raterUserId: { not: session.uid },
+    /** Rating I gave (rater = me). */
+    const [myRow, theirRow] = await Promise.all([
+      prisma.collaborationRating.findFirst({
+        where: { offerId, raterUserId: session.uid },
+        select: { rating: true, rateeUserId: true, reviewText: true },
+      }),
+      /** Rating I received: rater = counterparty, ratee = me. */
+      prisma.collaborationRating.findFirst({
+        where: {
+          offerId,
+          raterUserId: counterpartyUserId,
+          rateeUserId: session.uid,
+        },
+        select: { rating: true, reviewText: true },
+      }),
+    ]);
+
+    const iRated = myRow != null;
+    const theyRated = theirRow != null;
+
+    const body: CollaborationRatingGetResponse = {
+      ok: true,
+      offerId: offer.id,
+      offerStatus: offer.status,
+      eligible: offer.status === "COMPLETED",
+      counterpartyUserId,
+      mine: {
+        submitted: iRated,
+        rating: myRow?.rating ?? null,
+        rateeUserId: myRow?.rateeUserId ?? null,
+        reviewText: myRow?.reviewText ?? null,
       },
-      select: { rating: true, reviewText: true },
-    }),
-  ]);
+      theirs: {
+        submitted: theyRated,
+        rating: theirRow?.rating ?? null,
+        reviewText: theirRow?.reviewText ?? null,
+      },
+      ratingState: computeRatingFlowState({ iRated, theyRated }),
+    };
 
-  const iRated = myRow != null;
-  const theyRated = theirRow != null;
-
-  const body: CollaborationRatingGetResponse = {
-    ok: true,
-    offerId: offer.id,
-    offerStatus: offer.status,
-    eligible: offer.status === "COMPLETED",
-    counterpartyUserId,
-    mine: {
-      submitted: iRated,
-      rating: myRow?.rating ?? null,
-      rateeUserId: myRow?.rateeUserId ?? null,
-      reviewText: myRow?.reviewText ?? null,
-    },
-    theirs: {
-      submitted: theyRated,
-      rating: theirRow?.rating ?? null,
-      reviewText: theirRow?.reviewText ?? null,
-    },
-    ratingState: computeRatingFlowState({ iRated, theyRated }),
-  };
-
-  return NextResponse.json(body);
+    return NextResponse.json(body);
+  } catch {
+    return NextResponse.json(
+      { error: "Puan bilgisi yüklenirken bir sunucu hatası oluştu." },
+      { status: 500 },
+    );
+  }
 }
 
 export async function POST(
   request: Request,
-  context: { params: Promise<{ offerId: string }> },
+  context: { params?: Promise<Record<string, string | string[] | undefined>> },
 ) {
   const session = await getSessionPayload();
   if (!session) {
     return NextResponse.json({ error: "Oturum bulunamadı." }, { status: 401 });
   }
 
-  const { offerId } = await context.params;
-  if (!offerId?.trim()) {
+  const offerId = (await resolveOfferIdFromContext(context)).trim();
+  if (!offerId) {
     return NextResponse.json({ error: "Teklif ID gerekli." }, { status: 400 });
   }
 

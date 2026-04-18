@@ -20,7 +20,7 @@ export function getSearchTextVariants(raw: string): SearchTextVariants | null {
 
 function addFieldContains(
   or: Prisma.InfluencerProfileWhereInput[],
-  field: "username" | "nicheText" | "bio" | "category",
+  field: "username" | "nicheText" | "bio" | "category" | "city",
   primary: string,
   secondary: string | null,
 ) {
@@ -32,7 +32,7 @@ function addFieldContains(
 
 function addBrandFieldContains(
   or: Prisma.BrandProfileWhereInput[],
-  field: "companyName" | "city" | "bio",
+  field: "companyName" | "city" | "bio" | "website",
   primary: string,
   secondary: string | null,
 ) {
@@ -55,6 +55,7 @@ export function buildInfluencerProfileTextWhere(rawQuery: string): Prisma.Influe
   addFieldContains(or, "nicheText", primary, secondary);
   addFieldContains(or, "bio", primary, secondary);
   addFieldContains(or, "category", primary, secondary);
+  addFieldContains(or, "city", primary, secondary);
 
   or.push({ user: { name: { contains: primary, mode: "insensitive" } } });
   if (secondary) {
@@ -81,6 +82,7 @@ export function buildBrandProfileTextWhere(rawQuery: string): Prisma.BrandProfil
   addBrandFieldContains(or, "companyName", primary, secondary);
   addBrandFieldContains(or, "city", primary, secondary);
   addBrandFieldContains(or, "bio", primary, secondary);
+  addBrandFieldContains(or, "website", primary, secondary);
 
   or.push({ username: { contains: primary, mode: "insensitive" } });
   if (secondary) {
@@ -101,14 +103,21 @@ export function buildBrandProfileTextWhere(rawQuery: string): Prisma.BrandProfil
 }
 
 /**
- * Builds AND of optional city + optional text clause (for brand search).
+ * Builds AND of optional city + optional categories + optional text clause (for brand search).
  */
 export function buildBrandMarketplaceWhere(args: {
   city: string;
+  selectedCategoryKeys?: string[];
   textWhere: Prisma.BrandProfileWhereInput | null;
 }): Prisma.BrandProfileWhereInput {
   const parts: Prisma.BrandProfileWhereInput[] = [];
   if (args.city) parts.push({ city: args.city });
+  const cats = args.selectedCategoryKeys?.filter(Boolean) ?? [];
+  if (cats.length > 0) {
+    parts.push({
+      selectedCategories: { some: { categoryKey: { in: cats.slice(0, 3) } } },
+    });
+  }
   if (args.textWhere) parts.push(args.textWhere);
   if (parts.length === 0) return {};
   if (parts.length === 1) return parts[0]!;

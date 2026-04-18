@@ -16,8 +16,8 @@ export async function getCurrentUser() {
 
 /** Safe home for “Geri dön” from public profile pages: role dashboard or landing. */
 export function dashboardHomeHrefForRole(role: UserRole | null | undefined): string {
-  if (role === "INFLUENCER") return "/influencer";
-  if (role === "BRAND") return "/marka";
+  if (role === "INFLUENCER") return "/influencer/overview";
+  if (role === "BRAND") return "/marka/overview";
   return "/";
 }
 

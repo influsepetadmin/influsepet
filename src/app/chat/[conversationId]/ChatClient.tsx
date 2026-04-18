@@ -1,8 +1,8 @@
 "use client";
 
 import type { OfferStatus } from "@prisma/client";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChatOfferWorkflowActions } from "@/components/chat/ChatOfferWorkflowActions";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { EmptyGlyphChatBubble } from "@/components/icons/emptyStateGlyphs";
 import { CollaborationRatingPanel } from "@/components/offers/CollaborationRatingPanel";
@@ -189,12 +189,18 @@ function buildThreadItems(messages: Msg[]): ThreadItem[] {
   return out;
 }
 
+function isRevisionWorkflowCopy(body: string): boolean {
+  return /revizyon|revize|düzenle|duzenle|yeniden\s+teslim|yeniden teslim/i.test(body);
+}
+
 export default function ChatClient({
   conversationId,
   meId,
   offer,
   workflowMeta,
   chatContext,
+  offersPanelHref,
+  availableNextTransitions,
 }: {
   conversationId: string;
   meId: string;
@@ -218,7 +224,10 @@ export default function ChatClient({
     otherSideHandleLine: string | null;
     profileHref: string;
     offerTitle: string;
+    brief: string;
   };
+  offersPanelHref: string;
+  availableNextTransitions: OfferStatus[];
 }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [body, setBody] = useState("");
@@ -333,11 +342,14 @@ export default function ChatClient({
 
   return (
     <div className="chat-conversation">
-      <header className="chat-workflow-card chat-workflow-card--workspace">
+      <header className="chat-workflow-card chat-workflow-card--workspace" id="chat-workspace-header">
         <div className="chat-workflow-card__title-row">
           <div className="chat-workflow-card__title-block">
-            <span className="chat-workflow-card__kicker">İş birliği sohbeti</span>
+            <span className="chat-workflow-card__kicker">İş birliği çalışma alanı</span>
             <h2 className="chat-workflow-card__title">{chatContext.offerTitle}</h2>
+            {chatContext.brief.trim() ? (
+              <p className="chat-workflow-card__brief muted">{chatContext.brief}</p>
+            ) : null}
           </div>
           <div className="chat-workflow-card__title-aside">
             <StatusBadge status={offer.status} />
@@ -345,17 +357,19 @@ export default function ChatClient({
         </div>
 
         <div className="chat-workflow-card__identity">
-          <div className="chat-workflow-card__avatar-wrap" aria-hidden>
-            <div className="chat-workflow-card__avatar-ring">
-              <img
-                className="chat-workflow-card__avatar"
-                src={chatContext.otherSideAvatarSrc}
-                alt=""
-                width={48}
-                height={48}
-              />
+          <a className="chat-workflow-card__avatar-hit" href={chatContext.profileHref} title="Herkese açık profil">
+            <div className="chat-workflow-card__avatar-wrap" aria-hidden>
+              <div className="chat-workflow-card__avatar-ring">
+                <img
+                  className="chat-workflow-card__avatar"
+                  src={chatContext.otherSideAvatarSrc}
+                  alt=""
+                  width={52}
+                  height={52}
+                />
+              </div>
             </div>
-          </div>
+          </a>
           <div className="chat-workflow-card__identity-main">
             <span className="chat-workflow-card__identity-role">{chatContext.otherSideRole}</span>
             <span className="chat-workflow-card__identity-name">{chatContext.otherSideName}</span>
@@ -363,9 +377,6 @@ export default function ChatClient({
               <span className="chat-workflow-card__identity-handle muted">{chatContext.otherSideHandleLine}</span>
             ) : null}
           </div>
-          <Link className="btn secondary btn--sm chat-workflow-card__profile-btn" href={chatContext.profileHref}>
-            Profili görüntüle
-          </Link>
         </div>
 
         <dl className="chat-workflow-card__metrics" aria-label="İş birliği özeti">
@@ -387,27 +398,43 @@ export default function ChatClient({
           </div>
         </dl>
 
+        <ChatOfferWorkflowActions
+          offerId={offer.id}
+          availableNextTransitions={availableNextTransitions}
+          profileHref={chatContext.profileHref}
+          offersPanelHref={offersPanelHref}
+          showDeliveryShortcut={
+            offer.status === "IN_PROGRESS" ||
+            offer.status === "REVISION_REQUESTED" ||
+            offer.status === "DELIVERED"
+          }
+        />
+
         <div className="chat-workflow-card__workspace-foot">
           <p className="chat-workflow-card__workspace-hint muted">
-            Aşağıda teslim, revize ve tamamlama panelleri — teklif kısayolları ileride bu özetle birleştirilebilir.
+            Teslim, revize ve değerlendirme panelleri mesaj akışının üstünde yer alır.
           </p>
         </div>
       </header>
 
-      <DeliveryPanel
-        offerId={offer.id}
-        offerStatus={offer.status}
-        brandId={offer.brandId}
-        influencerId={offer.influencerId}
-        meId={meId}
-      />
-      <CollaborationRatingPanel
-        offerId={offer.id}
-        offerStatus={offer.status}
-        chatActivityEpoch={ratingChatEpoch}
-      />
+      <div id="chat-delivery-anchor" className="chat-delivery-anchor">
+        <DeliveryPanel
+          offerId={offer.id}
+          offerStatus={offer.status}
+          brandId={offer.brandId}
+          influencerId={offer.influencerId}
+          meId={meId}
+        />
+      </div>
+      <div className="chat-rating-wrap">
+        <CollaborationRatingPanel
+          offerId={offer.id}
+          offerStatus={offer.status}
+          chatActivityEpoch={ratingChatEpoch}
+        />
+      </div>
 
-      <div className="chat-thread chat-thread--premium">
+      <div className="chat-thread chat-thread--premium" role="region" aria-label="Mesajlar">
         {messages.length === 0 ? (
           <div className="chat-thread-empty">
             <EmptyStateCard
@@ -439,11 +466,16 @@ export default function ChatClient({
               const tone = pres.tone;
               const Icon =
                 tone === "positive" ? CheckCircle2 : tone === "warning" ? AlertCircle : Info;
+              const revisionEmphasis = isRevisionWorkflowCopy(m.body);
               return (
-                <div key={m.id} className="chat-msg chat-msg--workflow-event" role="status">
+                <div
+                  key={m.id}
+                  className={`chat-msg chat-msg--workflow-event${revisionEmphasis ? " chat-msg--workflow-revision" : ""}`}
+                  role="status"
+                >
                   <div className="chat-msg__inner chat-msg__inner--workflow-event">
                     <div
-                      className={`chat-bubble chat-bubble--system chat-event-pill chat-event-pill--${tone}`}
+                      className={`chat-bubble chat-bubble--system chat-event-pill chat-event-pill--${tone}${revisionEmphasis ? " chat-event-pill--revision-emphasis" : ""}`}
                     >
                       <span className="chat-event-pill__glyph" aria-hidden>
                         <Icon size={WORKFLOW_EVENT_ICON_PX} strokeWidth={WORKFLOW_EVENT_ICON_STROKE} />

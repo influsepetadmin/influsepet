@@ -1,5 +1,7 @@
 import Link from "next/link";
+import type { OfferStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { PageHeader } from "@/components/app-shell/PageHeader";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { getSessionPayload } from "@/lib/session";
 import { StatusBadge } from "@/components/offers/StatusBadge";
@@ -36,6 +38,25 @@ function formatListTime(iso: Date): string {
   } catch {
     return "";
   }
+}
+
+function inboxRowClass(status: OfferStatus, unread: number): string {
+  const parts = ["chat-inbox__row"];
+  if (unread > 0) parts.push("chat-inbox__row--unread");
+  if (["COMPLETED", "REJECTED", "CANCELLED", "DISPUTED"].includes(status)) {
+    parts.push("chat-inbox__row--archived");
+  } else if (status === "PENDING") {
+    parts.push("chat-inbox__row--pending");
+  } else {
+    parts.push("chat-inbox__row--active");
+  }
+  return parts.join(" ");
+}
+
+function initialFromName(name: string): string {
+  const t = name.trim();
+  if (!t) return "?";
+  return t.slice(0, 1).toLocaleUpperCase("tr-TR");
 }
 
 export default async function ChatIndexPage() {
@@ -84,7 +105,10 @@ export default async function ChatIndexPage() {
     );
   }
 
-  const panelHref = me.role === "BRAND" ? "/marka" : me.role === "INFLUENCER" ? "/influencer" : "/";
+  const panelHref =
+    me.role === "BRAND" ? "/marka/overview" : me.role === "INFLUENCER" ? "/influencer/overview" : "/";
+  const discoverHref = me.role === "BRAND" ? "/marka/discover" : "/influencer/discover";
+  const offersHref = me.role === "BRAND" ? "/marka/offers" : "/influencer/offers";
 
   const conversations = await prisma.conversation.findMany({
     where: {
@@ -126,28 +150,61 @@ export default async function ChatIndexPage() {
     },
   });
 
+  const convIds = conversations.map((c) => c.id);
+  const unreadRows =
+    convIds.length > 0
+      ? await prisma.message.groupBy({
+          by: ["conversationId"],
+          where: {
+            conversationId: { in: convIds },
+            senderId: { not: session.uid },
+            isSeen: false,
+          },
+          _count: { _all: true },
+        })
+      : [];
+  const unreadByConversation = Object.fromEntries(
+    unreadRows.map((r) => [r.conversationId, r._count._all]),
+  ) as Record<string, number>;
+
   return (
     <div className="chat-layout">
-      <header className="chat-page-header">
-        <div className="chat-page-header__main">
-          <h1 className="chat-page-header__title">Sohbetler</h1>
-          <p className="chat-page-header__lede muted">İş birliği görüşmeleriniz burada listelenir.</p>
-        </div>
-        <Link className="btn secondary chat-page-toolbar__panel" href={panelHref}>
-          Panele dön
-        </Link>
-      </header>
+      <PageHeader
+        eyebrow="Sohbetler"
+        title="Görüşmeler"
+        description="İş birliği akışınızdaki tüm konuşmalar."
+        action={
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "flex-end" }}>
+            <Link className="btn btn--sm" href={discoverHref}>
+              {me.role === "BRAND" ? "Influencer keşfet" : "Keşfet"}
+            </Link>
+            <Link className="btn secondary btn--sm" href={offersHref}>
+              Teklifler
+            </Link>
+          </div>
+        }
+      />
 
       {conversations.length === 0 ? (
-        <section className="dash-card dash-card--section">
+        <section className="dash-card dash-card--section chat-inbox-empty-card">
           <EmptyStateCard
             icon={<EmptyGlyphChatBubble />}
             title="Henüz sohbet yok"
-            description="Sohbetler, kabul edilmiş iş birlikleri üzerinden açılır. Önce bir teklif oluşturun veya gelen teklifi kabul edin."
+            description="Sohbetler, iş birliği teklifleri kabul edildikten sonra açılır. Keşfede yeni iş ortakları bulun veya teklif kutunuzu kontrol edin."
           >
-            <Link className="btn" href={panelHref}>
-              Uygun panele git
-            </Link>
+            <div className="chat-inbox-empty-card__stack">
+              <div className="chat-inbox-empty-card__actions">
+                <Link className="btn" href={discoverHref}>
+                  {me.role === "BRAND" ? "Influencer keşfet" : "Keşfet"}
+                </Link>
+                <Link className="btn secondary" href={offersHref}>
+                  Tekliflere git
+                </Link>
+              </div>
+              <Link className="chat-inbox-empty-card__panel muted" href={panelHref}>
+                Panele dön
+              </Link>
+            </div>
           </EmptyStateCard>
         </section>
       ) : (
@@ -164,22 +221,36 @@ export default async function ChatIndexPage() {
               const last = c.messages[0];
               const preview = lastMessagePreview(last);
               const when = last ? last.createdAt : c.createdAt;
+              const unread = unreadByConversation[c.id] ?? 0;
+              const rowClass = inboxRowClass(o.status, unread);
               return (
                 <li key={c.id}>
-                  <Link className="chat-inbox__row" href={`/chat/${c.id}`}>
-                    <div className="chat-inbox__row-top">
-                      <div className="chat-inbox__identity">
-                        <span className="chat-inbox__role">{sideLabel}</span>
-                        <span className="chat-inbox__name">{otherName}</span>
+                  <Link className={rowClass} href={`/chat/${c.id}`}>
+                    <div className="chat-inbox__row-inner">
+                      <div className="chat-inbox__avatar" aria-hidden>
+                        {initialFromName(otherName)}
                       </div>
-                      <time className="chat-inbox__time muted" dateTime={when.toISOString()}>
-                        {formatListTime(when)}
-                      </time>
-                    </div>
-                    <p className="chat-inbox__campaign">{t}</p>
-                    <div className="chat-inbox__row-bottom">
-                      <StatusBadge status={o.status} />
-                      <p className="chat-inbox__preview muted">{preview}</p>
+                      <div className="chat-inbox__main">
+                        <div className="chat-inbox__row-top">
+                          <div className="chat-inbox__identity">
+                            <span className="chat-inbox__role">{sideLabel}</span>
+                            <span className="chat-inbox__name">{otherName}</span>
+                          </div>
+                          <time className="chat-inbox__time muted" dateTime={when.toISOString()}>
+                            {formatListTime(when)}
+                          </time>
+                        </div>
+                        <p className="chat-inbox__campaign">{t}</p>
+                        <div className="chat-inbox__row-bottom">
+                          <StatusBadge status={o.status} />
+                          <p className="chat-inbox__preview muted">{preview}</p>
+                        </div>
+                      </div>
+                      {unread > 0 ? (
+                        <span className="chat-inbox__unread-badge" aria-label={`${unread} okunmamış`}>
+                          {unread > 99 ? "99+" : unread}
+                        </span>
+                      ) : null}
                     </div>
                   </Link>
                 </li>
