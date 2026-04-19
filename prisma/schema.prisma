@@ -88,6 +88,38 @@ model User {
   deliveriesSubmitted OfferDelivery[] @relation("OfferDeliverySubmitter")
   collaborationMediaUploaded CollaborationMedia[] @relation("CollaborationMediaUploader")
   passwordResetTokens      PasswordResetToken[]
+  influencerSavedBrands    InfluencerSavedBrand[] @relation("InfluencerSavedBrandRows")
+  brandsSavedByInfluencers InfluencerSavedBrand[] @relation("InfluencerSavedBrandTargets")
+  brandSavedInfluencers    BrandSavedInfluencer[] @relation("BrandSavedInfluencerRows")
+  savedAsInfluencerByBrands BrandSavedInfluencer[] @relation("BrandSavedInfluencerTargets")
+}
+
+/** Influencer panel: kayıtlı marka (User id = marka hesabı). */
+model InfluencerSavedBrand {
+  id               String   @id @default(cuid())
+  influencerUserId String
+  brandUserId      String
+  createdAt        DateTime @default(now())
+
+  influencerUser User @relation("InfluencerSavedBrandRows", fields: [influencerUserId], references: [id], onDelete: Cascade)
+  brandUser      User @relation("InfluencerSavedBrandTargets", fields: [brandUserId], references: [id], onDelete: Cascade)
+
+  @@unique([influencerUserId, brandUserId])
+  @@index([influencerUserId, createdAt])
+}
+
+/** Marka panel: kayıtlı içerik üreticisi (User id = influencer hesabı). */
+model BrandSavedInfluencer {
+  id                 String   @id @default(cuid())
+  brandUserId        String
+  influencerUserId   String
+  createdAt          DateTime @default(now())
+
+  brandUser        User @relation("BrandSavedInfluencerRows", fields: [brandUserId], references: [id], onDelete: Cascade)
+  influencerUser   User @relation("BrandSavedInfluencerTargets", fields: [influencerUserId], references: [id], onDelete: Cascade)
+
+  @@unique([brandUserId, influencerUserId])
+  @@index([brandUserId, createdAt])
 }
 
 /** Single-use password reset token (raw token is shown once in email; DB stores SHA-256 hash). */

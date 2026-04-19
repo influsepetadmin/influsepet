@@ -18,9 +18,9 @@ import { runBrandMarketplaceSearch } from "@/lib/discovery/marketplaceSearchRun"
 import { getInfluencerPanelAccess } from "@/lib/influencer/panelAccess";
 import { parseMarketplaceSearchQuery } from "@/lib/marketplaceTextSearch";
 import { prisma } from "@/lib/prisma";
+import { Bookmark } from "lucide-react";
 import {
   EmptyGlyphBuildingOffice,
-  EmptyGlyphListBullet,
   EmptyGlyphMapPin,
 } from "@/components/icons/emptyStateGlyphs";
 
@@ -81,10 +81,19 @@ export default async function InfluencerDiscoverPage({
         })
       : Promise.resolve([]);
 
-  const [discoverSections, brandResults] = await Promise.all([
+  const savedBrandsPromise = prisma.influencerSavedBrand.findMany({
+    where: { influencerUserId: user.id },
+    select: { brandUserId: true },
+  });
+
+  const [discoverSections, brandResults, savedBrandRows] = await Promise.all([
     discoverPromise ?? Promise.resolve(null),
     brandResultsPromise,
+    savedBrandsPromise,
   ]);
+
+  const savedBrandUserIds = new Set(savedBrandRows.map((r) => r.brandUserId));
+  const savedBrandCount = savedBrandUserIds.size;
 
   return (
     <div className="dashboard-page influencer-panel-page influencer-discover">
@@ -113,6 +122,7 @@ export default async function InfluencerDiscoverPage({
               sections={discoverSections}
               influencerBasePriceTRY={profile.basePriceTRY}
               hrefBase="/influencer/discover"
+              savedBrandUserIds={savedBrandUserIds}
             />
           ) : null}
 
@@ -238,7 +248,11 @@ export default async function InfluencerDiscoverPage({
                           <p className="muted brand-result-card__why">{searchMatchWhy(b._matchScore)}</p>
                         </div>
                         <div className="brand-result-card__actions">
-                          <DiscoverySaveButton />
+                          <DiscoverySaveButton
+                            targetUserId={b.userId}
+                            variant="influencer-saves-brand"
+                            initialSaved={savedBrandUserIds.has(b.userId)}
+                          />
                           <Link className="btn secondary btn--sm" href={`/profil/marka/${b.userId}`}>
                             Profili incele
                           </Link>
@@ -275,16 +289,27 @@ export default async function InfluencerDiscoverPage({
       ) : null}
 
       <section className="dash-card dash-card--section">
-        <h2 className="dash-section__title">Kayıtlı / favori markalar</h2>
-        <EmptyStateCard
-          icon={<EmptyGlyphListBullet />}
-          title="Yakında"
-          description="Beğendiğiniz markaları buraya kaydetme özelliği üzerinde çalışıyoruz."
-        >
-          <Link className="btn secondary" href="/influencer/discover">
-            Keşfet’e dön
-          </Link>
-        </EmptyStateCard>
+        <h2 className="dash-section__title">Kayıtlı markalar</h2>
+        {savedBrandCount === 0 ? (
+          <EmptyStateCard
+            icon={<Bookmark strokeWidth={1.25} />}
+            title="Listeniz boş"
+            description="Keşfet veya arama sonuçlarında marka kartlarındaki “Kaydet” ile buraya ekleyin; teklif öncesi hızlıca dönün."
+          >
+            <Link className="btn" href="/influencer/discover">
+              Keşfet
+            </Link>
+          </EmptyStateCard>
+        ) : (
+          <div className="saved-teaser">
+            <p className="muted saved-teaser__lede">
+              <strong>{savedBrandCount}</strong> marka kayıtlı.
+            </p>
+            <Link className="btn secondary" href="/influencer/saved">
+              Kayıtlıları görüntüle
+            </Link>
+          </div>
+        )}
       </section>
     </div>
   );

@@ -11,9 +11,11 @@ import { DiscoverySaveButton } from "./DiscoverySaveButton";
 function InfluencerDiscoverCard({
   p,
   reason,
+  initialSaved,
 }: {
   p: DiscoverInfluencerSectionRow;
   reason: SectionReason;
+  initialSaved: boolean;
 }) {
   const categories = p.selectedCategories.map((c) => getCategoryLabel(c.categoryKey)).join(", ");
   const defaultAmt = p.basePriceTRY > 0 ? Math.max(100, Math.ceil(p.basePriceTRY / 100) * 100) : 100;
@@ -33,7 +35,11 @@ function InfluencerDiscoverCard({
           <p className="muted influencer-result-card__why">{discoverCardWhy(reason)}</p>
         </div>
         <div className="influencer-result-card__actions">
-          <DiscoverySaveButton />
+          <DiscoverySaveButton
+            targetUserId={p.userId}
+            variant="brand-saves-influencer"
+            initialSaved={initialSaved}
+          />
           <Link className="btn secondary btn--sm" href={`/profil/influencer/${p.userId}`}>
             Profil
           </Link>
@@ -72,8 +78,10 @@ function InfluencerDiscoverCard({
 
 function SectionBlock({
   section,
+  savedInfluencerUserIds,
 }: {
   section: DiscoverSection<DiscoverInfluencerSectionRow>;
+  savedInfluencerUserIds: Set<string>;
 }) {
   if (section.items.length === 0) return null;
   return (
@@ -86,7 +94,12 @@ function SectionBlock({
       </div>
       <div className="marketplace-discover__grid discover-hub__grid">
         {section.items.map((p) => (
-          <InfluencerDiscoverCard key={p.id} p={p} reason={section.reason} />
+          <InfluencerDiscoverCard
+            key={p.id}
+            p={p}
+            reason={section.reason}
+            initialSaved={savedInfluencerUserIds.has(p.userId)}
+          />
         ))}
       </div>
     </section>
@@ -113,6 +126,7 @@ export function PopularCategoriesChipsMarka({ hrefBase }: { hrefBase: string }) 
 export function DiscoverHubInfluencers({
   sections,
   hrefBase,
+  savedInfluencerUserIds,
 }: {
   sections: {
     forYou: DiscoverSection<DiscoverInfluencerSectionRow>;
@@ -121,6 +135,7 @@ export function DiscoverHubInfluencers({
     featured: DiscoverSection<DiscoverInfluencerSectionRow>;
   };
   hrefBase: string;
+  savedInfluencerUserIds: Set<string>;
 }) {
   const list = [sections.forYou, sections.newest, sections.nearby, sections.featured];
   const anyItems = list.some((s) => s.items.length > 0);
@@ -145,7 +160,7 @@ export function DiscoverHubInfluencers({
       ) : (
         <div className="discover-hub__sections">
           {list.map((section) => (
-            <SectionBlock key={section.key} section={section} />
+            <SectionBlock key={section.key} section={section} savedInfluencerUserIds={savedInfluencerUserIds} />
           ))}
         </div>
       )}

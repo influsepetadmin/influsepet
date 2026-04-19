@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Bookmark } from "lucide-react";
 import CategoryMultiSelect from "@/components/CategoryMultiSelect";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
@@ -19,11 +20,7 @@ import { truncateText } from "@/lib/dashboardProfileCompletion";
 import { getMarkaPanelAccess } from "@/lib/marka/panelAccess";
 import { parseMarketplaceSearchQuery } from "@/lib/marketplaceTextSearch";
 import { prisma } from "@/lib/prisma";
-import {
-  EmptyGlyphListBullet,
-  EmptyGlyphMagnifyingGlass,
-  EmptyGlyphMapPin,
-} from "@/components/icons/emptyStateGlyphs";
+import { EmptyGlyphMagnifyingGlass, EmptyGlyphMapPin } from "@/components/icons/emptyStateGlyphs";
 
 export default async function MarkaDiscoverPage({
   searchParams,
@@ -89,10 +86,19 @@ export default async function MarkaDiscoverPage({
         })
       : Promise.resolve([]);
 
-  const [discoverSections, influencerResults] = await Promise.all([
+  const savedInfluencersPromise = prisma.brandSavedInfluencer.findMany({
+    where: { brandUserId: user.id },
+    select: { influencerUserId: true },
+  });
+
+  const [discoverSections, influencerResults, savedInfluencerRows] = await Promise.all([
     discoverPromise ?? Promise.resolve(null),
     influencerResultsPromise,
+    savedInfluencersPromise,
   ]);
+
+  const savedInfluencerUserIds = new Set(savedInfluencerRows.map((r) => r.influencerUserId));
+  const savedInfluencerCount = savedInfluencerUserIds.size;
 
   return (
     <div className="dashboard-page influencer-panel-page marka-discover">
@@ -128,7 +134,13 @@ export default async function MarkaDiscoverPage({
             </p>
           </header>
 
-          {discoverSections ? <DiscoverHubInfluencers sections={discoverSections} hrefBase="/marka/discover" /> : null}
+          {discoverSections ? (
+            <DiscoverHubInfluencers
+              sections={discoverSections}
+              hrefBase="/marka/discover"
+              savedInfluencerUserIds={savedInfluencerUserIds}
+            />
+          ) : null}
 
           <div className="discovery-search-panel">
             <form className="influencer-search-form discovery-search-form" method="get" action="/marka/discover">
@@ -246,7 +258,11 @@ export default async function MarkaDiscoverPage({
                           <p className="muted influencer-result-card__why">{searchMatchWhy(p._matchScore)}</p>
                         </div>
                         <div className="influencer-result-card__actions">
-                          <DiscoverySaveButton />
+                          <DiscoverySaveButton
+                            targetUserId={p.userId}
+                            variant="brand-saves-influencer"
+                            initialSaved={savedInfluencerUserIds.has(p.userId)}
+                          />
                           <Link className="btn secondary btn--sm" href={`/profil/influencer/${p.userId}`}>
                             Profili incele
                           </Link>
@@ -297,16 +313,27 @@ export default async function MarkaDiscoverPage({
       )}
 
       <section className="dash-card dash-card--section">
-        <h2 className="dash-section__title">Kayıtlı / favori influencerlar</h2>
-        <EmptyStateCard
-          icon={<EmptyGlyphListBullet />}
-          title="Yakında"
-          description="Beğendiğiniz içerik üreticilerini buraya kaydetme özelliği üzerinde çalışıyoruz."
-        >
-          <Link className="btn secondary" href="/marka/discover">
-            Keşfet’e dön
-          </Link>
-        </EmptyStateCard>
+        <h2 className="dash-section__title">Kayıtlı içerik üreticileri</h2>
+        {savedInfluencerCount === 0 ? (
+          <EmptyStateCard
+            icon={<Bookmark strokeWidth={1.25} />}
+            title="Listeniz boş"
+            description="Keşfet veya arama sonuçlarında profil kartlarındaki “Kaydet” ile buraya ekleyin; teklif aşamasına geldiğinizde hızlıca dönün."
+          >
+            <Link className="btn" href="/marka/discover">
+              Keşfet
+            </Link>
+          </EmptyStateCard>
+        ) : (
+          <div className="saved-teaser">
+            <p className="muted saved-teaser__lede">
+              <strong>{savedInfluencerCount}</strong> profil kayıtlı.
+            </p>
+            <Link className="btn secondary" href="/marka/saved">
+              Kayıtlıları görüntüle
+            </Link>
+          </div>
+        )}
       </section>
     </div>
   );

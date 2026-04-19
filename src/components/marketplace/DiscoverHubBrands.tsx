@@ -11,10 +11,12 @@ function BrandDiscoverCard({
   b,
   influencerBasePriceTRY,
   reason,
+  initialSaved,
 }: {
   b: DiscoverBrandSectionRow;
   influencerBasePriceTRY: number;
   reason: SectionReason;
+  initialSaved: boolean;
 }) {
   const defaultAmt =
     influencerBasePriceTRY > 0
@@ -39,7 +41,11 @@ function BrandDiscoverCard({
           <p className="muted brand-result-card__why">{discoverCardWhy(reason)}</p>
         </div>
         <div className="brand-result-card__actions">
-          <DiscoverySaveButton />
+          <DiscoverySaveButton
+            targetUserId={b.userId}
+            variant="influencer-saves-brand"
+            initialSaved={initialSaved}
+          />
           <Link className="btn secondary btn--sm" href={`/profil/marka/${b.userId}`}>
             Profil
           </Link>
@@ -73,9 +79,11 @@ function BrandDiscoverCard({
 function SectionBlock({
   section,
   influencerBasePriceTRY,
+  savedBrandUserIds,
 }: {
   section: DiscoverSection<DiscoverBrandSectionRow>;
   influencerBasePriceTRY: number;
+  savedBrandUserIds: Set<string>;
 }) {
   if (section.items.length === 0) return null;
   return (
@@ -93,6 +101,7 @@ function SectionBlock({
             b={b}
             influencerBasePriceTRY={influencerBasePriceTRY}
             reason={section.reason}
+            initialSaved={savedBrandUserIds.has(b.userId)}
           />
         ))}
       </div>
@@ -121,6 +130,7 @@ export function DiscoverHubBrands({
   sections,
   influencerBasePriceTRY,
   hrefBase,
+  savedBrandUserIds,
 }: {
   sections: {
     forYou: DiscoverSection<DiscoverBrandSectionRow>;
@@ -130,6 +140,7 @@ export function DiscoverHubBrands({
   };
   influencerBasePriceTRY: number;
   hrefBase: string;
+  savedBrandUserIds: Set<string>;
 }) {
   const list = [sections.forYou, sections.newest, sections.nearby, sections.featured];
   const anyItems = list.some((s) => s.items.length > 0);
@@ -154,7 +165,12 @@ export function DiscoverHubBrands({
       ) : (
         <div className="discover-hub__sections">
           {list.map((section) => (
-            <SectionBlock key={section.key} section={section} influencerBasePriceTRY={influencerBasePriceTRY} />
+            <SectionBlock
+              key={section.key}
+              section={section}
+              influencerBasePriceTRY={influencerBasePriceTRY}
+              savedBrandUserIds={savedBrandUserIds}
+            />
           ))}
         </div>
       )}

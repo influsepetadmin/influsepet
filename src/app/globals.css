@@ -4321,16 +4321,70 @@ main:has(.dashboard-page) {
   gap: 6px;
   padding: 8px 11px;
   border-radius: 12px;
-  border: 1px dashed rgba(148, 163, 184, 0.65);
-  background: rgba(248, 250, 252, 0.92);
-  color: #94a3b8;
+  border: 1px solid rgba(203, 213, 225, 0.95);
+  background: rgba(255, 255, 255, 0.95);
+  color: #64748b;
   font-size: 0.78rem;
   font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.dashboard-page .discovery-save-btn:hover:not(:disabled) {
+  border-color: #c7d2fe;
+  color: #4338ca;
+  background: rgba(238, 242, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.08);
+}
+
+.dashboard-page .discovery-save-btn--saved {
+  border-color: rgba(129, 140, 248, 0.55);
+  color: #4338ca;
+  background: linear-gradient(165deg, #eef2ff 0%, #e0e7ff 100%);
+}
+
+.dashboard-page .discovery-save-btn--saved:hover:not(:disabled) {
+  border-color: #818cf8;
+  color: #312e81;
+}
+
+.dashboard-page .discovery-save-btn--pending {
+  opacity: 0.72;
+  cursor: wait;
+}
+
+.dashboard-page .discovery-save-btn:disabled {
   cursor: not-allowed;
 }
 
 .dashboard-page .discovery-save-btn__text {
   line-height: 1;
+}
+
+.dashboard-page .saved-page__count {
+  margin: 0 0 16px;
+  font-size: 0.88rem;
+}
+
+.dashboard-page .saved-page__grid {
+  margin-top: 4px;
+}
+
+.dashboard-page .saved-teaser {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding: 4px 0 2px;
+}
+
+.dashboard-page .saved-teaser__lede {
+  margin: 0;
+  font-size: 0.92rem;
 }
 
 .dashboard-page .discovery-active-filters {

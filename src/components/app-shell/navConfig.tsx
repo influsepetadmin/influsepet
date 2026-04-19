@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Bookmark,
   Briefcase,
   Compass,
   Inbox,
@@ -34,6 +35,7 @@ export const INFLUENCER_NAV: ShellNavItem[] = [
     mobileBar: true,
   },
   { href: "/influencer/discover", label: "Keşfet", icon: Compass, mobileBar: true },
+  { href: "/influencer/saved", label: "Kayıtlı", icon: Bookmark, mobileBar: true },
   { href: "/influencer/offers", label: "Teklifler", icon: Inbox, mobileBar: true },
   { href: "/influencer/collaborations", label: "İş birlikleri", icon: Briefcase, mobileBar: true },
   { href: "/chat", label: "Sohbetler", icon: MessageCircle, mobileBar: true },
@@ -51,6 +53,7 @@ export const MARKA_NAV: ShellNavItem[] = [
     mobileBar: true,
   },
   { href: "/marka/discover", label: "Keşfet", icon: Compass, mobileBar: true },
+  { href: "/marka/saved", label: "Kayıtlı", icon: Bookmark, mobileBar: true },
   { href: "/marka/offers", label: "Teklifler", icon: Inbox, mobileBar: true },
   { href: "/marka/campaigns", label: "Kampanyalar", icon: Megaphone, mobileBar: true },
   { href: "/chat", label: "Sohbetler", icon: MessageCircle, mobileBar: true },
