@@ -289,8 +289,25 @@ model OfferDelivery {
 
   offer       Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
   submittedBy User  @relation("OfferDeliverySubmitter", fields: [submittedById], references: [id], onDelete: Cascade)
+  media       OfferDeliveryMedia[]
 
   @@index([offerId, createdAt])
+}
+
+/** Teslim kanıtı: sohbet medyasından ayrı; yalnızca ilgili OfferDelivery satırına bağlı. */
+model OfferDeliveryMedia {
+  id                   String                 @id @default(cuid())
+  offerDeliveryId      String
+  kind                 CollaborationMediaKind
+  mimeType             String
+  storedFilename       String
+  sizeBytes            Int
+  originalFilenameSafe String?
+  createdAt            DateTime               @default(now())
+
+  delivery OfferDelivery @relation(fields: [offerDeliveryId], references: [id], onDelete: Cascade)
+
+  @@index([offerDeliveryId])
 }
 
 model Conversation {

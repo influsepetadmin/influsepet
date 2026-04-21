@@ -12,17 +12,14 @@ export type OfferBasics = {
   initiatedBy: OfferInitiator;
 };
 
-/** Shared messages for POST /api/offers/[offerId]/deliveries body validation. */
-export const DELIVERY_PARSE_REQUIRED = "Teslim bağlantısı veya teslim notu gerekli.";
-export const DELIVERY_PARSE_TEXT_TOO_LONG = "Metin çok uzun.";
-
 export type DeliveryCheckResult = { ok: true } | { ok: false; code: string; message: string };
 
 /**
  * Submission rules (conservative):
  * - Only the influencer participant (offer.influencerId) may submit; we key off user id, not only role,
  *   so the correct account always acts even if roles were inconsistent in data.
- * - Offer must be IN_PROGRESS. Moving the offer to DELIVERED happens only in POST /deliveries after this row is created.
+ * - Offer must be IN_PROGRESS or REVISION_REQUESTED (revize sonrasi yeni teslim).
+ * - Moving the offer to DELIVERED happens only in POST /deliveries after this row is created.
  */
 export function canSubmitDelivery(input: {
   offer: OfferBasics;
@@ -33,11 +30,11 @@ export function canSubmitDelivery(input: {
   if (offer.influencerId !== sessionUser.id) {
     return { ok: false, code: "FORBIDDEN", message: "Teslimi yalnizca influencer gonderebilir." };
   }
-  if (offer.status !== "IN_PROGRESS") {
+  if (offer.status !== "IN_PROGRESS" && offer.status !== "REVISION_REQUESTED") {
     return {
       ok: false,
       code: "INVALID_STATE",
-      message: "Teslim yalnizca isbirligi calisirken (IN_PROGRESS) gonderilebilir.",
+      message: "Teslim yalnizca islemde veya revize asamasinda gonderilebilir.",
     };
   }
   return { ok: true };

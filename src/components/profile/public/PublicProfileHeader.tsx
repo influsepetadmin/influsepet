@@ -2,20 +2,25 @@ import type { ReactNode } from "react";
 import type { PublicProfileByUsernameResponse } from "@/lib/publicProfile/publicProfileByUsername";
 import { getAvatarUrl } from "@/lib/avatar";
 import { CategoryBadgeGroup } from "./CategoryBadgeGroup";
+import { PublicCollaborationRequestCta } from "./PublicCollaborationRequestCta";
 import {
   PublicProfileIconMapPin,
   PublicProfileIconShieldCheck,
 } from "./publicProfileInfluencerIcons";
+import { PublicProfileOwnerPreviewNote } from "./PublicProfileOwnerPreviewNote";
 import { PublicProfileRatingSummary } from "./PublicProfileRatingSummary";
 import { PublicRecentReviewsSection } from "./PublicRecentReviewsSection";
 
 export function PublicProfileHeader({
   data,
   cta,
+  isOwnPublicProfile,
 }: {
   data: PublicProfileByUsernameResponse;
-  /** When set (e.g. brand panel), replaces the default “coming soon” CTA block. */
+  /** Marka paneli: herkese açık link vb. (isteğe bağlı; iş birliği CTA’sından ayrı). */
   cta?: ReactNode;
+  /** Oturumdaki influencer bu herkese açık profili mi görüyor. */
+  isOwnPublicProfile: boolean;
 }) {
   const avatarSrc = data.avatarUrl?.trim() || getAvatarUrl(data.id);
   const socialVerifiedCount = data.verifiedSocialAccounts.length;
@@ -70,16 +75,19 @@ export function PublicProfileHeader({
           </p>
         )}
 
-        {cta != null ? (
-          <div className="public-profile-hero__cta public-profile-hero__cta--brand-panel">{cta}</div>
-        ) : (
-          <div className="public-profile-hero__cta">
-            <button type="button" className="btn public-profile-hero__cta-btn" disabled>
-              İş birliği isteği gönder
-            </button>
-            <p className="public-profile-hero__cta-hint">Bu özellik yakında etkinleşecek.</p>
-          </div>
-        )}
+        <div className="public-profile-hero__cta-region">
+          {cta != null ? (
+            <div className="public-profile-hero__cta public-profile-hero__cta--brand-panel">{cta}</div>
+          ) : null}
+          {isOwnPublicProfile ? (
+            <PublicProfileOwnerPreviewNote />
+          ) : (
+            <PublicCollaborationRequestCta
+              influencerUserId={data.id}
+              defaultBudgetTRY={data.basePriceTRY}
+            />
+          )}
+        </div>
       </div>
     </header>
   );

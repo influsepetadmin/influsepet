@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { PublicInfluencerProfileView } from "@/components/profile/public/PublicInfluencerProfileView";
 import { PublicProfileNotFound } from "@/components/profile/public/PublicProfileNotFound";
-import { getDashboardBackHref } from "@/lib/me";
+import { isOwnInfluencerPublicProfile } from "@/lib/publicProfile/isOwnInfluencerPublicProfile";
+import { getCurrentUser, getDashboardBackHref } from "@/lib/me";
 import { fetchPublicProfileByUsername } from "@/lib/publicProfile/fetchPublicProfileServer";
 
 type Props = { params: Promise<{ username: string }> };
@@ -20,9 +21,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicProfilePage({ params }: Props) {
   const { username } = await params;
-  const [data, homeHref] = await Promise.all([
+  const [data, homeHref, user] = await Promise.all([
     fetchPublicProfileByUsername(username),
     getDashboardBackHref(),
+    getCurrentUser(),
   ]);
 
   if (!data) {
@@ -33,5 +35,16 @@ export default async function PublicProfilePage({ params }: Props) {
     );
   }
 
-  return <PublicInfluencerProfileView data={data} homeHref={homeHref} />;
+  const viewer =
+    user && user.role === "INFLUENCER" && user.influencer
+      ? { id: user.id, role: user.role, influencer: { username: user.influencer.username } }
+      : user
+        ? { id: user.id, role: user.role, influencer: null as null }
+        : null;
+
+  const isOwnPublicProfile = isOwnInfluencerPublicProfile(viewer, data.id, data.username);
+
+  return (
+    <PublicInfluencerProfileView data={data} homeHref={homeHref} isOwnPublicProfile={isOwnPublicProfile} />
+  );
 }

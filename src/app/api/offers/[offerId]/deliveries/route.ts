@@ -1,53 +1,32 @@
+import { unlink } from "fs/promises";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionPayload } from "@/lib/session";
+import { DELIVERY_PARSE_REQUIRED, parseDeliveryUrlAndText } from "@/lib/offers/deliveryPayload";
+import { DELIVERY_MEDIA_MAX_FILES } from "@/lib/offers/deliverySubmitConstants";
+import { canSubmitDelivery, type OfferBasics } from "@/lib/offers/deliveries";
 import {
-  canSubmitDelivery,
-  DELIVERY_PARSE_REQUIRED,
-  DELIVERY_PARSE_TEXT_TOO_LONG,
-  type OfferBasics,
-} from "@/lib/offers/deliveries";
-import { parseOptionalHttpHttpsUrl } from "@/lib/safeUrl";
+  maxBytesForValidatedMedia,
+  prismaKindFromValidated,
+  sanitizeOriginalFilename,
+  validateCollaborationMediaBuffer,
+} from "@/lib/uploads/collabMediaUpload";
+import { deliveryMediaAbsolutePath, saveDeliveryMediaFile } from "@/lib/uploads/deliveryMediaUpload";
 
 function isParticipant(offer: OfferBasics, userId: string): boolean {
   return offer.brandId === userId || offer.influencerId === userId;
 }
 
-function parseDeliveryBody(body: Record<string, unknown>): {
-  deliveryUrl: string | null;
-  deliveryText: string | null;
-  error?: string;
-} {
-  const rawUrl = typeof body.deliveryUrl === "string" ? body.deliveryUrl.trim() : "";
-  const rawText = typeof body.deliveryText === "string" ? body.deliveryText.trim() : "";
-
-  if (!rawUrl && !rawText) {
-    return { deliveryUrl: null, deliveryText: null, error: DELIVERY_PARSE_REQUIRED };
-  }
-
-  if (rawUrl.length > 2000 || rawText.length > 8000) {
-    return { deliveryUrl: null, deliveryText: null, error: DELIVERY_PARSE_TEXT_TOO_LONG };
-  }
-
-  if (rawUrl) {
-    const safe = parseOptionalHttpHttpsUrl(rawUrl);
-    if (safe.ok === false) {
-      return { deliveryUrl: null, deliveryText: null, error: safe.error };
-    }
-    const deliveryUrl = safe.value;
-    if (deliveryUrl == null) {
-      return { deliveryUrl: null, deliveryText: null, error: "Gecersiz URL." };
-    }
-    return {
-      deliveryUrl,
-      deliveryText: rawText || null,
-    };
-  }
-
-  return {
-    deliveryUrl: null,
-    deliveryText: rawText || null,
-  };
+function mediaJsonShape(offerId: string, rows: { id: string; kind: string; mimeType: string; sizeBytes: number; originalFilenameSafe: string | null; createdAt: Date }[]) {
+  return rows.map((m) => ({
+    id: m.id,
+    kind: m.kind,
+    mimeType: m.mimeType,
+    sizeBytes: m.sizeBytes,
+    originalFilenameSafe: m.originalFilenameSafe,
+    createdAt: m.createdAt,
+    url: `/api/offers/${offerId}/deliveries/media/${m.id}`,
+  }));
 }
 
 export async function GET(
@@ -93,10 +72,26 @@ export async function GET(
       status: true,
       createdAt: true,
       submittedBy: { select: { id: true, name: true } },
+      media: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          kind: true,
+          mimeType: true,
+          sizeBytes: true,
+          originalFilenameSafe: true,
+          createdAt: true,
+        },
+      },
     },
   });
 
-  return NextResponse.json({ ok: true, deliveries });
+  const out = deliveries.map((d) => ({
+    ...d,
+    media: mediaJsonShape(offerId, d.media),
+  }));
+
+  return NextResponse.json({ ok: true, deliveries: out });
 }
 
 export async function POST(
@@ -121,10 +116,42 @@ export async function POST(
     return NextResponse.json({ error: "Kullanici bulunamadi." }, { status: 404 });
   }
 
-  const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-  const parsed = parseDeliveryBody(body ?? {});
+  const contentType = request.headers.get("content-type") ?? "";
+  let rawUrl = "";
+  let rawText = "";
+  let files: File[] = [];
+
+  if (contentType.includes("multipart/form-data")) {
+    let formData: FormData;
+    try {
+      formData = await request.formData();
+    } catch {
+      return NextResponse.json({ error: "Gecersiz istek." }, { status: 400 });
+    }
+    rawUrl = String(formData.get("deliveryUrl") ?? "").trim();
+    rawText = String(formData.get("deliveryText") ?? "").trim();
+    const rawFiles = formData.getAll("files");
+    files = rawFiles.filter((x): x is File => x instanceof File && x.size > 0);
+  } else {
+    const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+    rawUrl = typeof body?.deliveryUrl === "string" ? body.deliveryUrl.trim() : "";
+    rawText = typeof body?.deliveryText === "string" ? body.deliveryText.trim() : "";
+  }
+
+  if (files.length > DELIVERY_MEDIA_MAX_FILES) {
+    return NextResponse.json(
+      { error: `En fazla ${DELIVERY_MEDIA_MAX_FILES} dosya yukleyebilirsiniz.` },
+      { status: 400 },
+    );
+  }
+
+  const parsed = parseDeliveryUrlAndText({ rawUrl, rawText });
   if (parsed.error) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
+
+  if (!parsed.deliveryUrl && !parsed.deliveryText && files.length === 0) {
+    return NextResponse.json({ error: DELIVERY_PARSE_REQUIRED }, { status: 400 });
   }
 
   const offer = await prisma.offer.findUnique({
@@ -153,7 +180,47 @@ export async function POST(
     return NextResponse.json({ error: submitCheck.message, code: submitCheck.code }, { status });
   }
 
+  type PreparedFile = {
+    kind: ReturnType<typeof prismaKindFromValidated>;
+    mime: string;
+    storedFilename: string;
+    sizeBytes: number;
+    originalFilenameSafe: string | null;
+  };
+
+  const prepared: PreparedFile[] = [];
+  const writtenPaths: string[] = [];
+
   try {
+    for (const file of files) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const validated = validateCollaborationMediaBuffer(buffer);
+      if (validated.ok === false) {
+        return NextResponse.json({ error: validated.error }, { status: 400 });
+      }
+      const maxForKind = maxBytesForValidatedMedia(validated.media);
+      if (buffer.length > maxForKind) {
+        return NextResponse.json(
+          {
+            error:
+              validated.media.kind === "IMAGE"
+                ? "Goruntu en fazla 10 MB olabilir."
+                : "Video en fazla 100 MB olabilir.",
+          },
+          { status: 400 },
+        );
+      }
+      const saved = await saveDeliveryMediaFile(buffer, validated.media);
+      writtenPaths.push(saved.storedFilename);
+      prepared.push({
+        kind: prismaKindFromValidated(validated.media),
+        mime: validated.media.mime,
+        storedFilename: saved.storedFilename,
+        sizeBytes: buffer.length,
+        originalFilenameSafe: sanitizeOriginalFilename(file.name),
+      });
+    }
+
     const result = await prisma.$transaction(async (tx) => {
       const delivery = await tx.offerDelivery.create({
         data: {
@@ -175,6 +242,19 @@ export async function POST(
         },
       });
 
+      for (const p of prepared) {
+        await tx.offerDeliveryMedia.create({
+          data: {
+            offerDeliveryId: delivery.id,
+            kind: p.kind,
+            mimeType: p.mime,
+            storedFilename: p.storedFilename,
+            sizeBytes: p.sizeBytes,
+            originalFilenameSafe: p.originalFilenameSafe,
+          },
+        });
+      }
+
       const updatedOffer = await tx.offer.update({
         where: { id: offerId },
         data: { status: "DELIVERED" },
@@ -189,12 +269,35 @@ export async function POST(
       return { delivery, offer: updatedOffer };
     });
 
+    const mediaRows = await prisma.offerDeliveryMedia.findMany({
+      where: { offerDeliveryId: result.delivery.id },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        kind: true,
+        mimeType: true,
+        sizeBytes: true,
+        originalFilenameSafe: true,
+        createdAt: true,
+      },
+    });
+
     return NextResponse.json({
       ok: true,
-      delivery: result.delivery,
+      delivery: {
+        ...result.delivery,
+        media: mediaJsonShape(offerId, mediaRows),
+      },
       offer: result.offer,
     });
   } catch {
+    for (const name of writtenPaths) {
+      try {
+        await unlink(deliveryMediaAbsolutePath(name));
+      } catch {
+        /* ignore */
+      }
+    }
     return NextResponse.json({ error: "Teslim kaydedilemedi." }, { status: 500 });
   }
 }

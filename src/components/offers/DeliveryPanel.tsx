@@ -1,11 +1,23 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { DeliveryStatus, OfferStatus } from "@prisma/client";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import type { CollaborationMediaKind, DeliveryStatus, OfferStatus } from "@prisma/client";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { EmptyGlyphInbox } from "@/components/icons/emptyStateGlyphs";
+import { DELIVERY_MEDIA_MAX_FILES } from "@/lib/offers/deliverySubmitConstants";
+import { COLLAB_IMAGE_MAX_BYTES, COLLAB_VIDEO_MAX_BYTES } from "@/lib/uploads/collabMediaLimits";
 import { StatusBadge } from "./StatusBadge";
+
+type DeliveryMediaRow = {
+  id: string;
+  kind: CollaborationMediaKind;
+  mimeType: string;
+  sizeBytes: number;
+  originalFilenameSafe: string | null;
+  createdAt: string;
+  url: string;
+};
 
 type DeliveryRow = {
   id: string;
@@ -14,6 +26,7 @@ type DeliveryRow = {
   status: DeliveryStatus;
   createdAt: string;
   submittedBy: { id: string; name: string };
+  media: DeliveryMediaRow[];
 };
 
 const DELIVERY_STATUS_TR: Record<DeliveryStatus, string> = {
@@ -21,6 +34,9 @@ const DELIVERY_STATUS_TR: Record<DeliveryStatus, string> = {
   APPROVED: "Onaylandı",
   REVISION_REQUESTED: "Revize istendi",
 };
+
+const ACCEPT_MIME =
+  "image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,.jpg,.jpeg,.png,.webp,.mp4,.mov,.webm";
 
 function timelineItemClass(status: DeliveryStatus): string {
   if (status === "APPROVED") return "chat-delivery-timeline__item chat-delivery-timeline__item--approved";
@@ -34,6 +50,69 @@ function preview(s: string | null, max = 72): string {
   if (!s?.trim()) return "—";
   const t = s.trim();
   return t.length <= max ? t : `${t.slice(0, max)}…`;
+}
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function DeliveryProofThumbnails({ media }: { media: DeliveryMediaRow[] }) {
+  if (media.length === 0) return null;
+  return (
+    <div className="chat-delivery-media-strip" role="list">
+      {media.map((m) => (
+        <div key={m.id} className="chat-delivery-media-tile" role="listitem">
+          <a
+            className="chat-delivery-media-tile__link"
+            href={m.url}
+            target="_blank"
+            rel="noreferrer"
+            title={m.originalFilenameSafe ?? "Kanıt dosyası"}
+          >
+            {m.kind === "IMAGE" ? (
+              <img className="chat-delivery-media-tile__img" src={m.url} alt="" loading="lazy" />
+            ) : (
+              <div className="chat-delivery-media-tile__video-wrap">
+                <video
+                  className="chat-delivery-media-tile__video"
+                  src={m.url}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  aria-label="Video önizleme"
+                />
+                <span className="chat-delivery-media-tile__video-badge">Video</span>
+              </div>
+            )}
+          </a>
+          <span className="chat-delivery-media-tile__meta muted">{formatBytes(m.sizeBytes)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function validateClientFile(file: File): string | null {
+  if (file.size === 0) return "Bos dosya.";
+  const isVideo = file.type.startsWith("video/");
+  const max = isVideo ? COLLAB_VIDEO_MAX_BYTES : COLLAB_IMAGE_MAX_BYTES;
+  if (file.size > max) {
+    return isVideo ? "Video en fazla 100 MB olabilir." : "Goruntu en fazla 10 MB olabilir.";
+  }
+  const okTypes = new Set([
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "video/mp4",
+    "video/quicktime",
+    "video/webm",
+  ]);
+  if (file.type && !okTypes.has(file.type)) {
+    return "Desteklenmeyen dosya turu.";
+  }
+  return null;
 }
 
 export function DeliveryPanel({
@@ -52,6 +131,8 @@ export function DeliveryPanel({
   const router = useRouter();
   const isInfluencer = influencerId === meId;
   const isBrand = brandId === meId;
+  const formId = useId();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,10 +141,28 @@ export function DeliveryPanel({
 
   const [deliveryUrl, setDeliveryUrl] = useState("");
   const [deliveryText, setDeliveryText] = useState("");
+  const [staged, setStaged] = useState<{ key: string; file: File; previewUrl: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   const [reviewBusy, setReviewBusy] = useState<"APPROVE" | "REQUEST_REVISION" | null>(null);
   const busySubmit = useRef(false);
+
+  const revokeStagedUrls = useCallback((items: { previewUrl: string }[]) => {
+    for (const it of items) {
+      try {
+        URL.revokeObjectURL(it.previewUrl);
+      } catch {
+        /* ignore */
+      }
+    }
+  }, []);
+
+  const stagedRef = useRef(staged);
+  stagedRef.current = staged;
+  useEffect(() => {
+    return () => revokeStagedUrls(stagedRef.current);
+  }, [revokeStagedUrls]);
 
   const loadDeliveries = useCallback(async () => {
     setError(null);
@@ -75,7 +174,13 @@ export function DeliveryPanel({
         setDeliveries([]);
         return;
       }
-      setDeliveries(Array.isArray(data.deliveries) ? data.deliveries : []);
+      const list = Array.isArray(data.deliveries) ? data.deliveries : [];
+      setDeliveries(
+        list.map((d) => ({
+          ...d,
+          media: Array.isArray(d.media) ? d.media : [],
+        })),
+      );
     } catch {
       setError("Bağlantı hatası.");
       setDeliveries([]);
@@ -90,12 +195,42 @@ export function DeliveryPanel({
 
   const pendingReview = deliveries.find((d) => d.status === "SUBMITTED");
 
+  function removeStaged(key: string) {
+    setStaged((prev) => {
+      const found = prev.find((x) => x.key === key);
+      if (found) revokeStagedUrls([found]);
+      return prev.filter((x) => x.key !== key);
+    });
+  }
+
+  function addFiles(fileList: FileList | File[]) {
+    const incoming = Array.from(fileList);
+    if (incoming.length === 0) return;
+    setError(null);
+    const next: { key: string; file: File; previewUrl: string }[] = [];
+    for (const file of incoming) {
+      if (staged.length + next.length >= DELIVERY_MEDIA_MAX_FILES) {
+        setError(`En fazla ${DELIVERY_MEDIA_MAX_FILES} dosya ekleyebilirsiniz.`);
+        break;
+      }
+      const v = validateClientFile(file);
+      if (v) {
+        setError(v);
+        continue;
+      }
+      const previewUrl = URL.createObjectURL(file);
+      next.push({ key: `${file.name}-${file.size}-${Math.random()}`, file, previewUrl });
+    }
+    if (next.length) setStaged((s) => [...s, ...next]);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const url = deliveryUrl.trim();
     const note = deliveryText.trim();
-    if (!url && !note) {
-      setError("Teslim bağlantısı veya teslim notu girin.");
+    const files = staged.map((s) => s.file);
+    if (!url && !note && files.length === 0) {
+      setError("Teslim bağlantısı, not veya en az bir kanıt dosyası ekleyin.");
       return;
     }
     if (busySubmit.current || submitting) return;
@@ -104,19 +239,35 @@ export function DeliveryPanel({
     setError(null);
     setFeedback(null);
     try {
-      const res = await fetch(`/api/offers/${offerId}/deliveries`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...(url ? { deliveryUrl: url } : {}),
-          ...(note ? { deliveryText: note } : {}),
-        }),
-      });
+      let res: Response;
+      if (files.length > 0) {
+        const fd = new FormData();
+        fd.append("deliveryUrl", url);
+        fd.append("deliveryText", note);
+        for (const f of files) {
+          fd.append("files", f);
+        }
+        res = await fetch(`/api/offers/${offerId}/deliveries`, {
+          method: "POST",
+          body: fd,
+        });
+      } else {
+        res = await fetch(`/api/offers/${offerId}/deliveries`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...(url ? { deliveryUrl: url } : {}),
+            ...(note ? { deliveryText: note } : {}),
+          }),
+        });
+      }
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
         setError(data.error ?? "Teslim gönderilemedi.");
         return;
       }
+      revokeStagedUrls(staged);
+      setStaged([]);
       setDeliveryUrl("");
       setDeliveryText("");
       setFeedback("Teslim başarıyla gönderildi.");
@@ -156,7 +307,8 @@ export function DeliveryPanel({
     }
   }
 
-  const showSubmit = isInfluencer && offerStatus === "IN_PROGRESS";
+  const showSubmit =
+    isInfluencer && (offerStatus === "IN_PROGRESS" || offerStatus === "REVISION_REQUESTED");
   const showReview =
     isBrand && offerStatus === "DELIVERED" && Boolean(pendingReview);
 
@@ -183,8 +335,8 @@ export function DeliveryPanel({
           </div>
         </div>
         <p className="chat-delivery-intro__lede muted">
-          Bağlantı ve not ile teslim paylaşın; marka inceleyip onaylar veya revize talep eder. Geçmiş kayıtlar
-          aşağıda listelenir.
+          Bağlantı, not ve isteğe bağlı dosya yükleyerek kalıcı kanıt paylaşın; marka inceleyip onaylar veya revize
+          talep eder. Geçmiş kayıtlar aşağıda listelenir.
         </p>
       </div>
 
@@ -192,8 +344,8 @@ export function DeliveryPanel({
         <div className="chat-revision-callout" role="status">
           <p className="chat-revision-callout__title">Revize istendi</p>
           <p className="chat-revision-callout__body muted">
-            Marka son teslimi inceledi ve yeni bir sürüm bekliyor. Aşağıdan güncellenmiş bağlantı veya not
-            gönderin. Sohbetteki sistem mesajlarını da kontrol edin.
+            Marka son teslimi inceledi ve yeni bir sürüm bekliyor. Aşağıdan güncellenmiş bağlantı, not veya dosya
+            gönderin. Önceki teslimdeki dosyalar geçmişte görünmeye devam eder.
           </p>
         </div>
       )}
@@ -224,35 +376,146 @@ export function DeliveryPanel({
           <h4 className="chat-delivery-block__heading">Yeni teslim gönder</h4>
           <form className="chat-delivery-form" onSubmit={handleSubmit}>
             <div className="chat-delivery-field">
-              <label className="chat-delivery-label" htmlFor="delivery-url">
+              <label className="chat-delivery-label" htmlFor={`${formId}-delivery-url`}>
                 Teslim bağlantısı
               </label>
               <input
-                id="delivery-url"
+                id={`${formId}-delivery-url`}
                 className="chat-delivery-input"
                 type="text"
                 inputMode="url"
                 value={deliveryUrl}
                 onChange={(e) => setDeliveryUrl(e.target.value)}
                 disabled={submitting}
-                placeholder="https://..."
+                placeholder="https://... (isteğe bağlı)"
                 autoComplete="off"
               />
+              <p className="chat-delivery-field-hint muted">
+                Örn. story linki; süresi dolabilir — yanına mutlaka ekran görüntüsü veya video yüklemeniz önerilir.
+              </p>
             </div>
             <div className="chat-delivery-field">
-              <label className="chat-delivery-label" htmlFor="delivery-note">
+              <label className="chat-delivery-label" htmlFor={`${formId}-delivery-note`}>
                 Teslim notu
               </label>
               <textarea
-                id="delivery-note"
+                id={`${formId}-delivery-note`}
                 className="chat-delivery-textarea"
                 value={deliveryText}
                 onChange={(e) => setDeliveryText(e.target.value)}
                 disabled={submitting}
                 rows={3}
-                placeholder="Kısa açıklama"
+                placeholder="Kısa açıklama (isteğe bağlı)"
               />
             </div>
+
+            <div className="chat-delivery-field">
+              <span className="chat-delivery-label" id={`${formId}-upload-label`}>
+                Kanıt dosyaları
+              </span>
+              <div
+                className={`chat-delivery-upload${dragActive ? " chat-delivery-upload--drag" : ""}`}
+                role="group"
+                aria-labelledby={`${formId}-upload-label`}
+                onDragEnter={(e) => {
+                  e.preventDefault();
+                  setDragActive(true);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "copy";
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  if (e.currentTarget === e.target) setDragActive(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragActive(false);
+                  if (submitting) return;
+                  addFiles(e.dataTransfer.files);
+                }}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="chat-delivery-upload__input"
+                  accept={ACCEPT_MIME}
+                  multiple
+                  disabled={submitting}
+                  aria-label="Dosya seç"
+                  onChange={(ev) => {
+                    const fl = ev.target.files;
+                    if (fl?.length) addFiles(fl);
+                    ev.target.value = "";
+                  }}
+                />
+                <div className="chat-delivery-upload__inner">
+                  <span className="chat-delivery-upload__icon" aria-hidden>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M12 16V4m0 0l4 4m-4-4L8 8"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M4 14v4a2 2 0 002 2h12a2 2 0 002-2v-4"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </span>
+                  <p className="chat-delivery-upload__title">
+                    {staged.length === 0 ? "Dosya sürükleyip bırakın veya seçin" : `${staged.length} dosya seçildi`}
+                  </p>
+                  <p className="chat-delivery-upload__hint muted">
+                    JPEG, PNG, WebP (10 MB’a kadar) veya MP4, MOV, WebM (100 MB’a kadar). En fazla{" "}
+                    {DELIVERY_MEDIA_MAX_FILES} dosya.
+                  </p>
+                  <button
+                    type="button"
+                    className="btn secondary chat-delivery-upload__browse"
+                    disabled={submitting}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    Dosya seç
+                  </button>
+                </div>
+              </div>
+
+              {staged.length > 0 && (
+                <ul className="chat-delivery-staged-list" aria-label="Seçilen dosyalar">
+                  {staged.map((s) => (
+                    <li key={s.key} className="chat-delivery-staged-item">
+                      <div className="chat-delivery-staged-thumb">
+                        {s.file.type.startsWith("video/") ? (
+                          <video className="chat-delivery-staged-thumb__media" src={s.previewUrl} muted playsInline />
+                        ) : (
+                          <img className="chat-delivery-staged-thumb__media" src={s.previewUrl} alt="" />
+                        )}
+                      </div>
+                      <div className="chat-delivery-staged-meta">
+                        <span className="chat-delivery-staged-name">{s.file.name}</span>
+                        <span className="chat-delivery-staged-size muted">{formatBytes(s.file.size)}</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="chat-delivery-staged-remove"
+                        disabled={submitting}
+                        onClick={() => removeStaged(s.key)}
+                        aria-label={`${s.file.name} dosyasını kaldır`}
+                      >
+                        Kaldır
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
             <div className="chat-delivery-form-actions">
               <button className="btn chat-delivery-submit" type="submit" disabled={submitting}>
                 {submitting ? "Gönderiliyor…" : "Teslimi gönder"}
@@ -288,6 +551,12 @@ export function DeliveryPanel({
               <div className="chat-delivery-review__chunk">
                 <span className="chat-delivery-review__k">Not</span>
                 <p className="chat-delivery-review__text">{preview(pendingReview.deliveryText, 200)}</p>
+              </div>
+            )}
+            {pendingReview.media.length > 0 && (
+              <div className="chat-delivery-review__chunk">
+                <span className="chat-delivery-review__k">Yüklenen kanıt</span>
+                <DeliveryProofThumbnails media={pendingReview.media} />
               </div>
             )}
             <p className="chat-delivery-review__meta muted">
@@ -352,7 +621,13 @@ export function DeliveryPanel({
                   ) : null}
                   {d.deliveryUrl && d.deliveryText ? <span aria-hidden> · </span> : null}
                   {d.deliveryText ? <span>{preview(d.deliveryText, 48)}</span> : null}
+                  {!d.deliveryUrl && !d.deliveryText && d.media.length > 0 ? (
+                    <span className="chat-delivery-timeline__files-note">Yalnızca dosya</span>
+                  ) : null}
                 </div>
+                {d.media.length > 0 ? (
+                  <DeliveryProofThumbnails media={d.media} />
+                ) : null}
               </li>
             ))}
           </ul>

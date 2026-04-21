@@ -3,12 +3,12 @@ import { mkdir, writeFile } from "fs/promises";
 import { basename, join } from "path";
 import { validateImageBuffer } from "@/lib/uploads/profileImageUpload";
 import type { CollaborationMediaKind } from "@prisma/client";
+import { COLLAB_IMAGE_MAX_BYTES, COLLAB_VIDEO_MAX_BYTES } from "@/lib/uploads/collabMediaLimits";
 
 /** Local storage root (not under /public — served only via authenticated API). */
 export const COLLAB_MEDIA_DIR_SEGMENTS = ["private", "collab-media"] as const;
 
-export const COLLAB_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
-export const COLLAB_VIDEO_MAX_BYTES = 100 * 1024 * 1024;
+export { COLLAB_IMAGE_MAX_BYTES, COLLAB_VIDEO_MAX_BYTES } from "@/lib/uploads/collabMediaLimits";
 
 export type ValidatedCollabMedia =
   | {
