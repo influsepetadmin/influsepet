@@ -6,12 +6,25 @@ export const DELIVERY_PARSE_TEXT_TOO_LONG = "Metin cok uzun.";
 export const DELIVERY_PARSE_REQUIRED =
   "Teslim baglantisi, not veya en az bir kanit dosyasi gerekli.";
 
+const INVISIBLE_CHARS = /[\u200B-\u200D\uFEFF]/g;
+
+/** Form / multipart’ta boş sayılması gereken sahte “URL” değerleri (ör. yanlışlıkla stringleşmiş File). */
+export function normalizeDeliveryUrlField(raw: string): string {
+  const t = raw.trim().replace(INVISIBLE_CHARS, "");
+  if (/^\[object (File|Blob)\]$/i.test(t)) return "";
+  return t;
+}
+
+export function normalizeDeliveryTextField(raw: string): string {
+  return raw.trim().replace(INVISIBLE_CHARS, "");
+}
+
 export function parseDeliveryUrlAndText(input: {
   rawUrl: string;
   rawText: string;
 }): { deliveryUrl: string | null; deliveryText: string | null; error?: string } {
-  const rawUrl = input.rawUrl.trim();
-  const rawText = input.rawText.trim();
+  const rawUrl = normalizeDeliveryUrlField(input.rawUrl);
+  const rawText = normalizeDeliveryTextField(input.rawText);
 
   if (rawUrl.length > 2000 || rawText.length > 8000) {
     return { deliveryUrl: null, deliveryText: null, error: DELIVERY_PARSE_TEXT_TOO_LONG };
@@ -24,11 +37,19 @@ export function parseDeliveryUrlAndText(input: {
   if (rawUrl) {
     const safe = parseOptionalHttpHttpsUrl(rawUrl);
     if (safe.ok === false) {
-      return { deliveryUrl: null, deliveryText: null, error: safe.error };
+      const msg =
+        safe.error === "Gecersiz URL."
+          ? "Teslim baglantisi gecerli bir adres degil. http veya https ile tam bir URL girin."
+          : safe.error;
+      return { deliveryUrl: null, deliveryText: null, error: msg };
     }
     const deliveryUrl = safe.value;
     if (deliveryUrl == null) {
-      return { deliveryUrl: null, deliveryText: null, error: "Gecersiz URL." };
+      return {
+        deliveryUrl: null,
+        deliveryText: null,
+        error: "Teslim baglantisi gecerli bir adres degil. http veya https ile tam bir URL girin.",
+      };
     }
     return {
       deliveryUrl,

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { CollaborationMediaKind, DeliveryStatus, OfferStatus } from "@prisma/client";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { EmptyGlyphInbox } from "@/components/icons/emptyStateGlyphs";
+import { normalizeDeliveryUrlField } from "@/lib/offers/deliveryPayload";
 import {
   DELIVERY_MEDIA_MAX_FILES,
   DELIVERY_VIDEO_MAX_BYTES,
@@ -70,9 +71,22 @@ function isLikelyVideoFile(file: Pick<File, "type" | "name">): boolean {
 
 type DeliveryApiErr = { error?: string; code?: string };
 
-function messageForDeliverySubmitFailure(res: Response, data: DeliveryApiErr): string {
+function messageForDeliverySubmitFailure(
+  res: Response,
+  data: DeliveryApiErr,
+  rawBody?: string,
+): string {
+  const body = rawBody ?? "";
+  if (res.status === 413 || /413|entity too large|payload too large|request entity too large/i.test(body)) {
+    return deliveryVideoTooLargeMessage();
+  }
+  if (res.status === 408 || res.status === 504) {
+    return "Sunucu yanit vermedi veya zaman asimi. Tekrar deneyin.";
+  }
+
   const e = typeof data.error === "string" ? data.error.trim() : "";
   if (e) return e;
+
   switch (data.code) {
     case "DELIVERY_FILE_TOO_LARGE":
       return deliveryVideoTooLargeMessage();
@@ -83,12 +97,17 @@ function messageForDeliverySubmitFailure(res: Response, data: DeliveryApiErr): s
     case "DELIVERY_PROCESS_FAILED":
       return "Sunucuda islem tamamlanamadi. Lutfen tekrar deneyin.";
     case "DELIVERY_FORM_INVALID":
-      return "Istek bozuk veya baglanti kesildi. Sayfayi yenileyip tekrar deneyin.";
+      return "Form verisi okunamadi. Baglantiyi kontrol edip tekrar deneyin.";
+    case "DELIVERY_TEXT_INVALID":
+      return "Teslim baglantisi veya not alaninda duzeltme gerekli.";
     default:
       break;
   }
   if (res.status >= 500) {
     return "Sunucuya ulasilamadi veya islem tamamlanamadi. Bir sure sonra tekrar deneyin.";
+  }
+  if (body.length > 0 && !body.trim().startsWith("{")) {
+    return "Sunucu beklenmeyen bir yanit dondurdu (genelde gogde cok buyuk veya ara katman limiti). Videoyu kucultun veya tekrar deneyin.";
   }
   return "Teslim gonderilemedi. Tekrar deneyin.";
 }
@@ -266,7 +285,7 @@ export function DeliveryPanel({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const url = deliveryUrl.trim();
+    const url = normalizeDeliveryUrlField(deliveryUrl);
     const note = deliveryText.trim();
     const files = staged.map((s) => s.file);
     if (!url && !note && files.length === 0) {
@@ -308,9 +327,15 @@ export function DeliveryPanel({
           }),
         });
       }
-      const data = (await res.json().catch(() => ({}))) as DeliveryApiErr;
+      const rawText = await res.text();
+      let data: DeliveryApiErr = {};
+      try {
+        data = JSON.parse(rawText) as DeliveryApiErr;
+      } catch {
+        /* HTML veya bos govde */
+      }
       if (!res.ok) {
-        setError(messageForDeliverySubmitFailure(res, data));
+        setError(messageForDeliverySubmitFailure(res, data, rawText));
         return;
       }
       revokeStagedUrls(staged);

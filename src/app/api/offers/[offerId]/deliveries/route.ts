@@ -143,14 +143,14 @@ export async function POST(
         { status: 400 },
       );
     }
-    rawUrl = String(formData.get("deliveryUrl") ?? "").trim();
-    rawText = String(formData.get("deliveryText") ?? "").trim();
+    rawUrl = String(formData.get("deliveryUrl") ?? "");
+    rawText = String(formData.get("deliveryText") ?? "");
     const rawFiles = formData.getAll("files");
     files = rawFiles.filter((x): x is File => x instanceof File && x.size > 0);
   } else {
     const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-    rawUrl = typeof body?.deliveryUrl === "string" ? body.deliveryUrl.trim() : "";
-    rawText = typeof body?.deliveryText === "string" ? body.deliveryText.trim() : "";
+    rawUrl = typeof body?.deliveryUrl === "string" ? body.deliveryUrl : "";
+    rawText = typeof body?.deliveryText === "string" ? body.deliveryText : "";
   }
 
   if (files.length > DELIVERY_MEDIA_MAX_FILES) {
@@ -158,15 +158,6 @@ export async function POST(
       { error: `En fazla ${DELIVERY_MEDIA_MAX_FILES} dosya yukleyebilirsiniz.`, code: "DELIVERY_TOO_MANY_FILES" },
       { status: 400 },
     );
-  }
-
-  const parsed = parseDeliveryUrlAndText({ rawUrl, rawText });
-  if (parsed.error) {
-    return NextResponse.json({ error: parsed.error, code: "DELIVERY_TEXT_INVALID" }, { status: 400 });
-  }
-
-  if (!parsed.deliveryUrl && !parsed.deliveryText && files.length === 0) {
-    return NextResponse.json({ error: DELIVERY_PARSE_REQUIRED, code: "DELIVERY_PROOF_REQUIRED" }, { status: 400 });
   }
 
   const offer = await prisma.offer.findUnique({
@@ -195,24 +186,15 @@ export async function POST(
     return NextResponse.json({ error: submitCheck.message, code: submitCheck.code }, { status });
   }
 
-  type PreparedFile = {
-    kind: ReturnType<typeof prismaKindFromValidated>;
-    mime: string;
-    storedFilename: string;
-    sizeBytes: number;
+  type WorkItem = {
+    buffer: Buffer;
+    validated: ValidatedCollabMedia;
     originalFilenameSafe: string | null;
   };
+  const work: WorkItem[] = [];
 
-  const writtenPaths: string[] = [];
-
-  try {
-    type WorkItem = {
-      buffer: Buffer;
-      validated: ValidatedCollabMedia;
-      originalFilenameSafe: string | null;
-    };
-    const work: WorkItem[] = [];
-
+  /** Dosya kanıtı varsa önce dosyayı doğrula; URL metni “Gecersiz URL” ile dosya hatasını karıştırmasın. */
+  if (files.length > 0) {
     for (const file of files) {
       const likelyVideo = isLikelyVideoFile(file);
       const earlyMax = likelyVideo ? DELIVERY_VIDEO_MAX_BYTES : COLLAB_IMAGE_MAX_BYTES;
@@ -277,7 +259,28 @@ export async function POST(
         originalFilenameSafe: sanitizeOriginalFilename(file.name),
       });
     }
+  }
 
+  const parsed = parseDeliveryUrlAndText({ rawUrl, rawText });
+  if (parsed.error) {
+    return NextResponse.json({ error: parsed.error, code: "DELIVERY_TEXT_INVALID" }, { status: 400 });
+  }
+
+  if (!parsed.deliveryUrl && !parsed.deliveryText && files.length === 0) {
+    return NextResponse.json({ error: DELIVERY_PARSE_REQUIRED, code: "DELIVERY_PROOF_REQUIRED" }, { status: 400 });
+  }
+
+  type PreparedFile = {
+    kind: ReturnType<typeof prismaKindFromValidated>;
+    mime: string;
+    storedFilename: string;
+    sizeBytes: number;
+    originalFilenameSafe: string | null;
+  };
+
+  const writtenPaths: string[] = [];
+
+  try {
     const prepared: PreparedFile[] = [];
     for (const w of work) {
       let saved: { storedFilename: string };
