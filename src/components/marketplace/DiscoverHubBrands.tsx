@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { EmptyGlyphListBullet } from "@/components/icons/emptyStateGlyphs";
-import { getAvatarUrl } from "@/lib/avatar";
 import { CATEGORY_KEYS, getCategoryLabel } from "@/lib/categories";
 import { discoverCardWhy } from "@/lib/discovery/discoverCardWhy";
 import type { DiscoverBrandSectionRow, DiscoverSection, SectionReason } from "@/lib/discovery/discoverSections";
-import { DiscoverySaveButton } from "./DiscoverySaveButton";
+import { MarketplaceBrandOfferCard } from "./MarketplaceBrandOfferCard";
 
 function BrandDiscoverCard({
   b,
@@ -25,54 +24,21 @@ function BrandDiscoverCard({
   const cats = b.selectedCategories.map((c) => getCategoryLabel(c.categoryKey)).join(", ");
 
   return (
-    <article className="brand-result-card brand-result-card--discover brand-result-card--hub">
-      <div className="brand-result-card__head brand-result-card__head--hub">
-        <img
-          className="brand-result-card__avatar"
-          src={b.profileImageUrl ?? getAvatarUrl(b.userId)}
-          alt=""
-        />
-        <div className="brand-result-card__identity">
-          <p className="brand-result-card__name">{b.companyName}</p>
-          <p className="muted brand-result-card__city">{b.city ?? "—"}</p>
-          {cats ? (
-            <p className="muted brand-result-card__cats brand-result-card__meta-line">{cats}</p>
-          ) : null}
-          <p className="muted brand-result-card__why">{discoverCardWhy(reason)}</p>
-        </div>
-        <div className="brand-result-card__actions">
-          <DiscoverySaveButton
-            targetUserId={b.userId}
-            variant="influencer-saves-brand"
-            initialSaved={initialSaved}
-          />
-          <Link className="btn secondary btn--sm" href={`/profil/marka/${b.userId}`}>
-            Profil
-          </Link>
-        </div>
-      </div>
-
-      <form className="brand-result-card__form" action="/api/offers/create" method="post">
-        <input type="hidden" name="brandId" value={b.userId} />
-        <label htmlFor={`hub-brand-title-${b.id}`}>Kampanya başlığı</label>
-        <input id={`hub-brand-title-${b.id}`} name="title" type="text" required />
-        <label htmlFor={`hub-brand-brief-${b.id}`}>Kısa açıklama</label>
-        <textarea id={`hub-brand-brief-${b.id}`} name="brief" required rows={2} />
-        <label htmlFor={`hub-brand-amt-${b.id}`}>İş birliği bütçesi (TRY)</label>
-        <input
-          id={`hub-brand-amt-${b.id}`}
-          name="offerAmountTRY"
-          type="number"
-          required
-          min={100}
-          step={100}
-          defaultValue={defaultAmt}
-        />
-        <button className="btn" type="submit">
-          İş birliği isteği gönder
-        </button>
-      </form>
-    </article>
+    <MarketplaceBrandOfferCard
+      formIdKey={b.id}
+      brandUserId={b.userId}
+      companyName={b.companyName}
+      city={b.city}
+      profileImageUrl={b.profileImageUrl}
+      categoriesLine={cats}
+      whyLine={discoverCardWhy(reason)}
+      initialSaved={initialSaved}
+      defaultOfferAmountTRY={defaultAmt}
+      cardClassName="brand-result-card brand-result-card--discover brand-result-card--hub"
+      profileLinkLabel="Profil"
+      submitButtonLabel="İş birliği isteği gönder"
+      briefRows={2}
+    />
   );
 }
 

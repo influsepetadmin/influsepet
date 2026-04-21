@@ -3,10 +3,8 @@ import { Bookmark } from "lucide-react";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import { PageHeader } from "@/components/app-shell/PageHeader";
-import { DiscoverySaveButton } from "@/components/marketplace/DiscoverySaveButton";
-import { getAvatarUrl } from "@/lib/avatar";
+import { MarketplaceInfluencerOfferCard } from "@/components/marketplace/MarketplaceInfluencerOfferCard";
 import { getCategoryLabel } from "@/lib/categories";
-import { truncateText } from "@/lib/dashboardProfileCompletion";
 import { getMarkaPanelAccess } from "@/lib/marka/panelAccess";
 import { prisma } from "@/lib/prisma";
 
@@ -105,63 +103,26 @@ export default async function MarkaSavedPage() {
               const defaultAmt =
                 p.basePriceTRY > 0 ? Math.max(100, Math.ceil(p.basePriceTRY / 100) * 100) : 100;
               return (
-                <article
+                <MarketplaceInfluencerOfferCard
                   key={row.id}
-                  className="influencer-result-card influencer-result-card--discover influencer-result-card--hub"
-                >
-                  <div className="influencer-result-card__head influencer-result-card__head--hub">
-                    <img
-                      className="influencer-result-card__avatar"
-                      src={p.profileImageUrl ?? getAvatarUrl(p.userId)}
-                      alt=""
-                    />
-                    <div className="influencer-result-card__identity">
-                      <p className="influencer-result-card__name">{p.username}</p>
-                      <p className="muted influencer-result-card__city">{p.city ?? "—"}</p>
-                      <p className="muted influencer-result-card__meta">{categories || "—"}</p>
-                      <p className="muted influencer-result-card__why">Kayıtlı listenizde</p>
-                    </div>
-                    <div className="influencer-result-card__actions">
-                      <DiscoverySaveButton
-                        targetUserId={p.userId}
-                        variant="brand-saves-influencer"
-                        initialSaved
-                      />
-                      <Link className="btn secondary btn--sm" href={`/profil/influencer/${p.userId}`}>
-                        Profil
-                      </Link>
-                    </div>
-                  </div>
-                  <p className="muted influencer-result-card__meta influencer-result-card__stats">
-                    Takipçi: {p.followerCount.toLocaleString("tr-TR")} · Baz fiyat: {p.basePriceTRY} TRY
-                  </p>
-                  {p.nicheText?.trim() ? (
-                    <p className="muted influencer-result-card__niche">
-                      Niş: {truncateText(p.nicheText.trim(), 72)}
-                    </p>
-                  ) : null}
-
-                  <form className="influencer-result-card__form" action="/api/offers/create" method="post">
-                    <input type="hidden" name="influencerId" value={p.userId} />
-                    <label htmlFor={`saved-inf-title-${row.id}`}>Kampanya başlığı</label>
-                    <input id={`saved-inf-title-${row.id}`} name="title" type="text" required />
-                    <label htmlFor={`saved-inf-brief-${row.id}`}>Kısa açıklama</label>
-                    <textarea id={`saved-inf-brief-${row.id}`} name="brief" required rows={2} />
-                    <label htmlFor={`saved-inf-amt-${row.id}`}>İş birliği bütçesi (TRY)</label>
-                    <input
-                      id={`saved-inf-amt-${row.id}`}
-                      name="offerAmountTRY"
-                      type="number"
-                      required
-                      min={100}
-                      step={100}
-                      defaultValue={defaultAmt}
-                    />
-                    <button className="btn" type="submit">
-                      İş birliği isteği gönder
-                    </button>
-                  </form>
-                </article>
+                  formIdKey={row.id}
+                  influencerUserId={p.userId}
+                  username={p.username}
+                  city={p.city}
+                  profileImageUrl={p.profileImageUrl}
+                  categoriesLine={categories}
+                  whyLine="Kayıtlı listenizde"
+                  followerCount={p.followerCount}
+                  basePriceTRY={p.basePriceTRY}
+                  nicheText={p.nicheText}
+                  nicheTruncateLen={72}
+                  initialSaved={true}
+                  defaultOfferAmountTRY={defaultAmt}
+                  cardClassName="influencer-result-card influencer-result-card--discover influencer-result-card--hub"
+                  profileLinkLabel="Profil"
+                  submitButtonLabel="İş birliği isteği gönder"
+                  briefRows={2}
+                />
               );
             })}
           </div>

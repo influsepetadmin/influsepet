@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { EmptyGlyphListBullet } from "@/components/icons/emptyStateGlyphs";
-import { getAvatarUrl } from "@/lib/avatar";
 import { CATEGORY_KEYS, getCategoryLabel } from "@/lib/categories";
 import { discoverCardWhy } from "@/lib/discovery/discoverCardWhy";
 import type { DiscoverInfluencerSectionRow, DiscoverSection, SectionReason } from "@/lib/discovery/discoverSections";
-import { truncateText } from "@/lib/dashboardProfileCompletion";
-import { DiscoverySaveButton } from "./DiscoverySaveButton";
+import { MarketplaceInfluencerOfferCard } from "./MarketplaceInfluencerOfferCard";
 
 function InfluencerDiscoverCard({
   p,
@@ -21,58 +19,25 @@ function InfluencerDiscoverCard({
   const defaultAmt = p.basePriceTRY > 0 ? Math.max(100, Math.ceil(p.basePriceTRY / 100) * 100) : 100;
 
   return (
-    <article className="influencer-result-card influencer-result-card--discover influencer-result-card--hub">
-      <div className="influencer-result-card__head influencer-result-card__head--hub">
-        <img
-          className="influencer-result-card__avatar"
-          src={p.profileImageUrl ?? getAvatarUrl(p.userId)}
-          alt=""
-        />
-        <div className="influencer-result-card__identity">
-          <p className="influencer-result-card__name">{p.username}</p>
-          <p className="muted influencer-result-card__city">{p.city ?? "—"}</p>
-          <p className="muted influencer-result-card__meta">{categories || "—"}</p>
-          <p className="muted influencer-result-card__why">{discoverCardWhy(reason)}</p>
-        </div>
-        <div className="influencer-result-card__actions">
-          <DiscoverySaveButton
-            targetUserId={p.userId}
-            variant="brand-saves-influencer"
-            initialSaved={initialSaved}
-          />
-          <Link className="btn secondary btn--sm" href={`/profil/influencer/${p.userId}`}>
-            Profil
-          </Link>
-        </div>
-      </div>
-      <p className="muted influencer-result-card__meta influencer-result-card__stats">
-        Takipçi: {p.followerCount.toLocaleString("tr-TR")} · Baz fiyat: {p.basePriceTRY} TRY
-      </p>
-      {p.nicheText?.trim() ? (
-        <p className="muted influencer-result-card__niche">Niş: {truncateText(p.nicheText.trim(), 72)}</p>
-      ) : null}
-
-      <form className="influencer-result-card__form" action="/api/offers/create" method="post">
-        <input type="hidden" name="influencerId" value={p.userId} />
-        <label htmlFor={`hub-inf-title-${p.id}`}>Kampanya başlığı</label>
-        <input id={`hub-inf-title-${p.id}`} name="title" type="text" required />
-        <label htmlFor={`hub-inf-brief-${p.id}`}>Kısa açıklama</label>
-        <textarea id={`hub-inf-brief-${p.id}`} name="brief" required rows={2} />
-        <label htmlFor={`hub-inf-amt-${p.id}`}>İş birliği bütçesi (TRY)</label>
-        <input
-          id={`hub-inf-amt-${p.id}`}
-          name="offerAmountTRY"
-          type="number"
-          required
-          min={100}
-          step={100}
-          defaultValue={defaultAmt}
-        />
-        <button className="btn" type="submit">
-          İş birliği isteği gönder
-        </button>
-      </form>
-    </article>
+    <MarketplaceInfluencerOfferCard
+      formIdKey={p.id}
+      influencerUserId={p.userId}
+      username={p.username}
+      city={p.city}
+      profileImageUrl={p.profileImageUrl}
+      categoriesLine={categories}
+      whyLine={discoverCardWhy(reason)}
+      followerCount={p.followerCount}
+      basePriceTRY={p.basePriceTRY}
+      nicheText={p.nicheText}
+      nicheTruncateLen={72}
+      initialSaved={initialSaved}
+      defaultOfferAmountTRY={defaultAmt}
+      cardClassName="influencer-result-card influencer-result-card--discover influencer-result-card--hub"
+      profileLinkLabel="Profil"
+      submitButtonLabel="İş birliği isteği gönder"
+      briefRows={2}
+    />
   );
 }
 

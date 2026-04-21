@@ -3,8 +3,7 @@ import { Bookmark } from "lucide-react";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import { PageHeader } from "@/components/app-shell/PageHeader";
-import { DiscoverySaveButton } from "@/components/marketplace/DiscoverySaveButton";
-import { getAvatarUrl } from "@/lib/avatar";
+import { MarketplaceBrandOfferCard } from "@/components/marketplace/MarketplaceBrandOfferCard";
 import { getCategoryLabel } from "@/lib/categories";
 import { getInfluencerPanelAccess } from "@/lib/influencer/panelAccess";
 import { prisma } from "@/lib/prisma";
@@ -91,54 +90,22 @@ export default async function InfluencerSavedPage() {
               const defaultAmt =
                 basePriceTRY > 0 ? Math.max(100, Math.ceil(basePriceTRY / 100) * 100) : 100;
               return (
-                <article key={row.id} className="brand-result-card brand-result-card--discover brand-result-card--hub">
-                  <div className="brand-result-card__head brand-result-card__head--hub">
-                    <img
-                      className="brand-result-card__avatar"
-                      src={b.profileImageUrl ?? getAvatarUrl(b.userId)}
-                      alt=""
-                    />
-                    <div className="brand-result-card__identity">
-                      <p className="brand-result-card__name">{b.companyName}</p>
-                      <p className="muted brand-result-card__city">{b.city ?? "—"}</p>
-                      {cats ? (
-                        <p className="muted brand-result-card__cats brand-result-card__meta-line">{cats}</p>
-                      ) : null}
-                      <p className="muted brand-result-card__why">Kayıtlı listenizde</p>
-                    </div>
-                    <div className="brand-result-card__actions">
-                      <DiscoverySaveButton
-                        targetUserId={b.userId}
-                        variant="influencer-saves-brand"
-                        initialSaved
-                      />
-                      <Link className="btn secondary btn--sm" href={`/profil/marka/${b.userId}`}>
-                        Profil
-                      </Link>
-                    </div>
-                  </div>
-
-                  <form className="brand-result-card__form" action="/api/offers/create" method="post">
-                    <input type="hidden" name="brandId" value={b.userId} />
-                    <label htmlFor={`saved-brand-title-${row.id}`}>Kampanya başlığı</label>
-                    <input id={`saved-brand-title-${row.id}`} name="title" type="text" required />
-                    <label htmlFor={`saved-brand-brief-${row.id}`}>Kısa açıklama</label>
-                    <textarea id={`saved-brand-brief-${row.id}`} name="brief" required rows={2} />
-                    <label htmlFor={`saved-brand-amt-${row.id}`}>İş birliği bütçesi (TRY)</label>
-                    <input
-                      id={`saved-brand-amt-${row.id}`}
-                      name="offerAmountTRY"
-                      type="number"
-                      required
-                      min={100}
-                      step={100}
-                      defaultValue={defaultAmt}
-                    />
-                    <button className="btn" type="submit">
-                      İş birliği isteği gönder
-                    </button>
-                  </form>
-                </article>
+                <MarketplaceBrandOfferCard
+                  key={row.id}
+                  formIdKey={row.id}
+                  brandUserId={b.userId}
+                  companyName={b.companyName}
+                  city={b.city}
+                  profileImageUrl={b.profileImageUrl}
+                  categoriesLine={cats}
+                  whyLine="Kayıtlı listenizde"
+                  initialSaved={true}
+                  defaultOfferAmountTRY={defaultAmt}
+                  cardClassName="brand-result-card brand-result-card--discover brand-result-card--hub"
+                  profileLinkLabel="Profil"
+                  submitButtonLabel="İş birliği isteği gönder"
+                  briefRows={2}
+                />
               );
             })}
           </div>

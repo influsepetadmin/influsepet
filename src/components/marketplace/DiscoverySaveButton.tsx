@@ -2,36 +2,35 @@
 
 import { Bookmark } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-/**
- * Kayıtlı marka / kayıtlı influencer — yer imi stili; optimistik toggle + başarıda router.refresh.
- */
-export function DiscoverySaveButton({
-  targetUserId,
-  variant,
-  initialSaved,
-}: {
+export type DiscoverySaveVariant = "influencer-saves-brand" | "brand-saves-influencer";
+
+export type DiscoverySaveButtonProps = {
   targetUserId: string;
-  variant: "influencer-saves-brand" | "brand-saves-influencer";
+  variant: DiscoverySaveVariant;
   initialSaved: boolean;
-}) {
+};
+
+export function DiscoverySaveButton({ targetUserId, variant, initialSaved }: DiscoverySaveButtonProps) {
   const router = useRouter();
   const [saved, setSaved] = useState(initialSaved);
   const [pending, setPending] = useState(false);
+  const busyRef = useRef(false);
 
   useEffect(() => {
     setSaved(initialSaved);
   }, [initialSaved]);
 
-  const endpoint =
-    variant === "influencer-saves-brand" ? "/api/saved/brands" : "/api/saved/influencers";
+  const endpoint = variant === "influencer-saves-brand" ? "/api/saved/brands" : "/api/saved/influencers";
 
   async function toggle() {
-    if (pending) return;
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setPending(true);
     const next = !saved;
     setSaved(next);
-    setPending(true);
+
     try {
       if (next) {
         const body =
@@ -60,21 +59,22 @@ export function DiscoverySaveButton({
       }
       router.refresh();
     } finally {
+      busyRef.current = false;
       setPending(false);
     }
   }
 
   const label = saved ? "Kayıtlı" : "Kaydet";
   const title = saved ? "Kayıtlılardan çıkar" : "Kayıtlı listeye ekle";
+  const btnClass =
+    "discovery-save-btn" +
+    (saved ? " discovery-save-btn--saved" : "") +
+    (pending ? " discovery-save-btn--pending" : "");
 
   return (
     <button
       type="button"
-      className={
-        "discovery-save-btn" +
-        (saved ? " discovery-save-btn--saved" : "") +
-        (pending ? " discovery-save-btn--pending" : "")
-      }
+      className={btnClass}
       disabled={pending}
       title={title}
       aria-label={title}
@@ -85,12 +85,7 @@ export function DiscoverySaveButton({
         void toggle();
       }}
     >
-      <Bookmark
-        size={18}
-        strokeWidth={1.75}
-        aria-hidden
-        fill={saved ? "currentColor" : "none"}
-      />
+      <Bookmark size={18} strokeWidth={1.75} aria-hidden fill={saved ? "currentColor" : "none"} />
       <span className="discovery-save-btn__text">{label}</span>
     </button>
   );

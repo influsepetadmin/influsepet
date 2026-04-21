@@ -5,9 +5,8 @@ import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import CitySelect from "@/components/CitySelect";
 import { DiscoverActiveFilters } from "@/components/marketplace/DiscoverActiveFilters";
 import { DiscoverHubBrands } from "@/components/marketplace/DiscoverHubBrands";
-import { DiscoverySaveButton } from "@/components/marketplace/DiscoverySaveButton";
 import { DiscoverySearchQueryField } from "@/components/marketplace/DiscoverySearchQueryField";
-import { getAvatarUrl } from "@/lib/avatar";
+import { MarketplaceBrandOfferCard } from "@/components/marketplace/MarketplaceBrandOfferCard";
 import { getCategoryLabel } from "@/lib/categories";
 import { searchMatchWhy } from "@/lib/discovery/discoverCardWhy";
 import {
@@ -232,54 +231,22 @@ export default async function InfluencerDiscoverPage({
                       ? Math.max(100, Math.ceil(profile.basePriceTRY / 100) * 100)
                       : 100;
                   return (
-                    <article key={b.id} className="brand-result-card brand-result-card--hub">
-                      <div className="brand-result-card__head brand-result-card__head--hub">
-                        <img
-                          className="brand-result-card__avatar"
-                          src={b.profileImageUrl ?? getAvatarUrl(b.userId)}
-                          alt=""
-                        />
-                        <div className="brand-result-card__identity">
-                          <p className="brand-result-card__name">{b.companyName}</p>
-                          <p className="muted brand-result-card__city">{b.city ?? "—"}</p>
-                          {cats ? (
-                            <p className="muted brand-result-card__cats brand-result-card__meta-line">{cats}</p>
-                          ) : null}
-                          <p className="muted brand-result-card__why">{searchMatchWhy(b._matchScore)}</p>
-                        </div>
-                        <div className="brand-result-card__actions">
-                          <DiscoverySaveButton
-                            targetUserId={b.userId}
-                            variant="influencer-saves-brand"
-                            initialSaved={savedBrandUserIds.has(b.userId)}
-                          />
-                          <Link className="btn secondary btn--sm" href={`/profil/marka/${b.userId}`}>
-                            Profili incele
-                          </Link>
-                        </div>
-                      </div>
-
-                      <form className="brand-result-card__form" action="/api/offers/create" method="post">
-                        <input type="hidden" name="brandId" value={b.userId} />
-                        <label htmlFor={`title-${b.id}`}>Kampanya başlığı</label>
-                        <input id={`title-${b.id}`} name="title" type="text" required />
-                        <label htmlFor={`brief-${b.id}`}>Kısa açıklama</label>
-                        <textarea id={`brief-${b.id}`} name="brief" required rows={3} />
-                        <label htmlFor={`amt-${b.id}`}>İş birliği bütçesi (TRY)</label>
-                        <input
-                          id={`amt-${b.id}`}
-                          name="offerAmountTRY"
-                          type="number"
-                          required
-                          min={100}
-                          step={100}
-                          defaultValue={defaultAmt}
-                        />
-                        <button className="btn" type="submit">
-                          Markaya iş birliği isteği gönder
-                        </button>
-                      </form>
-                    </article>
+                    <MarketplaceBrandOfferCard
+                      key={b.id}
+                      formIdKey={b.id}
+                      brandUserId={b.userId}
+                      companyName={b.companyName}
+                      city={b.city}
+                      profileImageUrl={b.profileImageUrl}
+                      categoriesLine={cats}
+                      whyLine={searchMatchWhy(b._matchScore)}
+                      initialSaved={savedBrandUserIds.has(b.userId)}
+                      defaultOfferAmountTRY={defaultAmt}
+                      cardClassName="brand-result-card brand-result-card--hub"
+                      profileLinkLabel="Profili incele"
+                      submitButtonLabel="Markaya iş birliği isteği gönder"
+                      briefRows={3}
+                    />
                   );
                 })}
               </div>
