@@ -5,8 +5,13 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { CollaborationMediaKind, DeliveryStatus, OfferStatus } from "@prisma/client";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { EmptyGlyphInbox } from "@/components/icons/emptyStateGlyphs";
-import { DELIVERY_MEDIA_MAX_FILES } from "@/lib/offers/deliverySubmitConstants";
-import { COLLAB_IMAGE_MAX_BYTES, COLLAB_VIDEO_MAX_BYTES } from "@/lib/uploads/collabMediaLimits";
+import {
+  DELIVERY_MEDIA_MAX_FILES,
+  DELIVERY_VIDEO_MAX_BYTES,
+  deliveryImageTooLargeMessage,
+  deliveryVideoTooLargeMessage,
+} from "@/lib/offers/deliverySubmitConstants";
+import { COLLAB_IMAGE_MAX_BYTES } from "@/lib/uploads/collabMediaLimits";
 import { StatusBadge } from "./StatusBadge";
 
 type DeliveryMediaRow = {
@@ -58,6 +63,36 @@ function formatBytes(n: number): string {
   return `${(n / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function isLikelyVideoFile(file: Pick<File, "type" | "name">): boolean {
+  if (file.type.startsWith("video/")) return true;
+  return /\.(mp4|mov|webm)$/i.test(file.name);
+}
+
+type DeliveryApiErr = { error?: string; code?: string };
+
+function messageForDeliverySubmitFailure(res: Response, data: DeliveryApiErr): string {
+  const e = typeof data.error === "string" ? data.error.trim() : "";
+  if (e) return e;
+  switch (data.code) {
+    case "DELIVERY_FILE_TOO_LARGE":
+      return deliveryVideoTooLargeMessage();
+    case "DELIVERY_FILE_UNSUPPORTED":
+      return "Desteklenmeyen dosya turu (JPEG, PNG, WebP, MP4, MOV, WebM).";
+    case "DELIVERY_UPLOAD_INTERRUPTED":
+      return "Dosya aktarimi yarıda kaldi veya kesildi. Tekrar deneyin.";
+    case "DELIVERY_PROCESS_FAILED":
+      return "Sunucuda islem tamamlanamadi. Lutfen tekrar deneyin.";
+    case "DELIVERY_FORM_INVALID":
+      return "Istek bozuk veya baglanti kesildi. Sayfayi yenileyip tekrar deneyin.";
+    default:
+      break;
+  }
+  if (res.status >= 500) {
+    return "Sunucuya ulasilamadi veya islem tamamlanamadi. Bir sure sonra tekrar deneyin.";
+  }
+  return "Teslim gonderilemedi. Tekrar deneyin.";
+}
+
 function DeliveryProofThumbnails({ media }: { media: DeliveryMediaRow[] }) {
   if (media.length === 0) return null;
   return (
@@ -96,10 +131,10 @@ function DeliveryProofThumbnails({ media }: { media: DeliveryMediaRow[] }) {
 
 function validateClientFile(file: File): string | null {
   if (file.size === 0) return "Bos dosya.";
-  const isVideo = file.type.startsWith("video/");
-  const max = isVideo ? COLLAB_VIDEO_MAX_BYTES : COLLAB_IMAGE_MAX_BYTES;
+  const likelyVideo = isLikelyVideoFile(file);
+  const max = likelyVideo ? DELIVERY_VIDEO_MAX_BYTES : COLLAB_IMAGE_MAX_BYTES;
   if (file.size > max) {
-    return isVideo ? "Video en fazla 100 MB olabilir." : "Goruntu en fazla 10 MB olabilir.";
+    return likelyVideo ? deliveryVideoTooLargeMessage() : deliveryImageTooLargeMessage();
   }
   const okTypes = new Set([
     "image/jpeg",
@@ -110,7 +145,7 @@ function validateClientFile(file: File): string | null {
     "video/webm",
   ]);
   if (file.type && !okTypes.has(file.type)) {
-    return "Desteklenmeyen dosya turu.";
+    return "Desteklenmeyen dosya turu (JPEG, PNG, WebP, MP4, MOV, WebM).";
   }
   return null;
 }
@@ -206,22 +241,27 @@ export function DeliveryPanel({
   function addFiles(fileList: FileList | File[]) {
     const incoming = Array.from(fileList);
     if (incoming.length === 0) return;
-    setError(null);
     const next: { key: string; file: File; previewUrl: string }[] = [];
+    const skipped: string[] = [];
     for (const file of incoming) {
       if (staged.length + next.length >= DELIVERY_MEDIA_MAX_FILES) {
-        setError(`En fazla ${DELIVERY_MEDIA_MAX_FILES} dosya ekleyebilirsiniz.`);
+        skipped.push(`En fazla ${DELIVERY_MEDIA_MAX_FILES} dosya eklenebilir.`);
         break;
       }
       const v = validateClientFile(file);
       if (v) {
-        setError(v);
+        skipped.push(`${file.name}: ${v}`);
         continue;
       }
       const previewUrl = URL.createObjectURL(file);
       next.push({ key: `${file.name}-${file.size}-${Math.random()}`, file, previewUrl });
     }
     if (next.length) setStaged((s) => [...s, ...next]);
+    if (skipped.length) {
+      setError(skipped[0] ?? "Dosya eklenemedi.");
+    } else if (next.length) {
+      setError(null);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -232,6 +272,13 @@ export function DeliveryPanel({
     if (!url && !note && files.length === 0) {
       setError("Teslim bağlantısı, not veya en az bir kanıt dosyası ekleyin.");
       return;
+    }
+    for (const f of files) {
+      const v = validateClientFile(f);
+      if (v) {
+        setError(v);
+        return;
+      }
     }
     if (busySubmit.current || submitting) return;
     busySubmit.current = true;
@@ -261,9 +308,9 @@ export function DeliveryPanel({
           }),
         });
       }
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      const data = (await res.json().catch(() => ({}))) as DeliveryApiErr;
       if (!res.ok) {
-        setError(data.error ?? "Teslim gönderilemedi.");
+        setError(messageForDeliverySubmitFailure(res, data));
         return;
       }
       revokeStagedUrls(staged);
@@ -274,7 +321,7 @@ export function DeliveryPanel({
       await loadDeliveries();
       router.refresh();
     } catch {
-      setError("Bağlantı hatası.");
+      setError("Baglanti kesildi veya zaman asimi. Tekrar deneyin.");
     } finally {
       setSubmitting(false);
       busySubmit.current = false;
@@ -469,11 +516,16 @@ export function DeliveryPanel({
                     </svg>
                   </span>
                   <p className="chat-delivery-upload__title">
-                    {staged.length === 0 ? "Dosya sürükleyip bırakın veya seçin" : `${staged.length} dosya seçildi`}
+                    {staged.length === 0
+                      ? "Dosya sürükleyip bırakın veya seçin"
+                      : `${staged.length} dosya forma eklendi (henüz gönderilmedi)`}
                   </p>
                   <p className="chat-delivery-upload__hint muted">
-                    JPEG, PNG, WebP (10 MB’a kadar) veya MP4, MOV, WebM (100 MB’a kadar). En fazla{" "}
-                    {DELIVERY_MEDIA_MAX_FILES} dosya.
+                    Görsel: JPEG, PNG, WebP · en fazla 10 MB. Video: MP4, MOV, WebM · şimdilik en fazla 200 MB (daha
+                    büyük ve kesintisiz yükleme yakında). Tek seferde en fazla {DELIVERY_MEDIA_MAX_FILES} dosya.
+                  </p>
+                  <p className="chat-delivery-upload__hint chat-delivery-upload__hint--sub muted">
+                    Seçtikten sonra dosyalar cihazınızda kalır; sunucuya yalnızca «Teslimi gönder» ile yüklenir.
                   </p>
                   <button
                     type="button"
@@ -488,10 +540,15 @@ export function DeliveryPanel({
 
               {staged.length > 0 && (
                 <ul className="chat-delivery-staged-list" aria-label="Seçilen dosyalar">
+                  <li className="chat-delivery-staged-preamble">
+                    <span className="muted">
+                      Önizleme — bu dosyalar sunucuya aktarılmadı. Gönderim bitene kadar «başarılı» sayılmaz.
+                    </span>
+                  </li>
                   {staged.map((s) => (
                     <li key={s.key} className="chat-delivery-staged-item">
                       <div className="chat-delivery-staged-thumb">
-                        {s.file.type.startsWith("video/") ? (
+                        {isLikelyVideoFile(s.file) ? (
                           <video className="chat-delivery-staged-thumb__media" src={s.previewUrl} muted playsInline />
                         ) : (
                           <img className="chat-delivery-staged-thumb__media" src={s.previewUrl} alt="" />
@@ -499,7 +556,12 @@ export function DeliveryPanel({
                       </div>
                       <div className="chat-delivery-staged-meta">
                         <span className="chat-delivery-staged-name">{s.file.name}</span>
-                        <span className="chat-delivery-staged-size muted">{formatBytes(s.file.size)}</span>
+                        <span className="chat-delivery-staged-size-row">
+                          <span className="chat-delivery-staged-size">{formatBytes(s.file.size)}</span>
+                          {isLikelyVideoFile(s.file) && s.file.size > DELIVERY_VIDEO_MAX_BYTES * 0.85 ? (
+                            <span className="chat-delivery-staged-size-warn muted">Yakın sınır</span>
+                          ) : null}
+                        </span>
                       </div>
                       <button
                         type="button"
@@ -518,7 +580,11 @@ export function DeliveryPanel({
 
             <div className="chat-delivery-form-actions">
               <button className="btn chat-delivery-submit" type="submit" disabled={submitting}>
-                {submitting ? "Gönderiliyor…" : "Teslimi gönder"}
+                {submitting
+                  ? staged.length > 0
+                    ? "Dosyalar yükleniyor, teslim kaydediliyor…"
+                    : "Gönderiliyor…"
+                  : "Teslimi gönder"}
               </button>
             </div>
           </form>

@@ -3,18 +3,30 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionPayload } from "@/lib/session";
 import { DELIVERY_PARSE_REQUIRED, parseDeliveryUrlAndText } from "@/lib/offers/deliveryPayload";
-import { DELIVERY_MEDIA_MAX_FILES } from "@/lib/offers/deliverySubmitConstants";
-import { canSubmitDelivery, type OfferBasics } from "@/lib/offers/deliveries";
 import {
-  maxBytesForValidatedMedia,
+  DELIVERY_MEDIA_MAX_FILES,
+  DELIVERY_VIDEO_MAX_BYTES,
+  deliveryImageTooLargeMessage,
+  deliveryVideoTooLargeMessage,
+} from "@/lib/offers/deliverySubmitConstants";
+import { maxBytesForDeliveryMedia } from "@/lib/offers/deliveryMediaServer";
+import { canSubmitDelivery, type OfferBasics } from "@/lib/offers/deliveries";
+import { COLLAB_IMAGE_MAX_BYTES } from "@/lib/uploads/collabMediaLimits";
+import {
   prismaKindFromValidated,
   sanitizeOriginalFilename,
   validateCollaborationMediaBuffer,
+  type ValidatedCollabMedia,
 } from "@/lib/uploads/collabMediaUpload";
 import { deliveryMediaAbsolutePath, saveDeliveryMediaFile } from "@/lib/uploads/deliveryMediaUpload";
 
 function isParticipant(offer: OfferBasics, userId: string): boolean {
   return offer.brandId === userId || offer.influencerId === userId;
+}
+
+function isLikelyVideoFile(file: Pick<File, "type" | "name">): boolean {
+  if (file.type.startsWith("video/")) return true;
+  return /\.(mp4|mov|webm)$/i.test(file.name);
 }
 
 function mediaJsonShape(offerId: string, rows: { id: string; kind: string; mimeType: string; sizeBytes: number; originalFilenameSafe: string | null; createdAt: Date }[]) {
@@ -126,7 +138,10 @@ export async function POST(
     try {
       formData = await request.formData();
     } catch {
-      return NextResponse.json({ error: "Gecersiz istek." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Form verisi okunamadi. Baglantiyi kontrol edip tekrar deneyin.", code: "DELIVERY_FORM_INVALID" },
+        { status: 400 },
+      );
     }
     rawUrl = String(formData.get("deliveryUrl") ?? "").trim();
     rawText = String(formData.get("deliveryText") ?? "").trim();
@@ -140,18 +155,18 @@ export async function POST(
 
   if (files.length > DELIVERY_MEDIA_MAX_FILES) {
     return NextResponse.json(
-      { error: `En fazla ${DELIVERY_MEDIA_MAX_FILES} dosya yukleyebilirsiniz.` },
+      { error: `En fazla ${DELIVERY_MEDIA_MAX_FILES} dosya yukleyebilirsiniz.`, code: "DELIVERY_TOO_MANY_FILES" },
       { status: 400 },
     );
   }
 
   const parsed = parseDeliveryUrlAndText({ rawUrl, rawText });
   if (parsed.error) {
-    return NextResponse.json({ error: parsed.error }, { status: 400 });
+    return NextResponse.json({ error: parsed.error, code: "DELIVERY_TEXT_INVALID" }, { status: 400 });
   }
 
   if (!parsed.deliveryUrl && !parsed.deliveryText && files.length === 0) {
-    return NextResponse.json({ error: DELIVERY_PARSE_REQUIRED }, { status: 400 });
+    return NextResponse.json({ error: DELIVERY_PARSE_REQUIRED, code: "DELIVERY_PROOF_REQUIRED" }, { status: 400 });
   }
 
   const offer = await prisma.offer.findUnique({
@@ -188,36 +203,109 @@ export async function POST(
     originalFilenameSafe: string | null;
   };
 
-  const prepared: PreparedFile[] = [];
   const writtenPaths: string[] = [];
 
   try {
+    type WorkItem = {
+      buffer: Buffer;
+      validated: ValidatedCollabMedia;
+      originalFilenameSafe: string | null;
+    };
+    const work: WorkItem[] = [];
+
     for (const file of files) {
-      const buffer = Buffer.from(await file.arrayBuffer());
+      const likelyVideo = isLikelyVideoFile(file);
+      const earlyMax = likelyVideo ? DELIVERY_VIDEO_MAX_BYTES : COLLAB_IMAGE_MAX_BYTES;
+      if (file.size > earlyMax) {
+        return NextResponse.json(
+          {
+            error: likelyVideo ? deliveryVideoTooLargeMessage() : deliveryImageTooLargeMessage(),
+            code: "DELIVERY_FILE_TOO_LARGE",
+          },
+          { status: 400 },
+        );
+      }
+
+      let buffer: Buffer;
+      try {
+        buffer = Buffer.from(await file.arrayBuffer());
+      } catch {
+        return NextResponse.json(
+          {
+            error: "Dosya okunamadi veya aktarim yarıda kaldi. Tekrar deneyin.",
+            code: "DELIVERY_UPLOAD_INTERRUPTED",
+          },
+          { status: 400 },
+        );
+      }
+
+      if (buffer.length > earlyMax) {
+        return NextResponse.json(
+          {
+            error: likelyVideo ? deliveryVideoTooLargeMessage() : deliveryImageTooLargeMessage(),
+            code: "DELIVERY_FILE_TOO_LARGE",
+          },
+          { status: 400 },
+        );
+      }
+
       const validated = validateCollaborationMediaBuffer(buffer);
       if (validated.ok === false) {
-        return NextResponse.json({ error: validated.error }, { status: 400 });
+        return NextResponse.json(
+          { error: validated.error, code: "DELIVERY_FILE_UNSUPPORTED" },
+          { status: 400 },
+        );
       }
-      const maxForKind = maxBytesForValidatedMedia(validated.media);
+
+      const maxForKind = maxBytesForDeliveryMedia(validated.media);
       if (buffer.length > maxForKind) {
         return NextResponse.json(
           {
             error:
               validated.media.kind === "IMAGE"
-                ? "Goruntu en fazla 10 MB olabilir."
-                : "Video en fazla 100 MB olabilir.",
+                ? deliveryImageTooLargeMessage()
+                : deliveryVideoTooLargeMessage(),
+            code: "DELIVERY_FILE_TOO_LARGE",
           },
           { status: 400 },
         );
       }
-      const saved = await saveDeliveryMediaFile(buffer, validated.media);
+
+      work.push({
+        buffer,
+        validated: validated.media,
+        originalFilenameSafe: sanitizeOriginalFilename(file.name),
+      });
+    }
+
+    const prepared: PreparedFile[] = [];
+    for (const w of work) {
+      let saved: { storedFilename: string };
+      try {
+        saved = await saveDeliveryMediaFile(w.buffer, w.validated);
+      } catch {
+        for (const name of writtenPaths) {
+          try {
+            await unlink(deliveryMediaAbsolutePath(name));
+          } catch {
+            /* ignore */
+          }
+        }
+        return NextResponse.json(
+          {
+            error: "Dosya diske yazilamadi. Tekrar deneyin veya daha kucuk bir dosya deneyin.",
+            code: "DELIVERY_PROCESS_FAILED",
+          },
+          { status: 500 },
+        );
+      }
       writtenPaths.push(saved.storedFilename);
       prepared.push({
-        kind: prismaKindFromValidated(validated.media),
-        mime: validated.media.mime,
+        kind: prismaKindFromValidated(w.validated),
+        mime: w.validated.mime,
         storedFilename: saved.storedFilename,
-        sizeBytes: buffer.length,
-        originalFilenameSafe: sanitizeOriginalFilename(file.name),
+        sizeBytes: w.buffer.length,
+        originalFilenameSafe: w.originalFilenameSafe,
       });
     }
 
@@ -298,6 +386,12 @@ export async function POST(
         /* ignore */
       }
     }
-    return NextResponse.json({ error: "Teslim kaydedilemedi." }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Sunucuda islem tamamlanamadi. Lutfen tekrar deneyin.",
+        code: "DELIVERY_PROCESS_FAILED",
+      },
+      { status: 500 },
+    );
   }
 }

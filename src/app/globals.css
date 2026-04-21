@@ -1550,6 +1550,13 @@ main:has(.public-profile-page--app) {
   line-height: 1.5;
 }
 
+.chat-delivery-upload__hint--sub {
+  margin-top: 4px;
+  max-width: 36rem;
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
 .chat-delivery-upload__browse {
   margin-top: 4px;
 }
@@ -1561,6 +1568,15 @@ main:has(.public-profile-page--app) {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.chat-delivery-staged-preamble {
+  margin: 0;
+  padding: 0 2px 10px;
+  border-bottom: 1px dashed rgba(203, 213, 225, 0.75);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #64748b;
 }
 
 .chat-delivery-staged-item {
@@ -1605,8 +1621,23 @@ main:has(.public-profile-page--app) {
   white-space: nowrap;
 }
 
+.chat-delivery-staged-size-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
 .chat-delivery-staged-size {
   font-size: 0.72rem;
+  color: #64748b;
+}
+
+.chat-delivery-staged-size-warn {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #b45309;
+  letter-spacing: 0.02em;
 }
 
 .chat-delivery-staged-remove {
