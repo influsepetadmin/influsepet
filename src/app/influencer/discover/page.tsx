@@ -4,15 +4,12 @@ import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import CitySelect from "@/components/CitySelect";
 import { DiscoverActiveFilters } from "@/components/marketplace/DiscoverActiveFilters";
-import { DiscoverHubBrands } from "@/components/marketplace/DiscoverHubBrands";
+import { DiscoverExploreBrands } from "@/components/marketplace/DiscoverExplore";
 import { DiscoverySearchQueryField } from "@/components/marketplace/DiscoverySearchQueryField";
 import { MarketplaceBrandOfferCard } from "@/components/marketplace/MarketplaceBrandOfferCard";
 import { getCategoryLabel } from "@/lib/categories";
 import { searchMatchWhy } from "@/lib/discovery/discoverCardWhy";
-import {
-  loadBrandDiscoverSections,
-  viewerCategoryKeysFromInfluencer,
-} from "@/lib/discovery/discoverSections";
+import { loadBrandDiscoverExplore } from "@/lib/discovery/discoverSections";
 import { runBrandMarketplaceSearch } from "@/lib/discovery/marketplaceSearchRun";
 import { getInfluencerPanelAccess } from "@/lib/influencer/panelAccess";
 import { parseMarketplaceSearchQuery } from "@/lib/marketplaceTextSearch";
@@ -62,13 +59,9 @@ export default async function InfluencerDiscoverPage({
         : [];
   const selectedCategoryKeys = categoriesArray.filter(Boolean).slice(0, 3);
   const hasBrandSearch = Boolean(city) || Boolean(q) || selectedCategoryKeys.length > 0;
+  const showExploreRail = Boolean(profile) && !q.trim();
 
-  const discoverPromise = profile
-    ? loadBrandDiscoverSections(prisma, {
-        city: profile.city,
-        categoryKeys: viewerCategoryKeysFromInfluencer(profile),
-      })
-    : null;
+  const explorePromise = showExploreRail ? loadBrandDiscoverExplore(prisma) : Promise.resolve(null);
 
   const brandResultsPromise =
     profile && hasBrandSearch
@@ -85,8 +78,8 @@ export default async function InfluencerDiscoverPage({
     select: { brandUserId: true },
   });
 
-  const [discoverSections, brandResults, savedBrandRows] = await Promise.all([
-    discoverPromise ?? Promise.resolve(null),
+  const [exploreData, brandResults, savedBrandRows] = await Promise.all([
+    explorePromise,
     brandResultsPromise,
     savedBrandsPromise,
   ]);
@@ -96,11 +89,13 @@ export default async function InfluencerDiscoverPage({
 
   return (
     <div className="dashboard-page influencer-panel-page influencer-discover">
-      <header className="influencer-panel-page__hero">
+      <header className="influencer-panel-page__hero discover-page-hero">
         <h1 className="influencer-panel-page__title">Keşfet</h1>
         <p className="influencer-panel-page__lede muted">
-          Marka arayın: kullanıcı adı, firma adı, şehir, kategori ve yazım toleranslı eşleşme. Keşfet
-          bölümünde öneriler profilinize göre listelenir.
+          Tek kutuda veya şehir / kategori ile: firma adı, marka kullanıcı adı, hesap adı, şehir, kategori ve açıklama
+          için metin eşleşmesi (Türkçe büyük/küçük harf ve birleşik yazım destekli). Uzun sorgularda hafif yazım
+          toleransı vardır; güçlü tam/kısmi eşleşmeler önceliklidir. Birden fazla kelimede her kelime ayrı ayrı
+          eşleşmelidir.
         </p>
       </header>
 
@@ -116,25 +111,16 @@ export default async function InfluencerDiscoverPage({
             </p>
           </header>
 
-          {discoverSections ? (
-            <DiscoverHubBrands
-              sections={discoverSections}
-              influencerBasePriceTRY={profile.basePriceTRY}
-              hrefBase="/influencer/discover"
-              savedBrandUserIds={savedBrandUserIds}
-            />
-          ) : null}
-
           <div className="discovery-search-panel">
             <form className="influencer-search-form discovery-search-form" method="get" action="/influencer/discover">
               <div className="discovery-search-field discovery-search-field--query">
                 <label className="discovery-search-field__label" htmlFor="discovery-query-influencer-discover">
-                  İsim veya kullanıcı adı ara
+                  Firma adı, kullanıcı adı, kategori veya şehir (metin)
                 </label>
                 <DiscoverySearchQueryField
                   id="discovery-query-influencer-discover"
                   defaultValue={q}
-                  placeholder="ör. akbir, kırtasiye, elbistan, kitap…"
+                  placeholder="örn. akbir, Ankara, teknoloji, kitap…"
                   debouncedAutoSubmitMs={480}
                 />
                 <p className="discovery-search-field__hint muted discovery-search-field__hint--debounce">
@@ -208,13 +194,22 @@ export default async function InfluencerDiscoverPage({
             />
           ) : null}
 
+          {showExploreRail && exploreData && profile ? (
+            <DiscoverExploreBrands
+              data={exploreData}
+              hrefBase="/influencer/discover"
+              savedBrandUserIds={savedBrandUserIds}
+              influencerBasePriceTRY={profile.basePriceTRY}
+            />
+          ) : null}
+
           <div className="discovery-search-results">
             <h3 className="discovery-search-results__title">Sonuçlar</h3>
             {!hasBrandSearch ? (
               <EmptyStateCard
                 icon={<EmptyGlyphBuildingOffice />}
                 title="Aramayı başlatın veya filtre seçin"
-                description="Şehir, kategori veya arama kutusu ile sonuçları daraltın. Üstteki Keşfet bölümünden önerilen markalara da göz atabilirsiniz."
+                description="Yukarıdaki önerilerden bir etikete tıklayın veya şehir, kategori ve arama kutusu ile sonuçları daraltın."
               />
             ) : brandResults.length === 0 ? (
               <EmptyStateCard
@@ -239,7 +234,11 @@ export default async function InfluencerDiscoverPage({
                       city={b.city}
                       profileImageUrl={b.profileImageUrl}
                       categoriesLine={cats}
-                      whyLine={searchMatchWhy(b._matchScore)}
+                      whyLine={searchMatchWhy({
+                        literal: b._matchScore,
+                        fuzzy: b._fuzzyScore,
+                        reason: b._matchReason,
+                      })}
                       initialSaved={savedBrandUserIds.has(b.userId)}
                       defaultOfferAmountTRY={defaultAmt}
                       cardClassName="brand-result-card brand-result-card--hub"

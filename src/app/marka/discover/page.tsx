@@ -5,15 +5,12 @@ import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import CitySelect from "@/components/CitySelect";
 import { DiscoverActiveFilters } from "@/components/marketplace/DiscoverActiveFilters";
-import { DiscoverHubInfluencers } from "@/components/marketplace/DiscoverHubInfluencers";
+import { DiscoverExploreInfluencers } from "@/components/marketplace/DiscoverExplore";
 import { DiscoverySearchQueryField } from "@/components/marketplace/DiscoverySearchQueryField";
 import { MarketplaceInfluencerOfferCard } from "@/components/marketplace/MarketplaceInfluencerOfferCard";
 import { getCategoryLabel } from "@/lib/categories";
 import { searchMatchWhy } from "@/lib/discovery/discoverCardWhy";
-import {
-  loadInfluencerDiscoverSections,
-  viewerCategoryKeysFromBrand,
-} from "@/lib/discovery/discoverSections";
+import { loadInfluencerDiscoverExplore } from "@/lib/discovery/discoverSections";
 import { runInfluencerMarketplaceSearch } from "@/lib/discovery/marketplaceSearchRun";
 import { getMarkaPanelAccess } from "@/lib/marka/panelAccess";
 import { parseMarketplaceSearchQuery } from "@/lib/marketplaceTextSearch";
@@ -66,13 +63,9 @@ export default async function MarkaDiscoverPage({
   const selectedCategoryKeys = categoriesArray.filter(Boolean).slice(0, 3);
   const hasActiveSearch =
     Boolean(city.trim()) || selectedCategoryKeys.length > 0 || Boolean(q);
+  const showExploreRail = canUseMarketplace && !q.trim();
 
-  const discoverPromise = canUseMarketplace && profile
-    ? loadInfluencerDiscoverSections(prisma, {
-        city: profile.city,
-        categoryKeys: viewerCategoryKeysFromBrand(profile),
-      })
-    : null;
+  const explorePromise = showExploreRail ? loadInfluencerDiscoverExplore(prisma) : Promise.resolve(null);
 
   const influencerResultsPromise =
     canUseMarketplace && hasActiveSearch
@@ -89,8 +82,8 @@ export default async function MarkaDiscoverPage({
     select: { influencerUserId: true },
   });
 
-  const [discoverSections, influencerResults, savedInfluencerRows] = await Promise.all([
-    discoverPromise ?? Promise.resolve(null),
+  const [exploreData, influencerResults, savedInfluencerRows] = await Promise.all([
+    explorePromise,
     influencerResultsPromise,
     savedInfluencersPromise,
   ]);
@@ -100,11 +93,13 @@ export default async function MarkaDiscoverPage({
 
   return (
     <div className="dashboard-page influencer-panel-page marka-discover">
-      <header className="influencer-panel-page__hero">
+      <header className="influencer-panel-page__hero discover-page-hero">
         <h1 className="influencer-panel-page__title">Keşfet</h1>
         <p className="influencer-panel-page__lede muted">
-          İçerik üreticisi arayın: kullanıcı adı, görünen ad, şehir, kategori, niş ve yazım toleranslı
-          eşleşme. Keşfet bölümü profilinize göre öneriler sunar.
+          Tek kutuda veya şehir / kategori ile birlikte: kullanıcı adı, ad soyad, şehir, kategori ve niş için
+          metin eşleşmesi (Türkçe büyük/küçük harf ve birleşik yazım destekli). Uzun sorgularda hafif yazım
+          toleransı devreye girer; güçlü tam/kısmi eşleşmeler her zaman önce gelir. Birden fazla kelimede her
+          kelime ayrı ayrı eşleşmelidir.
         </p>
       </header>
 
@@ -128,28 +123,21 @@ export default async function MarkaDiscoverPage({
           <header className="discovery-search-card__intro">
             <h2 className="dash-section__title discovery-search-card__title">İçerik üreticisi bul</h2>
             <p className="dash-section__lede muted discovery-search-card__lede">
-              Şehir, kategori veya metin ile daraltın; yakın yazımlar ve kısmi eşleşmeler desteklenir.
+              Arama kutusu: isim, @kullanıcıadı, şehir adı, kategori veya niş metninde kısmi eşleşme. Şehir ve
+              kategori alanları aynı anda uygulanır (hepsi birlikte daraltır).
             </p>
           </header>
-
-          {discoverSections ? (
-            <DiscoverHubInfluencers
-              sections={discoverSections}
-              hrefBase="/marka/discover"
-              savedInfluencerUserIds={savedInfluencerUserIds}
-            />
-          ) : null}
 
           <div className="discovery-search-panel">
             <form className="influencer-search-form discovery-search-form" method="get" action="/marka/discover">
               <div className="discovery-search-field discovery-search-field--query">
                 <label className="discovery-search-field__label" htmlFor="discovery-query-marka-discover">
-                  İsim veya kullanıcı adı ara
+                  İsim, kullanıcı adı, kategori veya şehir (metin)
                 </label>
                 <DiscoverySearchQueryField
                   id="discovery-query-marka-discover"
                   defaultValue={q}
-                  placeholder="ör. zeynepbastık, niş, şehir…"
+                  placeholder="örn. zeynep, zeynepbastık, İstanbul, moda…"
                   debouncedAutoSubmitMs={480}
                 />
                 <p className="discovery-search-field__hint muted discovery-search-field__hint--debounce">
@@ -223,13 +211,21 @@ export default async function MarkaDiscoverPage({
             />
           ) : null}
 
+          {showExploreRail && exploreData ? (
+            <DiscoverExploreInfluencers
+              data={exploreData}
+              hrefBase="/marka/discover"
+              savedInfluencerUserIds={savedInfluencerUserIds}
+            />
+          ) : null}
+
           <div className="discovery-search-results">
             <h3 className="discovery-search-results__title">Sonuçlar</h3>
             {!hasActiveSearch ? (
               <EmptyStateCard
                 icon={<EmptyGlyphMagnifyingGlass />}
                 title="Aramayı başlatın veya filtre seçin"
-                description="Şehir, kategori veya arama kutusu ile sonuçları daraltın. Üstteki Keşfet bölümünden önerilen profillere de göz atabilirsiniz."
+                description="Yukarıdaki önerilerden bir etikete tıklayın veya şehir, kategori ve arama kutusu ile sonuçları daraltın."
               />
             ) : influencerResults.length === 0 ? (
               <EmptyStateCard
@@ -252,7 +248,11 @@ export default async function MarkaDiscoverPage({
                       city={p.city}
                       profileImageUrl={p.profileImageUrl}
                       categoriesLine={categories}
-                      whyLine={searchMatchWhy(p._matchScore)}
+                      whyLine={searchMatchWhy({
+                        literal: p._matchScore,
+                        fuzzy: p._fuzzyScore,
+                        reason: p._matchReason,
+                      })}
                       followerCount={p.followerCount}
                       basePriceTRY={p.basePriceTRY}
                       nicheText={p.nicheText}

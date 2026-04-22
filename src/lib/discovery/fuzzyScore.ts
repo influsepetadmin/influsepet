@@ -26,7 +26,8 @@ function bestTokenScore(queryNorm: string, hayWords: string[]): number {
       best = Math.max(best, 78);
       continue;
     }
-    if (queryNorm.length <= MAX_LV && w.length <= MAX_LV) {
+    /* Typo distance: avoid noisy matches on 1–2 character queries */
+    if (queryNorm.length >= 3 && queryNorm.length <= MAX_LV && w.length <= MAX_LV) {
       const d = levenshtein(queryNorm, w);
       if (d === 1) best = Math.max(best, 72);
       else if (d === 2) best = Math.max(best, 55);
@@ -55,6 +56,7 @@ export type InfluencerScoreRow = {
   city: string | null;
   category: string;
   nicheText: string | null;
+  bio: string | null;
   user: { name: string };
   selectedCategories: { categoryKey: string }[];
 };
@@ -73,6 +75,7 @@ export function scoreInfluencerMatch(rawQuery: string, row: InfluencerScoreRow):
     row.city,
     row.category,
     row.nicheText,
+    row.bio,
     catLabels.join(" "),
   ]
     .filter(Boolean)
@@ -93,6 +96,7 @@ export function scoreInfluencerMatch(rawQuery: string, row: InfluencerScoreRow):
     row.city,
     row.category,
     row.nicheText,
+    row.bio,
     catLabels.join(" "),
   );
   const wordsFold = haystackWordsFolded(
@@ -101,6 +105,7 @@ export function scoreInfluencerMatch(rawQuery: string, row: InfluencerScoreRow):
     row.city,
     row.category,
     row.nicheText,
+    row.bio,
     catLabels.join(" "),
   );
 

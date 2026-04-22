@@ -1,5 +1,4 @@
 import type { Prisma } from "@prisma/client";
-import { matchCategoryKeysForSearch } from "@/lib/categories";
 import {
   buildBrandMarketplaceWhere,
   buildBrandProfileTextWhere,
@@ -7,77 +6,9 @@ import {
   buildInfluencerProfileTextWhere,
   parseMarketplaceSearchQuery,
 } from "@/lib/marketplaceTextSearch";
-import { tokenizeSearchQuery } from "./searchNormalize";
-import {
-  MIN_FUZZY_SCORE,
-  MIN_FUZZY_SCORE_FALLBACK,
-  scoreBrandMatch,
-  scoreInfluencerMatch,
-  type BrandScoreRow,
-  type InfluencerScoreRow,
-} from "./fuzzyScore";
-
-function flattenOrClause(w: Prisma.InfluencerProfileWhereInput | null): Prisma.InfluencerProfileWhereInput[] {
-  if (!w) return [];
-  if ("OR" in w && Array.isArray(w.OR)) return w.OR as Prisma.InfluencerProfileWhereInput[];
-  return [w];
-}
-
-function flattenBrandOrClause(w: Prisma.BrandProfileWhereInput | null): Prisma.BrandProfileWhereInput[] {
-  if (!w) return [];
-  if ("OR" in w && Array.isArray(w.OR)) return w.OR as Prisma.BrandProfileWhereInput[];
-  return [w];
-}
-
-/** Widen Prisma OR with per-token contains + category keys per token. */
-function extendInfluencerTextWhereWithTokens(
-  base: Prisma.InfluencerProfileWhereInput | null,
-  rawQuery: string,
-): Prisma.InfluencerProfileWhereInput | null {
-  const tokens = tokenizeSearchQuery(rawQuery, 2);
-  const tokenOrs: Prisma.InfluencerProfileWhereInput[] = [];
-  for (const tok of tokens) {
-    if (tok.length < 2) continue;
-    tokenOrs.push({ username: { contains: tok, mode: "insensitive" } });
-    tokenOrs.push({ city: { contains: tok, mode: "insensitive" } });
-    tokenOrs.push({ nicheText: { contains: tok, mode: "insensitive" } });
-    tokenOrs.push({ category: { contains: tok, mode: "insensitive" } });
-    tokenOrs.push({ user: { name: { contains: tok, mode: "insensitive" } } });
-    const keys = matchCategoryKeysForSearch(tok);
-    if (keys.length) {
-      tokenOrs.push({ selectedCategories: { some: { categoryKey: { in: keys } } } });
-    }
-  }
-  const baseOrs = flattenOrClause(base);
-  const all = [...baseOrs, ...tokenOrs];
-  if (all.length === 0) return null;
-  return { OR: all };
-}
-
-function extendBrandTextWhereWithTokens(
-  base: Prisma.BrandProfileWhereInput | null,
-  rawQuery: string,
-): Prisma.BrandProfileWhereInput | null {
-  const tokens = tokenizeSearchQuery(rawQuery, 2);
-  const tokenOrs: Prisma.BrandProfileWhereInput[] = [];
-  for (const tok of tokens) {
-    if (tok.length < 2) continue;
-    tokenOrs.push({ companyName: { contains: tok, mode: "insensitive" } });
-    tokenOrs.push({ city: { contains: tok, mode: "insensitive" } });
-    tokenOrs.push({ bio: { contains: tok, mode: "insensitive" } });
-    tokenOrs.push({ username: { contains: tok, mode: "insensitive" } });
-    tokenOrs.push({ website: { contains: tok, mode: "insensitive" } });
-    tokenOrs.push({ user: { name: { contains: tok, mode: "insensitive" } } });
-    const keys = matchCategoryKeysForSearch(tok);
-    if (keys.length) {
-      tokenOrs.push({ selectedCategories: { some: { categoryKey: { in: keys } } } });
-    }
-  }
-  const baseOrs = flattenBrandOrClause(base);
-  const all = [...baseOrs, ...tokenOrs];
-  if (all.length === 0) return null;
-  return { OR: all };
-}
+import { scoreBrandMatch, scoreInfluencerMatch, type BrandScoreRow, type InfluencerScoreRow } from "./fuzzyScore";
+import { compareLiteralFirstBrand, compareLiteralFirstInfluencer } from "./marketplaceLiteralFirstSort";
+import { literalRankBrand, literalRankInfluencer } from "./marketplaceLiteralRank";
 
 const influencerSearchSelect = {
   id: true,
@@ -89,6 +20,7 @@ const influencerSearchSelect = {
   basePriceTRY: true,
   category: true,
   nicheText: true,
+  bio: true,
   selectedCategories: { select: { categoryKey: true } },
   user: { select: { name: true } },
 } as const;
@@ -106,8 +38,50 @@ const brandSearchSelect = {
   user: { select: { name: true } },
 } as const;
 
-export type InfluencerSearchHit = InfluencerScoreRow & { _matchScore: number };
-export type BrandSearchHit = BrandScoreRow & { _matchScore: number };
+export type InfluencerSearchHit = Prisma.InfluencerProfileGetPayload<{ select: typeof influencerSearchSelect }> & {
+  _matchScore: number;
+  _matchReason: "literal" | "typo";
+  _fuzzyScore: number;
+};
+
+export type BrandSearchHit = Prisma.BrandProfileGetPayload<{ select: typeof brandSearchSelect }> & {
+  _matchScore: number;
+  _matchReason: "literal" | "typo";
+  _fuzzyScore: number;
+};
+
+const LITERAL_FETCH = 220;
+const BROAD_FETCH = 320;
+/** Broad-pool rows must clear this fuzzy floor (typo layer). */
+const BROAD_MIN_FUZZY = 42;
+
+function asInfluencerScoreRow(
+  row: Prisma.InfluencerProfileGetPayload<{ select: typeof influencerSearchSelect }>,
+): InfluencerScoreRow {
+  return {
+    id: row.id,
+    username: row.username,
+    city: row.city,
+    category: row.category,
+    nicheText: row.nicheText,
+    bio: row.bio ?? null,
+    user: row.user,
+    selectedCategories: row.selectedCategories,
+  };
+}
+
+function asBrandScoreRow(row: Prisma.BrandProfileGetPayload<{ select: typeof brandSearchSelect }>): BrandScoreRow {
+  return {
+    id: row.id,
+    companyName: row.companyName,
+    username: row.username,
+    city: row.city,
+    bio: row.bio,
+    website: row.website,
+    user: row.user,
+    selectedCategories: row.selectedCategories,
+  };
+}
 
 export async function runInfluencerMarketplaceSearch(
   prisma: import("@prisma/client").PrismaClient,
@@ -120,6 +94,7 @@ export async function runInfluencerMarketplaceSearch(
 ): Promise<InfluencerSearchHit[]> {
   const take = args.take ?? 30;
   const q = parseMarketplaceSearchQuery(args.q);
+  const qLen = q.trim().length;
   const baseWhere = buildInfluencerMarketplaceWhere({
     city: args.city.trim(),
     selectedCategoryKeys: args.selectedCategoryKeys,
@@ -127,58 +102,95 @@ export async function runInfluencerMarketplaceSearch(
   });
 
   if (!q) {
-    const rows = (await prisma.influencerProfile.findMany({
+    const rows = await prisma.influencerProfile.findMany({
       where: baseWhere,
       select: influencerSearchSelect,
       take,
       orderBy: { followerCount: "desc" },
-    })) as InfluencerScoreRow[];
-    return rows.map((row) => ({ ...row, _matchScore: 100 }));
+    });
+    return rows.map((row) => ({
+      ...row,
+      _matchScore: 100,
+      _matchReason: "literal" as const,
+      _fuzzyScore: 0,
+    }));
   }
 
-  const legacyText = buildInfluencerProfileTextWhere(q);
-  const tokenText = extendInfluencerTextWhereWithTokens(legacyText, q);
-  const textWhere = tokenText ?? legacyText;
-
-  const where = buildInfluencerMarketplaceWhere({
+  const textWhere = buildInfluencerProfileTextWhere(q);
+  const whereLiteral = buildInfluencerMarketplaceWhere({
     city: args.city.trim(),
     selectedCategoryKeys: args.selectedCategoryKeys,
     textWhere,
   });
 
-  let rows = (await prisma.influencerProfile.findMany({
-    where,
+  const literalRows = await prisma.influencerProfile.findMany({
+    where: whereLiteral,
     select: influencerSearchSelect,
-    take: 180,
-    orderBy: { updatedAt: "desc" },
-  })) as InfluencerScoreRow[];
+    take: LITERAL_FETCH,
+    orderBy: { followerCount: "desc" },
+  });
 
-  let scored = rows
-    .map((row) => ({ row, score: scoreInfluencerMatch(q, row) }))
-    .filter((x) => x.score >= MIN_FUZZY_SCORE)
-    .sort((a, b) => b.score - a.score);
+  type Scored = {
+    row: Prisma.InfluencerProfileGetPayload<{ select: typeof influencerSearchSelect }>;
+    literal: number;
+    fuzzy: number;
+    source: "literal" | "broad";
+  };
 
-  if (scored.length < 6 && q.length >= 3) {
-    const broad = (await prisma.influencerProfile.findMany({
-      where: baseWhere,
+  const scored: Scored[] = literalRows.map((row) => {
+    const scoreRow = asInfluencerScoreRow(row);
+    return {
+      row,
+      literal: literalRankInfluencer(q, scoreRow),
+      fuzzy: qLen <= 2 ? 0 : scoreInfluencerMatch(q, scoreRow),
+      source: "literal",
+    };
+  });
+
+  const maxLiteral = scored.reduce((m, s) => Math.max(m, s.literal), 0);
+  const needsBroad =
+    qLen >= 3 && (literalRows.length === 0 || literalRows.length < take || maxLiteral < 72);
+
+  if (needsBroad && qLen >= 3) {
+    const literalIds = new Set(literalRows.map((r) => r.id));
+    const broadWhere: Prisma.InfluencerProfileWhereInput =
+      literalIds.size > 0 ? { AND: [baseWhere, { id: { notIn: [...literalIds] } }] } : baseWhere;
+
+    const broadRows = await prisma.influencerProfile.findMany({
+      where: broadWhere,
       select: influencerSearchSelect,
-      take: 450,
+      take: BROAD_FETCH,
       orderBy: { followerCount: "desc" },
-    })) as InfluencerScoreRow[];
-    const seen = new Set(scored.map((s) => s.row.id));
-    const extra = broad
-      .filter((r) => !seen.has(r.id))
-      .map((row) => ({ row, score: scoreInfluencerMatch(q, row) }))
-      .filter((x) => x.score >= MIN_FUZZY_SCORE_FALLBACK)
-      .sort((a, b) => b.score - a.score);
-    scored = [...scored, ...extra].sort((a, b) => b.score - a.score);
+    });
+
+    for (const row of broadRows) {
+      const scoreRow = asInfluencerScoreRow(row);
+      const fuzzy = scoreInfluencerMatch(q, scoreRow);
+      if (fuzzy < BROAD_MIN_FUZZY) continue;
+      const literal = literalRankInfluencer(q, scoreRow);
+      scored.push({
+        row,
+        literal,
+        fuzzy,
+        source: "broad",
+      });
+    }
   }
 
-  const out: InfluencerSearchHit[] = scored.slice(0, take).map((s) => ({
+  scored.sort((a, b) =>
+    compareLiteralFirstInfluencer(
+      { literal: a.literal, fuzzy: a.fuzzy, followerCount: a.row.followerCount },
+      { literal: b.literal, fuzzy: b.fuzzy, followerCount: b.row.followerCount },
+      qLen,
+    ),
+  );
+
+  return scored.slice(0, take).map((s) => ({
     ...s.row,
-    _matchScore: s.score,
+    _matchScore: s.literal,
+    _fuzzyScore: s.fuzzy,
+    _matchReason: s.source === "broad" ? ("typo" as const) : ("literal" as const),
   }));
-  return out;
 }
 
 export async function runBrandMarketplaceSearch(
@@ -192,6 +204,7 @@ export async function runBrandMarketplaceSearch(
 ): Promise<BrandSearchHit[]> {
   const take = args.take ?? 30;
   const q = parseMarketplaceSearchQuery(args.q);
+  const qLen = q.trim().length;
   const catKeys = (args.selectedCategoryKeys ?? []).filter(Boolean).slice(0, 3);
 
   const baseOnly: Prisma.BrandProfileWhereInput = buildBrandMarketplaceWhere({
@@ -201,55 +214,94 @@ export async function runBrandMarketplaceSearch(
   });
 
   if (!q) {
-    const rows = (await prisma.brandProfile.findMany({
+    const rows = await prisma.brandProfile.findMany({
       where: baseOnly,
       select: brandSearchSelect,
       take,
       orderBy: { companyName: "asc" },
-    })) as BrandScoreRow[];
-    return rows.map((row) => ({ ...row, _matchScore: 100 }));
+    });
+    return rows.map((row) => ({
+      ...row,
+      _matchScore: 100,
+      _matchReason: "literal" as const,
+      _fuzzyScore: 0,
+    }));
   }
 
-  const legacyText = buildBrandProfileTextWhere(q);
-  const tokenText = extendBrandTextWhereWithTokens(legacyText, q);
-  const textWhere = tokenText ?? legacyText;
-
-  const where = buildBrandMarketplaceWhere({
+  const textWhere = buildBrandProfileTextWhere(q);
+  const whereLiteral = buildBrandMarketplaceWhere({
     city: args.city.trim(),
     selectedCategoryKeys: catKeys,
     textWhere,
   });
 
-  let rows = (await prisma.brandProfile.findMany({
-    where,
+  const literalRows = await prisma.brandProfile.findMany({
+    where: whereLiteral,
     select: brandSearchSelect,
-    take: 180,
+    take: LITERAL_FETCH,
     orderBy: { updatedAt: "desc" },
-  })) as BrandScoreRow[];
+  });
 
-  let scored = rows
-    .map((row) => ({ row, score: scoreBrandMatch(q, row) }))
-    .filter((x) => x.score >= MIN_FUZZY_SCORE)
-    .sort((a, b) => b.score - a.score);
+  type Scored = {
+    row: Prisma.BrandProfileGetPayload<{ select: typeof brandSearchSelect }>;
+    literal: number;
+    fuzzy: number;
+    source: "literal" | "broad";
+  };
 
-  if (scored.length < 6 && q.length >= 3) {
-    const broad = (await prisma.brandProfile.findMany({
-      where: baseOnly,
+  const scored: Scored[] = literalRows.map((row) => {
+    const scoreRow = asBrandScoreRow(row);
+    return {
+      row,
+      literal: literalRankBrand(q, scoreRow),
+      fuzzy: qLen <= 2 ? 0 : scoreBrandMatch(q, scoreRow),
+      source: "literal",
+    };
+  });
+
+  const maxLiteral = scored.reduce((m, s) => Math.max(m, s.literal), 0);
+  const needsBroad = qLen >= 3 && (literalRows.length === 0 || literalRows.length < take || maxLiteral < 72);
+
+  if (needsBroad && qLen >= 3) {
+    const literalIds = new Set(literalRows.map((r) => r.id));
+    const broadWhere: Prisma.BrandProfileWhereInput =
+      literalIds.size > 0 ? { AND: [baseOnly, { id: { notIn: [...literalIds] } }] } : baseOnly;
+
+    const broadRows = await prisma.brandProfile.findMany({
+      where: broadWhere,
       select: brandSearchSelect,
-      take: 450,
+      take: BROAD_FETCH,
       orderBy: { updatedAt: "desc" },
-    })) as BrandScoreRow[];
-    const seen = new Set(scored.map((s) => s.row.id));
-    const extra = broad
-      .filter((r) => !seen.has(r.id))
-      .map((row) => ({ row, score: scoreBrandMatch(q, row) }))
-      .filter((x) => x.score >= MIN_FUZZY_SCORE_FALLBACK)
-      .sort((a, b) => b.score - a.score);
-    scored = [...scored, ...extra].sort((a, b) => b.score - a.score);
+    });
+
+    for (const row of broadRows) {
+      const scoreRow = asBrandScoreRow(row);
+      const fuzzy = scoreBrandMatch(q, scoreRow);
+      if (fuzzy < BROAD_MIN_FUZZY) continue;
+      const literal = literalRankBrand(q, scoreRow);
+      scored.push({
+        row,
+        literal,
+        fuzzy,
+        source: "broad",
+      });
+    }
   }
+
+  scored.sort((a, b) => {
+    const c = compareLiteralFirstBrand(
+      { literal: a.literal, fuzzy: a.fuzzy },
+      { literal: b.literal, fuzzy: b.fuzzy },
+      qLen,
+    );
+    if (c !== 0) return c;
+    return a.row.companyName.localeCompare(b.row.companyName, "tr");
+  });
 
   return scored.slice(0, take).map((s) => ({
     ...s.row,
-    _matchScore: s.score,
+    _matchScore: s.literal,
+    _fuzzyScore: s.fuzzy,
+    _matchReason: s.source === "broad" ? ("typo" as const) : ("literal" as const),
   }));
 }

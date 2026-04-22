@@ -1,15 +1,20 @@
 "use client";
 
-import type { OfferStatus } from "@prisma/client";
+import type { DeliveryStatus, OfferStatus } from "@prisma/client";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatOfferWorkflowActions } from "@/components/chat/ChatOfferWorkflowActions";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { EmptyGlyphChatBubble } from "@/components/icons/emptyStateGlyphs";
 import { CollaborationRatingPanel } from "@/components/offers/CollaborationRatingPanel";
 import { DeliveryPanel } from "@/components/offers/DeliveryPanel";
-import { StatusBadge } from "@/components/offers/StatusBadge";
-import { AlertCircle, CheckCircle2, Info } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2, Compass, Info, LayoutDashboard } from "lucide-react";
 import { formatWorkflowEventBody, getChatThreadPresentation } from "@/lib/chat/chatThreadMessagePresentation";
+import {
+  buildWorkspaceMilestones,
+  workspaceDeliveryPill,
+  workspaceOfferPill,
+} from "@/lib/chat/workspaceMilestones";
 
 const WORKFLOW_EVENT_ICON_PX = 12;
 const WORKFLOW_EVENT_ICON_STROKE = 1.65;
@@ -136,6 +141,17 @@ function formatMsgTime(iso: string): string {
   }
 }
 
+function formatMsgTimeFull(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString("tr-TR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
+  } catch {
+    return "";
+  }
+}
+
 function sameCalendarDay(a: Date, b: Date): boolean {
   return (
     a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
@@ -189,8 +205,173 @@ function buildThreadItems(messages: Msg[]): ThreadItem[] {
   return out;
 }
 
+function isPeerChatLine(m: Msg): boolean {
+  const p = getChatThreadPresentation(m);
+  return p.mode !== "workflow-event" && p.mode !== "system-error";
+}
+
+function prevSameCluster(threadItems: ThreadItem[], idx: number, m: Msg): boolean {
+  if (!isPeerChatLine(m)) return false;
+  for (let i = idx - 1; i >= 0; i--) {
+    const it = threadItems[i];
+    if (it.kind === "day") return false;
+    const pm = it.message;
+    if (!isPeerChatLine(pm)) return false;
+    return pm.senderId === m.senderId;
+  }
+  return false;
+}
+
+function nextSameCluster(threadItems: ThreadItem[], idx: number, m: Msg): boolean {
+  if (!isPeerChatLine(m)) return false;
+  for (let i = idx + 1; i < threadItems.length; i++) {
+    const it = threadItems[i];
+    if (it.kind === "day") return false;
+    const pm = it.message;
+    if (!isPeerChatLine(pm)) return false;
+    return pm.senderId === m.senderId;
+  }
+  return false;
+}
+
+type MessageClusterMeta =
+  | { kind: "event"; clusterStart: true; clusterEnd: true; showTime: true }
+  | {
+      kind: "peer";
+      clusterStart: boolean;
+      clusterEnd: boolean;
+      clusterMid: boolean;
+      showTime: boolean;
+    };
+
+function messageClusterMeta(threadItems: ThreadItem[], idx: number, m: Msg): MessageClusterMeta {
+  const p = getChatThreadPresentation(m);
+  if (p.mode === "workflow-event" || p.mode === "system-error") {
+    return { kind: "event", clusterStart: true, clusterEnd: true, showTime: true };
+  }
+  const clusterStart = !prevSameCluster(threadItems, idx, m);
+  const clusterEnd = !nextSameCluster(threadItems, idx, m);
+  return {
+    kind: "peer",
+    clusterStart,
+    clusterEnd,
+    clusterMid: !clusterStart && !clusterEnd,
+    showTime: clusterEnd,
+  };
+}
+
+function ChatThreadSkeleton() {
+  return (
+    <div className="chat-thread-skeleton" aria-busy="true" aria-label="Mesajlar yükleniyor">
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <div
+          key={i}
+          className={`chat-thread-skeleton__row${i % 3 === 0 ? " chat-thread-skeleton__row--them" : " chat-thread-skeleton__row--mine"}`}
+        >
+          <div className="chat-thread-skeleton__bar" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function isRevisionWorkflowCopy(body: string): boolean {
   return /revizyon|revize|düzenle|duzenle|yeniden\s+teslim|yeniden teslim/i.test(body);
+}
+
+function ChatWorkspaceNav({
+  chatListHref,
+  homeHref,
+  discoverHref,
+  offersPanelHref,
+  collaborationTitle,
+  discoverLabel,
+}: {
+  chatListHref: string;
+  homeHref: string;
+  discoverHref: string;
+  offersPanelHref: string;
+  collaborationTitle: string;
+  discoverLabel: string;
+}) {
+  return (
+    <nav className="chat-workflow-nav" aria-label="Sohbet gezintisi">
+      <div className="chat-workflow-nav__start">
+        <Link className="chat-workflow-nav__back" href={chatListHref}>
+          <span className="chat-workflow-nav__back-icon" aria-hidden>
+            <ArrowLeft size={18} strokeWidth={2} />
+          </span>
+          <span className="chat-workflow-nav__back-text">Sohbetler</span>
+        </Link>
+      </div>
+      <div className="chat-workflow-nav__context" title={collaborationTitle}>
+        <Link className="chat-workflow-nav__panel" href={homeHref}>
+          <LayoutDashboard className="chat-workflow-nav__panel-icon" size={16} strokeWidth={2} aria-hidden />
+          <span className="chat-workflow-nav__panel-text">Panele dön</span>
+        </Link>
+        <span className="chat-workflow-nav__context-sep" aria-hidden>
+          /
+        </span>
+        <span className="chat-workflow-nav__title-truncate">{collaborationTitle}</span>
+      </div>
+      <div className="chat-workflow-nav__end">
+        <Link className="btn secondary btn--sm" href={discoverHref}>
+          <Compass size={16} strokeWidth={2} aria-hidden className="chat-workflow-nav__btn-icon" />
+          {discoverLabel}
+        </Link>
+        <Link className="btn secondary btn--sm" href={offersPanelHref}>
+          Teklifler
+        </Link>
+      </div>
+    </nav>
+  );
+}
+
+function ChatWorkspacePills({
+  offerStatus,
+  latestDelivery,
+}: {
+  offerStatus: OfferStatus;
+  latestDelivery: { status: DeliveryStatus } | null;
+}) {
+  const o = workspaceOfferPill(offerStatus);
+  const d = workspaceDeliveryPill(offerStatus, latestDelivery);
+  return (
+    <div className="chat-workspace-pills" role="list" aria-label="İş birliği durumu">
+      <span role="listitem" className={`chat-workspace-pill chat-workspace-pill--${o.tone}`}>
+        {o.text}
+      </span>
+      {d ? (
+        <span
+          role="listitem"
+          className={`chat-workspace-pill chat-workspace-pill--${d.tone} chat-workspace-pill--secondary`}
+        >
+          {d.text}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function ChatWorkspaceTimeline({ offerStatus }: { offerStatus: OfferStatus }) {
+  const items = buildWorkspaceMilestones(offerStatus);
+  return (
+    <div className="chat-workspace-timeline" aria-label="İş akışı kilometre taşları">
+      <p className="chat-workspace-timeline__label muted">Akış</p>
+      <ol className="chat-workspace-timeline__track" role="list">
+        {items.map((it) => (
+          <li
+            key={it.key}
+            className={`chat-workspace-timeline__step chat-workspace-timeline__step--${it.state}`}
+            title={it.label}
+          >
+            <span className="chat-workspace-timeline__dot" aria-hidden />
+            <span className="chat-workspace-timeline__text">{it.label}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
 }
 
 export default function ChatClient({
@@ -198,6 +379,8 @@ export default function ChatClient({
   meId,
   offer,
   workflowMeta,
+  workspaceNav,
+  workspaceSummary,
   chatContext,
   offersPanelHref,
   availableNextTransitions,
@@ -215,7 +398,18 @@ export default function ChatClient({
   workflowMeta: {
     budgetLabel: string;
     createdAtLabel: string;
-    statusLabel: string;
+    dueDateLabel: string | null;
+  };
+  workspaceNav: {
+    chatListHref: string;
+    homeHref: string;
+    discoverHref: string;
+    offersPanelHref: string;
+    collaborationTitle: string;
+    discoverLabel: string;
+  };
+  workspaceSummary: {
+    latestDelivery: { status: DeliveryStatus } | null;
   };
   chatContext: {
     otherSideName: string;
@@ -237,40 +431,48 @@ export default function ChatClient({
   const [uploadErr, setUploadErr] = useState<string | null>(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [ratingChatEpoch, setRatingChatEpoch] = useState(0);
+  const [threadReady, setThreadReady] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const emojiPopoverRef = useRef<HTMLDivElement>(null);
   const seenInFlightRef = useRef(false);
   const chatLoadsRef = useRef(0);
 
   const load = useCallback(async () => {
-    const res = await fetch(`/api/chat/messages?conversationId=${encodeURIComponent(conversationId)}`);
-    const data = await res.json().catch(() => null);
-    if (!data?.messages) return;
-    const msgs = data.messages as Msg[];
-    setMessages(msgs);
-    chatLoadsRef.current += 1;
-    /** After the first poll, bump epoch so CollaborationRatingPanel refetches (counterparty may have just rated). */
-    if (offer.status === "COMPLETED" && chatLoadsRef.current >= 2) {
-      setRatingChatEpoch((n) => n + 1);
-    }
-
-    const needsSeen = msgs.some((m) => m.senderId !== meId && !m.isSeen);
-    if (!needsSeen || seenInFlightRef.current) return;
-
-    seenInFlightRef.current = true;
     try {
-      const seenRes = await fetch("/api/chat/messages/seen", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ conversationId }),
-      });
-      if (seenRes.ok) {
-        setMessages((prev) =>
-          prev.map((m) => (m.senderId !== meId && !m.isSeen ? { ...m, isSeen: true } : m)),
-        );
+      const res = await fetch(`/api/chat/messages?conversationId=${encodeURIComponent(conversationId)}`);
+      const data = await res.json().catch(() => null);
+      if (!data?.messages) {
+        setMessages([]);
+      } else {
+        const msgs = data.messages as Msg[];
+        setMessages(msgs);
+        chatLoadsRef.current += 1;
+        /** After the first poll, bump epoch so CollaborationRatingPanel refetches (counterparty may have just rated). */
+        if (offer.status === "COMPLETED" && chatLoadsRef.current >= 2) {
+          setRatingChatEpoch((n) => n + 1);
+        }
+
+        const needsSeen = msgs.some((m) => m.senderId !== meId && !m.isSeen);
+        if (needsSeen && !seenInFlightRef.current) {
+          seenInFlightRef.current = true;
+          try {
+            const seenRes = await fetch("/api/chat/messages/seen", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ conversationId }),
+            });
+            if (seenRes.ok) {
+              setMessages((prev) =>
+                prev.map((m) => (m.senderId !== meId && !m.isSeen ? { ...m, isSeen: true } : m)),
+              );
+            }
+          } finally {
+            seenInFlightRef.current = false;
+          }
+        }
       }
     } finally {
-      seenInFlightRef.current = false;
+      setThreadReady(true);
     }
   }, [conversationId, meId, offer.status]);
 
@@ -341,110 +543,146 @@ export default function ChatClient({
   const threadItems = useMemo(() => buildThreadItems(messages), [messages]);
 
   return (
-    <div className="chat-conversation">
-      <header className="chat-workflow-card chat-workflow-card--workspace" id="chat-workspace-header">
-        <div className="chat-workflow-card__title-row">
-          <div className="chat-workflow-card__title-block">
-            <span className="chat-workflow-card__kicker">İş birliği çalışma alanı</span>
-            <h2 className="chat-workflow-card__title">{chatContext.offerTitle}</h2>
-            {chatContext.brief.trim() ? (
-              <p className="chat-workflow-card__brief muted">{chatContext.brief}</p>
-            ) : null}
-          </div>
-          <div className="chat-workflow-card__title-aside">
-            <StatusBadge status={offer.status} />
-          </div>
-        </div>
-
-        <div className="chat-workflow-card__identity">
-          <a className="chat-workflow-card__avatar-hit" href={chatContext.profileHref} title="Herkese açık profil">
-            <div className="chat-workflow-card__avatar-wrap" aria-hidden>
-              <div className="chat-workflow-card__avatar-ring">
-                <img
-                  className="chat-workflow-card__avatar"
-                  src={chatContext.otherSideAvatarSrc}
-                  alt=""
-                  width={52}
-                  height={52}
+    <div className="chat-conversation chat-conversation--workspace">
+      <div className="chat-workspace-top chat-workspace-top--sticky">
+        <ChatWorkspaceNav {...workspaceNav} />
+        <header
+          className="chat-workflow-card chat-workflow-card--workspace chat-workspace-summary-card"
+          id="chat-workspace-header"
+        >
+          <div className="chat-workspace-summary-card__intro">
+            <p className="chat-workspace-summary-card__eyebrow muted">Kampanya ve teslim özeti</p>
+            <div className="chat-workflow-card__title-row chat-workflow-card__title-row--workspace">
+              <div className="chat-workflow-card__title-block">
+                <span className="chat-workflow-card__kicker">İş birliği çalışma alanı</span>
+                <h2 className="chat-workflow-card__title">{chatContext.offerTitle}</h2>
+                <ChatWorkspacePills
+                  offerStatus={offer.status}
+                  latestDelivery={workspaceSummary.latestDelivery}
                 />
+                {chatContext.brief.trim() ? (
+                  <p className="chat-workflow-card__brief muted">{chatContext.brief}</p>
+                ) : null}
               </div>
             </div>
-          </a>
-          <div className="chat-workflow-card__identity-main">
-            <span className="chat-workflow-card__identity-role">{chatContext.otherSideRole}</span>
-            <span className="chat-workflow-card__identity-name">{chatContext.otherSideName}</span>
-            {chatContext.otherSideHandleLine ? (
-              <span className="chat-workflow-card__identity-handle muted">{chatContext.otherSideHandleLine}</span>
-            ) : null}
+            <ChatWorkspaceTimeline offerStatus={offer.status} />
           </div>
-        </div>
 
-        <dl className="chat-workflow-card__metrics" aria-label="İş birliği özeti">
-          <div className="chat-workflow-metric">
-            <dt className="chat-workflow-metric__label">Bütçe</dt>
-            <dd className="chat-workflow-metric__value">{workflowMeta.budgetLabel}</dd>
+          <div className="chat-workflow-card__identity chat-workflow-card__identity--workspace">
+            <Link
+              className="chat-workflow-card__avatar-hit"
+              href={chatContext.profileHref}
+              title="Herkese açık profil"
+            >
+              <div className="chat-workflow-card__avatar-wrap" aria-hidden>
+                <div className="chat-workflow-card__avatar-ring">
+                  <img
+                    className="chat-workflow-card__avatar"
+                    src={chatContext.otherSideAvatarSrc}
+                    alt=""
+                    width={44}
+                    height={44}
+                  />
+                </div>
+              </div>
+            </Link>
+            <div className="chat-workflow-card__identity-main">
+              <span className="chat-workflow-card__identity-role">{chatContext.otherSideRole}</span>
+              <span className="chat-workflow-card__identity-name">{chatContext.otherSideName}</span>
+              {chatContext.otherSideHandleLine ? (
+                <span className="chat-workflow-card__identity-handle muted">{chatContext.otherSideHandleLine}</span>
+              ) : null}
+            </div>
+            <Link className="chat-workflow-card__profile-quick" href={chatContext.profileHref}>
+              Profili görüntüle
+            </Link>
           </div>
-          <div className="chat-workflow-metric">
-            <dt className="chat-workflow-metric__label">Oluşturulma</dt>
-            <dd className="chat-workflow-metric__value chat-workflow-metric__value--muted">
-              {workflowMeta.createdAtLabel}
-            </dd>
+
+          <dl className="chat-workflow-card__metrics" aria-label="Özet rakamlar">
+            <div className="chat-workflow-metric">
+              <dt className="chat-workflow-metric__label">Bütçe</dt>
+              <dd className="chat-workflow-metric__value">{workflowMeta.budgetLabel}</dd>
+            </div>
+            <div className="chat-workflow-metric">
+              <dt className="chat-workflow-metric__label">Son teslim</dt>
+              <dd
+                className={`chat-workflow-metric__value${workflowMeta.dueDateLabel ? "" : " chat-workflow-metric__value--muted"}`}
+              >
+                {workflowMeta.dueDateLabel ?? "—"}
+              </dd>
+            </div>
+            <div className="chat-workflow-metric">
+              <dt className="chat-workflow-metric__label">Başlangıç</dt>
+              <dd className="chat-workflow-metric__value chat-workflow-metric__value--muted">
+                {workflowMeta.createdAtLabel}
+              </dd>
+            </div>
+          </dl>
+
+          <ChatOfferWorkflowActions
+            offerId={offer.id}
+            availableNextTransitions={availableNextTransitions}
+            profileHref={chatContext.profileHref}
+            offersPanelHref={offersPanelHref}
+            showDeliveryShortcut={
+              offer.status === "IN_PROGRESS" ||
+              offer.status === "REVISION_REQUESTED" ||
+              offer.status === "DELIVERED"
+            }
+          />
+
+          <div className="chat-workflow-card__workspace-foot">
+            <p className="chat-workflow-card__workspace-hint muted">
+              Teslim ve puanlama aşağıda; mesajlar bu özetin altında devam eder.
+            </p>
           </div>
-          <div className="chat-workflow-metric">
-            <dt className="chat-workflow-metric__label">Durum</dt>
-            <dd className="chat-workflow-metric__value chat-workflow-metric__value--status">
-              {workflowMeta.statusLabel}
-            </dd>
-          </div>
-        </dl>
-
-        <ChatOfferWorkflowActions
-          offerId={offer.id}
-          availableNextTransitions={availableNextTransitions}
-          profileHref={chatContext.profileHref}
-          offersPanelHref={offersPanelHref}
-          showDeliveryShortcut={
-            offer.status === "IN_PROGRESS" ||
-            offer.status === "REVISION_REQUESTED" ||
-            offer.status === "DELIVERED"
-          }
-        />
-
-        <div className="chat-workflow-card__workspace-foot">
-          <p className="chat-workflow-card__workspace-hint muted">
-            Teslim, revize ve değerlendirme panelleri mesaj akışının üstünde yer alır.
-          </p>
-        </div>
-      </header>
-
-      <div id="chat-delivery-anchor" className="chat-delivery-anchor">
-        <DeliveryPanel
-          offerId={offer.id}
-          offerStatus={offer.status}
-          brandId={offer.brandId}
-          influencerId={offer.influencerId}
-          meId={meId}
-        />
+        </header>
       </div>
-      <div className="chat-rating-wrap">
-        <CollaborationRatingPanel
-          offerId={offer.id}
-          offerStatus={offer.status}
-          chatActivityEpoch={ratingChatEpoch}
-        />
-      </div>
+
+      <section className="chat-workspace-block" aria-labelledby="chat-delivery-section-label">
+        <div className="chat-workspace-block__head">
+          <h3 id="chat-delivery-section-label" className="chat-workspace-block__label">
+            Teslimat
+          </h3>
+          <p className="chat-workspace-block__hint muted">Kanıt yükleyin veya teslim kayıtlarını buradan izleyin.</p>
+        </div>
+        <div id="chat-delivery-anchor" className="chat-delivery-anchor">
+          <DeliveryPanel
+            offerId={offer.id}
+            offerStatus={offer.status}
+            brandId={offer.brandId}
+            influencerId={offer.influencerId}
+            meId={meId}
+          />
+        </div>
+      </section>
+
+      <section className="chat-workspace-block chat-workspace-block--rating" aria-labelledby="chat-rating-section-label">
+        <h3 id="chat-rating-section-label" className="chat-workspace-block__label">
+          Değerlendirme
+        </h3>
+        <div className="chat-rating-wrap">
+          <CollaborationRatingPanel
+            offerId={offer.id}
+            offerStatus={offer.status}
+            chatActivityEpoch={ratingChatEpoch}
+          />
+        </div>
+      </section>
 
       <div className="chat-thread chat-thread--premium" role="region" aria-label="Mesajlar">
-        {messages.length === 0 ? (
-          <div className="chat-thread-empty">
+        {!threadReady ? (
+          <ChatThreadSkeleton />
+        ) : messages.length === 0 ? (
+          <div className="chat-thread-empty chat-thread-empty--premium">
             <EmptyStateCard
               icon={<EmptyGlyphChatBubble />}
               title="Henüz mesaj yok"
-              description="İlk mesajı veya dosyayı göndererek görüşmeyi başlatabilirsiniz."
+              description="İlk mesajı veya dosyayı göndererek görüşmeyi başlatın. Teslim ve iş akışı güncellemeleri üstteki özetten takip edilir."
             />
           </div>
         ) : (
-          threadItems.map((item) => {
+          threadItems.map((item, itemIdx) => {
             if (item.kind === "day") {
               return (
                 <div key={`day-${item.key}`} className="chat-day-separator" role="separator">
@@ -461,6 +699,7 @@ export default function ChatClient({
             const pres = getChatThreadPresentation(m);
             const isSystemPlaceholder = pres.mode === "system-error";
             const showTicks = mine && m.id === lastOutgoingMessageId;
+            const cluster = messageClusterMeta(threadItems, itemIdx, m);
 
             if (pres.mode === "workflow-event") {
               const tone = pres.tone;
@@ -474,6 +713,7 @@ export default function ChatClient({
                   role="status"
                 >
                   <div className="chat-msg__inner chat-msg__inner--workflow-event">
+                    <span className="chat-workflow-thread-label">İş akışı</span>
                     <div
                       className={`chat-bubble chat-bubble--system chat-event-pill chat-event-pill--${tone}${revisionEmphasis ? " chat-event-pill--revision-emphasis" : ""}`}
                     >
@@ -492,12 +732,29 @@ export default function ChatClient({
               );
             }
 
+            const peerCluster =
+              cluster.kind === "peer"
+                ? [
+                    "chat-msg--peer",
+                    cluster.clusterStart ? "chat-msg--cluster-start" : "",
+                    cluster.clusterEnd ? "chat-msg--cluster-end" : "",
+                    cluster.clusterMid ? "chat-msg--cluster-mid" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")
+                : "";
+
+            const timeTitle = cluster.kind === "peer" && !cluster.showTime ? formatMsgTimeFull(m.createdAt) : undefined;
+
             return (
               <div
                 key={m.id}
-                className={`chat-msg ${mine ? "chat-msg--mine" : "chat-msg--them"}${isSystemPlaceholder ? " chat-msg--system" : ""}`}
+                className={`chat-msg ${mine ? "chat-msg--mine" : "chat-msg--them"}${isSystemPlaceholder ? " chat-msg--system" : ""} ${peerCluster}`.trim()}
               >
-                <div className="chat-msg__inner">
+                <div
+                  className="chat-msg__inner"
+                  title={timeTitle}
+                >
                   <div
                     className={`chat-bubble ${mine ? "chat-bubble--mine" : "chat-bubble--them"}${isSystemPlaceholder ? " chat-bubble--system" : ""}`}
                   >
@@ -505,13 +762,21 @@ export default function ChatClient({
                       <div
                         className={`chat-media-card ${mine ? "chat-media-card--mine" : "chat-media-card--them"}`}
                       >
-                        <div className="chat-media-card__surface">
-                          {m.media.kind === "IMAGE" ? (
-                            <img src={m.media.url} alt="Paylaşılan görüntü" loading="lazy" />
-                          ) : (
-                            <video src={m.media.url} controls playsInline preload="metadata" />
-                          )}
-                        </div>
+                        <a
+                          className="chat-media-card__hit"
+                          href={m.media.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label="Medyayı tam boyutta aç"
+                        >
+                          <div className="chat-media-card__surface">
+                            {m.media.kind === "IMAGE" ? (
+                              <img src={m.media.url} alt="Paylaşılan görüntü" loading="lazy" />
+                            ) : (
+                              <video src={m.media.url} controls playsInline preload="metadata" />
+                            )}
+                          </div>
+                        </a>
                         <div className="chat-media-card__footer">
                           <a
                             className="chat-media-card__link"
@@ -545,7 +810,10 @@ export default function ChatClient({
                   <div
                     className={`chat-msg__meta ${mine ? "chat-msg__meta--mine" : "chat-msg__meta--them"}`}
                   >
-                    <time className="chat-msg__time" dateTime={m.createdAt}>
+                    <time
+                      className={`chat-msg__time${cluster.kind === "peer" && !cluster.showTime ? " chat-msg__time--cluster-hidden" : ""}`}
+                      dateTime={m.createdAt}
+                    >
                       {formatMsgTime(m.createdAt)}
                     </time>
                     {mine && showTicks ? (

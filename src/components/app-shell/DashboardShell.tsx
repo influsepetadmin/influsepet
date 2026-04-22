@@ -7,7 +7,12 @@ import { AppTopbar } from "./AppTopbar";
 import { AppSidebar } from "./AppSidebar";
 import { SidebarNav } from "./SidebarNav";
 import { MobileBottomNav } from "./MobileBottomNav";
-import { INFLUENCER_NAV, MARKA_NAV, type ShellNavItem } from "./navConfig";
+import {
+  flattenNavGroups,
+  INFLUENCER_NAV_GROUPS,
+  MARKA_NAV_GROUPS,
+  type ShellNavItem,
+} from "./navConfig";
 import "./app-shell.css";
 
 const COLLAPSED_KEY = "influsepet-sidebar-collapsed";
@@ -54,10 +59,14 @@ export function DashboardShell({
   settingsHref: string;
   children: React.ReactNode;
 }) {
-  const navItems: ShellNavItem[] = panel === "influencer" ? INFLUENCER_NAV : MARKA_NAV;
-  const panelTitle = panel === "influencer" ? "Influencer" : "Marka";
+  const navGroups = panel === "influencer" ? INFLUENCER_NAV_GROUPS : MARKA_NAV_GROUPS;
+  const navItems: ShellNavItem[] = flattenNavGroups(navGroups);
   const roleLabel = panel === "influencer" ? "Influencer" : "Marka";
   const homeHref = panel === "influencer" ? "/influencer/overview" : "/marka/overview";
+  const sidebarTagline =
+    panel === "influencer"
+      ? "Markaları keşfedin, teklif verin ve iş birliklerinizi yönetin."
+      : "İçerik üreticilerini bulun, teklif alın ve kampanyaları takip edin.";
   const pathname = usePathname() ?? "";
   const collapsed = useSyncExternalStore(subscribeCollapsed, getCollapsedSnapshot, () => false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -82,7 +91,11 @@ export function DashboardShell({
   const hoverClass = collapsed && sidebarHovered ? " app-shell--sidebar-hover" : "";
 
   return (
-    <div className={`app-shell${collapsedClass}${hoverClass}`}>
+    <div
+      className={`app-shell${collapsedClass}${hoverClass}`}
+      data-app-shell="dashboard"
+      data-sidebar-collapsed={collapsed ? "true" : "false"}
+    >
       {drawerOpen ? (
         <button
           type="button"
@@ -93,10 +106,11 @@ export function DashboardShell({
       ) : null}
 
       <AppSidebar
-        panelTitle={panelTitle}
+        productName="Influsepet"
         roleLabel={roleLabel}
         homeHref={homeHref}
-        navItems={navItems}
+        navGroups={navGroups}
+        sidebarTagline={sidebarTagline}
         pathname={pathname}
         collapsed={collapsed}
         onToggleCollapse={toggleCollapse}
@@ -115,9 +129,9 @@ export function DashboardShell({
         id="app-shell-drawer"
       >
         <div className="app-shell__drawer-inner">
-          <p className="app-shell__drawer-title">{panelTitle}</p>
+          <p className="app-shell__drawer-title">Influsepet · {roleLabel}</p>
           <SidebarNav
-            items={navItems}
+            groups={navGroups}
             pathname={pathname}
             collapsed={false}
             onToggleCollapse={() => {}}

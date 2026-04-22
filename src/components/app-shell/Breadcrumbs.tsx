@@ -11,6 +11,7 @@ const LABELS: Record<string, string> = {
   offers: "Teklifler",
   chat: "Sohbetler",
   collaborations: "İş birlikleri",
+  saved: "Kayıtlı",
   profile: "Profil",
   settings: "Ayarlar",
   campaigns: "Kampanyalar",

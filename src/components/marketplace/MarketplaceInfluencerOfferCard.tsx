@@ -21,6 +21,8 @@ export type MarketplaceInfluencerOfferCardProps = {
   profileLinkLabel: string;
   submitButtonLabel: string;
   briefRows: 2 | 3;
+  /** Compact rail: hide offer form (e.g. Discover Explore rows). */
+  exploreRail?: boolean;
 };
 
 export function MarketplaceInfluencerOfferCard({
@@ -41,6 +43,7 @@ export function MarketplaceInfluencerOfferCard({
   profileLinkLabel,
   submitButtonLabel,
   briefRows,
+  exploreRail = false,
 }: MarketplaceInfluencerOfferCardProps) {
   const nicheTrimmed = nicheText?.trim() ?? "";
 
@@ -72,32 +75,34 @@ export function MarketplaceInfluencerOfferCard({
       <p className="muted influencer-result-card__meta influencer-result-card__stats">
         Takipçi: {followerCount.toLocaleString("tr-TR")} · Baz fiyat: {basePriceTRY} TRY
       </p>
-      {nicheTrimmed ? (
+      {!exploreRail && nicheTrimmed ? (
         <p className="muted influencer-result-card__niche">
           Niş: {truncateText(nicheTrimmed, nicheTruncateLen)}
         </p>
       ) : null}
 
-      <form className="influencer-result-card__form" action="/api/offers/create" method="post">
-        <input type="hidden" name="influencerId" value={influencerUserId} />
-        <label htmlFor={`inf-offer-title-${formIdKey}`}>Kampanya başlığı</label>
-        <input id={`inf-offer-title-${formIdKey}`} name="title" type="text" required />
-        <label htmlFor={`inf-offer-brief-${formIdKey}`}>Kısa açıklama</label>
-        <textarea id={`inf-offer-brief-${formIdKey}`} name="brief" required rows={briefRows} />
-        <label htmlFor={`inf-offer-amt-${formIdKey}`}>İş birliği bütçesi (TRY)</label>
-        <input
-          id={`inf-offer-amt-${formIdKey}`}
-          name="offerAmountTRY"
-          type="number"
-          required
-          min={100}
-          step={100}
-          defaultValue={defaultOfferAmountTRY}
-        />
-        <button className="btn" type="submit">
-          {submitButtonLabel}
-        </button>
-      </form>
+      {!exploreRail ? (
+        <form className="influencer-result-card__form" action="/api/offers/create" method="post">
+          <input type="hidden" name="influencerId" value={influencerUserId} />
+          <label htmlFor={`inf-offer-title-${formIdKey}`}>Kampanya başlığı</label>
+          <input id={`inf-offer-title-${formIdKey}`} name="title" type="text" required />
+          <label htmlFor={`inf-offer-brief-${formIdKey}`}>Kısa açıklama</label>
+          <textarea id={`inf-offer-brief-${formIdKey}`} name="brief" required rows={briefRows} />
+          <label htmlFor={`inf-offer-amt-${formIdKey}`}>İş birliği bütçesi (TRY)</label>
+          <input
+            id={`inf-offer-amt-${formIdKey}`}
+            name="offerAmountTRY"
+            type="number"
+            required
+            min={100}
+            step={100}
+            defaultValue={defaultOfferAmountTRY}
+          />
+          <button className="btn" type="submit">
+            {submitButtonLabel}
+          </button>
+        </form>
+      ) : null}
     </article>
   );
 }

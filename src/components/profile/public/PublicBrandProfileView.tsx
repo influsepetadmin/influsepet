@@ -15,6 +15,7 @@ export function PublicBrandProfileView({
   homeLinkLabel,
   headerCta,
   appShell,
+  isOwnPublicProfile,
 }: {
   data: PublicBrandProfileResponse;
   homeHref: string;
@@ -23,6 +24,8 @@ export function PublicBrandProfileView({
   headerCta?: ReactNode;
   /** `/profil/...` önizlemesi: logged-in shell + indigo primary (herkese açık `/brand` mavi kalır). */
   appShell?: boolean;
+  /** Oturumdaki marka kendi herkese açık profilini mi görüyor (kendine teklif CTA’sı gizlenir). */
+  isOwnPublicProfile: boolean;
 }) {
   return (
     <div
@@ -31,7 +34,7 @@ export function PublicBrandProfileView({
       <div className="public-profile-page__inner public-profile-page__inner--brand">
         <div className="public-profile-shell public-profile-shell--brand">
           <PublicProfileHomeLink href={homeHref} label={homeLinkLabel} />
-          <PublicBrandProfileHeader data={data} cta={headerCta} />
+          <PublicBrandProfileHeader data={data} cta={headerCta} isOwnPublicProfile={isOwnPublicProfile} />
           <PublicBrandProfileStats data={data} />
           <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
         </div>

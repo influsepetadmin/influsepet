@@ -7,7 +7,6 @@ import { prisma } from "@/lib/prisma";
 import { getAvailableOfferTransitions, type OfferForTransition } from "@/lib/offers/transitions";
 import { getSessionPayload } from "@/lib/session";
 import { EmptyGlyphLockClosed } from "@/components/icons/emptyStateGlyphs";
-import { statusBadgeLabel } from "@/components/offers/StatusBadge";
 import ChatClient from "./ChatClient";
 
 function offerTitle(title: string | null, campaignName: string | null): string {
@@ -41,7 +40,7 @@ export default async function ChatConversationPage({
     );
   }
 
-  const [conversation, me] = await Promise.all([
+  const [conversation, me, latestDelivery] = await Promise.all([
     prisma.conversation.findUnique({
       where: { id: conversationId },
       select: {
@@ -57,6 +56,7 @@ export default async function ChatConversationPage({
             title: true,
             campaignName: true,
             createdAt: true,
+            dueDate: true,
             budgetTRY: true,
             offerAmountTRY: true,
             brand: {
@@ -80,6 +80,11 @@ export default async function ChatConversationPage({
     prisma.user.findUnique({
       where: { id: session.uid },
       select: { role: true },
+    }),
+    prisma.offerDelivery.findFirst({
+      where: { offer: { conversation: { id: conversationId } } },
+      orderBy: { createdAt: "desc" },
+      select: { status: true },
     }),
   ]);
 
@@ -146,6 +151,9 @@ export default async function ChatConversationPage({
     dateStyle: "medium",
     timeStyle: "short",
   });
+  const dueDateLabel = o.dueDate
+    ? o.dueDate.toLocaleString("tr-TR", { dateStyle: "medium" })
+    : null;
 
   const forTransition: OfferForTransition = {
     id: o.id,
@@ -162,27 +170,10 @@ export default async function ChatConversationPage({
   const briefPreview = o.brief?.trim() ?? "";
   const briefForClient =
     briefPreview.length > 280 ? `${briefPreview.slice(0, 280).trim()}…` : briefPreview;
+  const collaborationTitle = offerTitle(o.title, o.campaignName);
 
   return (
     <div className="chat-layout chat-layout--conversation">
-      <nav className="chat-workflow-nav" aria-label="Sohbet gezintisi">
-        <div className="chat-workflow-nav__start">
-          <Link className="chat-workflow-nav__back" href="/chat">
-            <span className="chat-workflow-nav__back-icon" aria-hidden>
-              ←
-            </span>
-            <span className="chat-workflow-nav__back-text">Sohbetler</span>
-          </Link>
-        </div>
-        <div className="chat-workflow-nav__end">
-          <Link className="btn secondary btn--sm" href={discoverHref}>
-            {me.role === "BRAND" ? "Influencer keşfet" : "Keşfet"}
-          </Link>
-          <Link className="btn secondary btn--sm" href={offersPanelHref}>
-            Teklifler
-          </Link>
-        </div>
-      </nav>
       <ChatClient
         conversationId={conversationId}
         meId={session.uid}
@@ -197,7 +188,18 @@ export default async function ChatConversationPage({
         workflowMeta={{
           budgetLabel,
           createdAtLabel,
-          statusLabel: statusBadgeLabel(o.status),
+          dueDateLabel,
+        }}
+        workspaceNav={{
+          chatListHref: "/chat",
+          homeHref,
+          discoverHref,
+          offersPanelHref,
+          collaborationTitle,
+          discoverLabel: me.role === "BRAND" ? "Influencer keşfet" : "Keşfet",
+        }}
+        workspaceSummary={{
+          latestDelivery: latestDelivery ? { status: latestDelivery.status } : null,
         }}
         chatContext={{
           otherSideName,

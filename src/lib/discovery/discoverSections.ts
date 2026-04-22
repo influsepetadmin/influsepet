@@ -1,4 +1,4 @@
-import { normalizeCategoryKeysForForm } from "@/lib/categories";
+import { CATEGORY_KEYS, normalizeCategoryKeysForForm } from "@/lib/categories";
 import type { PrismaClient } from "@prisma/client";
 
 const brandCardSelect = {
@@ -246,4 +246,109 @@ export function viewerCategoryKeysFromBrand(profile: {
   selectedCategories: { categoryKey: string }[];
 }): string[] {
   return normalizeCategoryKeysForForm(profile.selectedCategories.map((c) => c.categoryKey));
+}
+
+const allowedCategoryKeySet = new Set<string>(CATEGORY_KEYS);
+
+export type ExploreCategoryCount = { key: string; count: number };
+export type ExploreCityCount = { city: string; count: number };
+
+/** Lightweight aggregates + profile rows for Discover “Explore” (no text query). */
+export async function loadInfluencerDiscoverExplore(prisma: PrismaClient): Promise<{
+  popularCategories: ExploreCategoryCount[];
+  trendingCities: ExploreCityCount[];
+  suggested: DiscoverInfluencerSectionRow[];
+  newest: DiscoverInfluencerSectionRow[];
+}> {
+  const [catGroups, cityGroups, suggestedRows, newestRows] = await Promise.all([
+    prisma.influencerSelectedCategory.groupBy({
+      by: ["categoryKey"],
+      _count: { _all: true },
+      orderBy: { _count: { categoryKey: "desc" } },
+      take: 24,
+    }),
+    prisma.influencerProfile.groupBy({
+      by: ["city"],
+      where: { city: { not: null } },
+      _count: { _all: true },
+      orderBy: { _count: { city: "desc" } },
+      take: 16,
+    }),
+    prisma.influencerProfile.findMany({
+      select: influencerCardSelect,
+      take: 12,
+      orderBy: [{ followerCount: "desc" }, { updatedAt: "desc" }],
+    }),
+    prisma.influencerProfile.findMany({
+      select: influencerCardSelect,
+      take: 20,
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  const popularCategories = catGroups
+    .filter((g) => allowedCategoryKeySet.has(g.categoryKey))
+    .slice(0, 12)
+    .map((g) => ({ key: g.categoryKey, count: g._count._all }));
+
+  const trendingCities = cityGroups
+    .filter((g) => g.city != null && String(g.city).trim().length > 0)
+    .slice(0, 12)
+    .map((g) => ({ city: String(g.city).trim(), count: g._count._all }));
+
+  const suggested = suggestedRows as DiscoverInfluencerSectionRow[];
+  const sugIds = new Set(suggested.map((s) => s.id));
+  const newest = (newestRows as DiscoverInfluencerSectionRow[]).filter((r) => !sugIds.has(r.id)).slice(0, 12);
+
+  return { popularCategories, trendingCities, suggested, newest };
+}
+
+export async function loadBrandDiscoverExplore(prisma: PrismaClient): Promise<{
+  popularSectors: ExploreCategoryCount[];
+  activeCities: ExploreCityCount[];
+  featured: DiscoverBrandSectionRow[];
+  newest: DiscoverBrandSectionRow[];
+}> {
+  const [catGroups, cityGroups, featuredRows, newestRows] = await Promise.all([
+    prisma.brandSelectedCategory.groupBy({
+      by: ["categoryKey"],
+      _count: { _all: true },
+      orderBy: { _count: { categoryKey: "desc" } },
+      take: 24,
+    }),
+    prisma.brandProfile.groupBy({
+      by: ["city"],
+      where: { city: { not: null } },
+      _count: { _all: true },
+      orderBy: { _count: { city: "desc" } },
+      take: 16,
+    }),
+    prisma.brandProfile.findMany({
+      where: { profileImageUrl: { not: null } },
+      select: brandCardSelect,
+      take: 12,
+      orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
+    }),
+    prisma.brandProfile.findMany({
+      select: brandCardSelect,
+      take: 20,
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  const popularSectors = catGroups
+    .filter((g) => allowedCategoryKeySet.has(g.categoryKey))
+    .slice(0, 12)
+    .map((g) => ({ key: g.categoryKey, count: g._count._all }));
+
+  const activeCities = cityGroups
+    .filter((g) => g.city != null && String(g.city).trim().length > 0)
+    .slice(0, 12)
+    .map((g) => ({ city: String(g.city).trim(), count: g._count._all }));
+
+  const featured = featuredRows as DiscoverBrandSectionRow[];
+  const featIds = new Set(featured.map((b) => b.id));
+  const newest = (newestRows as DiscoverBrandSectionRow[]).filter((b) => !featIds.has(b.id)).slice(0, 12);
+
+  return { popularSectors, activeCities, featured, newest };
 }

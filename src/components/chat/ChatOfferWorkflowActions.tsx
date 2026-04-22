@@ -177,7 +177,7 @@ export function ChatOfferWorkflowActions({
       <div className="chat-workflow-actions__row chat-workflow-actions__row--secondary">
         {showDeliveryShortcut ? (
           <button type="button" className="btn secondary btn--sm" onClick={scrollToDelivery}>
-            Teslim bölümü
+            Teslim alanına git
           </button>
         ) : null}
         <Link className="btn secondary btn--sm" href={profileHref}>

@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { LogOut, Settings } from "lucide-react";
 import { SidebarNav } from "./SidebarNav";
-import type { ShellNavItem } from "./navConfig";
+import type { ShellNavGroup } from "./navConfig";
 
 export function AppSidebar({
-  panelTitle,
+  productName,
   roleLabel,
   homeHref,
-  navItems,
+  navGroups,
+  sidebarTagline,
   pathname,
   collapsed,
   onToggleCollapse,
@@ -21,11 +22,14 @@ export function AppSidebar({
   onMouseEnter,
   onMouseLeave,
 }: {
-  panelTitle: string;
-  /** Short role chip in footer (e.g. Influencer / Marka). */
+  /** Product wordmark (compact). */
+  productName: string;
+  /** Panel role shown next to product (e.g. Influencer / Marka). */
   roleLabel: string;
   homeHref: string;
-  navItems: ShellNavItem[];
+  navGroups: ShellNavGroup[];
+  /** One line under the brand row (hidden when sidebar collapsed). */
+  sidebarTagline: string;
   pathname: string;
   collapsed: boolean;
   onToggleCollapse: () => void;
@@ -37,19 +41,31 @@ export function AppSidebar({
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
 }) {
+  const brandAria = `${productName} — ${roleLabel} paneli`;
   return (
     <aside
       className="app-shell__sidebar app-shell__sidebar--desktop"
-      aria-label={panelTitle}
+      aria-label={brandAria}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <Link href={homeHref} className="app-shell__brand" title={panelTitle} aria-label={panelTitle}>
-        <span className="app-shell__brand-mark" aria-hidden />
-        <span className="app-shell__brand-text">{panelTitle}</span>
-      </Link>
+      <div className="app-shell__sidebar-head">
+        <Link href={homeHref} className="app-shell__brand" title={brandAria} aria-label={brandAria}>
+          <span className="app-shell__brand-mark" aria-hidden />
+          <span className="app-shell__brand-stack">
+            <span className="app-shell__brand-topline">
+              <span className="app-shell__product-name">{productName}</span>
+              <span className="app-shell__brand-role-sep" aria-hidden>
+                ·
+              </span>
+              <span className="app-shell__brand-role">{roleLabel}</span>
+            </span>
+          </span>
+        </Link>
+        <p className="app-shell__sidebar-tagline muted">{sidebarTagline}</p>
+      </div>
       <SidebarNav
-        items={navItems}
+        groups={navGroups}
         pathname={pathname}
         collapsed={collapsed}
         onToggleCollapse={onToggleCollapse}

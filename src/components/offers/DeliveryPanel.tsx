@@ -52,6 +52,13 @@ function timelineItemClass(status: DeliveryStatus): string {
   return "chat-delivery-timeline__item chat-delivery-timeline__item--submitted";
 }
 
+function timelineBadgeClass(status: DeliveryStatus): string {
+  const base = "chat-delivery-timeline__badge";
+  if (status === "APPROVED") return `${base} chat-delivery-timeline__badge--approved`;
+  if (status === "REVISION_REQUESTED") return `${base} chat-delivery-timeline__badge--revision`;
+  return `${base} chat-delivery-timeline__badge--submitted`;
+}
+
 function preview(s: string | null, max = 72): string {
   if (!s?.trim()) return "—";
   const t = s.trim();
@@ -694,30 +701,61 @@ export function DeliveryPanel({
 
       {!loading && deliveries.length > 0 && (
         <div className="chat-delivery-block chat-delivery-block--timeline">
-          <h4 className="chat-delivery-timeline__title">Teslim geçmişi</h4>
+          <div className="chat-delivery-timeline__head">
+            <h4 className="chat-delivery-timeline__title">Teslim geçmişi</h4>
+            <p className="chat-delivery-timeline__lede muted">Onaylanan ve önceki sürümler.</p>
+          </div>
           <ul className="chat-delivery-timeline__list" role="list">
             {deliveries.map((d) => (
               <li key={d.id} className={timelineItemClass(d.status)}>
-                <div className="chat-delivery-timeline__row">
-                  <span className="chat-delivery-timeline__status">{DELIVERY_STATUS_TR[d.status] ?? d.status}</span>
-                  <span className="chat-delivery-timeline__time muted">
+                <div className="chat-delivery-timeline__card-top">
+                  <span className={timelineBadgeClass(d.status)}>{DELIVERY_STATUS_TR[d.status] ?? d.status}</span>
+                  <time className="chat-delivery-timeline__time" dateTime={d.createdAt}>
                     {new Date(d.createdAt).toLocaleString("tr-TR")}
-                  </span>
+                  </time>
                 </div>
-                <div className="chat-delivery-timeline__body muted">
-                  {d.deliveryUrl ? (
-                    <a href={d.deliveryUrl} target="_blank" rel="noreferrer" className="chat-delivery-timeline__link">
-                      Bağlantıyı aç
+                <p className="chat-delivery-timeline__byline">
+                  <span className="chat-delivery-timeline__byline-label">Gönderen</span>
+                  <span className="chat-delivery-timeline__byline-name">{d.submittedBy.name}</span>
+                </p>
+                {d.status === "REVISION_REQUESTED" ? (
+                  <p className="chat-delivery-timeline__state-callout" role="note">
+                    Bu kayıt revize ile sonuçlandı; güncel teslim için yeni gönderim gerekir.
+                  </p>
+                ) : null}
+                {d.deliveryUrl ? (
+                  <div className="chat-delivery-timeline__field">
+                    <span className="chat-delivery-timeline__k">Bağlantı</span>
+                    <a
+                      href={d.deliveryUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="chat-delivery-timeline__link-chip"
+                      title={d.deliveryUrl}
+                    >
+                      {preview(d.deliveryUrl, 96)}
                     </a>
-                  ) : null}
-                  {d.deliveryUrl && d.deliveryText ? <span aria-hidden> · </span> : null}
-                  {d.deliveryText ? <span>{preview(d.deliveryText, 48)}</span> : null}
-                  {!d.deliveryUrl && !d.deliveryText && d.media.length > 0 ? (
-                    <span className="chat-delivery-timeline__files-note">Yalnızca dosya</span>
-                  ) : null}
-                </div>
+                  </div>
+                ) : null}
+                {d.deliveryText ? (
+                  <div className="chat-delivery-timeline__field">
+                    <span className="chat-delivery-timeline__k">Not</span>
+                    <div className="chat-delivery-timeline__note">{d.deliveryText}</div>
+                  </div>
+                ) : null}
+                {!d.deliveryUrl && !d.deliveryText && d.media.length > 0 ? (
+                  <div className="chat-delivery-timeline__field">
+                    <span className="chat-delivery-timeline__k">İçerik</span>
+                    <p className="chat-delivery-timeline__files-only">Yalnızca dosya yüklendi; bağlantı veya not yok.</p>
+                  </div>
+                ) : null}
                 {d.media.length > 0 ? (
-                  <DeliveryProofThumbnails media={d.media} />
+                  <div className="chat-delivery-timeline__field chat-delivery-timeline__field--media">
+                    <span className="chat-delivery-timeline__k">Kanıt dosyaları</span>
+                    <div className="chat-delivery-timeline__media-shell">
+                      <DeliveryProofThumbnails media={d.media} />
+                    </div>
+                  </div>
                 ) : null}
               </li>
             ))}

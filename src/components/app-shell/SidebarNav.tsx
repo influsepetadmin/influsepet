@@ -3,18 +3,18 @@
 import { PanelLeftClose, PanelLeft } from "lucide-react";
 import { SidebarNavItem } from "./SidebarNavItem";
 import { SidebarSection } from "./SidebarSection";
-import type { ShellNavItem } from "./navConfig";
+import type { ShellNavGroup } from "./navConfig";
 import { isNavItemActive } from "./navConfig";
 
 export function SidebarNav({
-  items,
+  groups,
   pathname,
   collapsed,
   onToggleCollapse,
   onNavigate,
   showCollapseControl = true,
 }: {
-  items: ShellNavItem[];
+  groups: ShellNavGroup[];
   pathname: string;
   collapsed: boolean;
   onToggleCollapse: () => void;
@@ -39,19 +39,25 @@ export function SidebarNav({
         </div>
       ) : null}
 
-      <SidebarSection>
-        {items.map((item) => (
-          <SidebarNavItem
-            key={item.href}
-            href={item.href}
-            label={item.label}
-            icon={item.icon}
-            active={isNavItemActive(pathname, item)}
-            collapsed={collapsed}
-            onNavigate={onNavigate}
-          />
-        ))}
-      </SidebarSection>
+      {groups.map((group, index) => (
+        <SidebarSection
+          key={group.id}
+          title={collapsed ? undefined : group.sectionLabel}
+          className={index > 0 ? "app-shell-sidebar__section--below" : ""}
+        >
+          {group.items.map((item) => (
+            <SidebarNavItem
+              key={item.href}
+              href={item.href}
+              label={item.label}
+              icon={item.icon}
+              active={isNavItemActive(pathname, item)}
+              collapsed={collapsed}
+              onNavigate={onNavigate}
+            />
+          ))}
+        </SidebarSection>
+      ))}
     </nav>
   );
 }

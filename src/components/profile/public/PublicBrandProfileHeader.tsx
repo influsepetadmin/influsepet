@@ -23,10 +23,13 @@ function safeWebsiteHref(url: string): string | null {
 export function PublicBrandProfileHeader({
   data,
   cta,
+  isOwnPublicProfile,
 }: {
   data: PublicBrandProfileResponse;
   /** Dahili profil vb.: varsayılan “yakında” CTA yerine özel aksiyonlar. */
   cta?: ReactNode;
+  /** Kendi herkese açık profil: kendine teklif gönder CTA’sı gösterilmez. */
+  isOwnPublicProfile: boolean;
 }) {
   const avatarSrc = data.avatarUrl?.trim() || getAvatarUrl(data.id);
   const socialVerifiedCount = data.verifiedSocialAccounts.length;
@@ -124,7 +127,7 @@ export function PublicBrandProfileHeader({
 
             {cta != null ? (
               <div className="public-profile-hero__cta public-profile-hero__cta--brand-panel">{cta}</div>
-            ) : (
+            ) : isOwnPublicProfile ? null : (
               <div className="public-profile-hero__cta">
                 <button type="button" className="btn public-profile-hero__cta-btn" disabled>
                   İş birliği teklifi gönder

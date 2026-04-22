@@ -71,13 +71,13 @@ export function normalizeCategoryKeysForForm(storedKeys: string[], primaryFallba
  * Used for Prisma `categoryKey: { in: [...] }` — no DB extension required.
  */
 export function matchCategoryKeysForSearch(raw: string): string[] {
-  const primary = raw.trim().toLowerCase();
+  const primary = raw.trim().toLocaleLowerCase("tr-TR");
   if (!primary) return [];
   const compact = primary.replace(/\s+/g, "");
   const keys = new Set<string>();
 
   for (const def of CATEGORY_DEFINITIONS) {
-    const label = def.label.toLowerCase();
+    const label = def.label.toLocaleLowerCase("tr-TR");
     const key = def.key.toLowerCase();
     const labelCompact = label.replace(/\s+/g, "");
     if (
@@ -94,7 +94,7 @@ export function matchCategoryKeysForSearch(raw: string): string[] {
 
   for (const legacy of Object.keys(LEGACY_LABELS)) {
     const lk = legacy.toLowerCase();
-    const legacyLabel = (LEGACY_LABELS[legacy] ?? "").toLowerCase();
+    const legacyLabel = (LEGACY_LABELS[legacy] ?? "").toLocaleLowerCase("tr-TR");
     const legacyLabelCompact = legacyLabel.replace(/\s+/g, "");
     if (
       lk.includes(primary) ||

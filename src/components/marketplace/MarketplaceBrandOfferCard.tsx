@@ -17,6 +17,7 @@ export type MarketplaceBrandOfferCardProps = {
   profileLinkLabel: string;
   submitButtonLabel: string;
   briefRows: 2 | 3;
+  exploreRail?: boolean;
 };
 
 export function MarketplaceBrandOfferCard({
@@ -33,6 +34,7 @@ export function MarketplaceBrandOfferCard({
   profileLinkLabel,
   submitButtonLabel,
   briefRows,
+  exploreRail = false,
 }: MarketplaceBrandOfferCardProps) {
   return (
     <article className={cardClassName}>
@@ -62,26 +64,28 @@ export function MarketplaceBrandOfferCard({
         </div>
       </div>
 
-      <form className="brand-result-card__form" action="/api/offers/create" method="post">
-        <input type="hidden" name="brandId" value={brandUserId} />
-        <label htmlFor={`brand-offer-title-${formIdKey}`}>Kampanya başlığı</label>
-        <input id={`brand-offer-title-${formIdKey}`} name="title" type="text" required />
-        <label htmlFor={`brand-offer-brief-${formIdKey}`}>Kısa açıklama</label>
-        <textarea id={`brand-offer-brief-${formIdKey}`} name="brief" required rows={briefRows} />
-        <label htmlFor={`brand-offer-amt-${formIdKey}`}>İş birliği bütçesi (TRY)</label>
-        <input
-          id={`brand-offer-amt-${formIdKey}`}
-          name="offerAmountTRY"
-          type="number"
-          required
-          min={100}
-          step={100}
-          defaultValue={defaultOfferAmountTRY}
-        />
-        <button className="btn" type="submit">
-          {submitButtonLabel}
-        </button>
-      </form>
+      {!exploreRail ? (
+        <form className="brand-result-card__form" action="/api/offers/create" method="post">
+          <input type="hidden" name="brandId" value={brandUserId} />
+          <label htmlFor={`brand-offer-title-${formIdKey}`}>Kampanya başlığı</label>
+          <input id={`brand-offer-title-${formIdKey}`} name="title" type="text" required />
+          <label htmlFor={`brand-offer-brief-${formIdKey}`}>Kısa açıklama</label>
+          <textarea id={`brand-offer-brief-${formIdKey}`} name="brief" required rows={briefRows} />
+          <label htmlFor={`brand-offer-amt-${formIdKey}`}>İş birliği bütçesi (TRY)</label>
+          <input
+            id={`brand-offer-amt-${formIdKey}`}
+            name="offerAmountTRY"
+            type="number"
+            required
+            min={100}
+            step={100}
+            defaultValue={defaultOfferAmountTRY}
+          />
+          <button className="btn" type="submit">
+            {submitButtonLabel}
+          </button>
+        </form>
+      ) : null}
     </article>
   );
 }
