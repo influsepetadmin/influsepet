@@ -60,6 +60,9 @@ export default async function MarkaProfilePage({
         <p className="influencer-panel-page__lede muted">
           Marka bilgileri, sosyal hesaplar ve herkese açık sayfa ayarları.
         </p>
+        <p className="profile-page__context-hint muted">
+          Eksiksiz şirket profili keşfet ve teklif adımlarında daha net görünmenizi sağlar.
+        </p>
       </header>
 
       <div className="influencer-tab-bar influencer-tab-bar--scroll" role="tablist" aria-label="Profil bölümleri">
@@ -101,6 +104,9 @@ export default async function MarkaProfilePage({
         <>
           <section className="dash-card dash-card--section">
             <h2 className="dash-section__title">Profil bilgileri</h2>
+            <p className="dash-section__microhint muted">
+              Şirket adı, şehir ve kategoriler keşfette görünür; herkese açık kullanıcı adını tanımlayın.
+            </p>
             <BrandProfilePanel
               err={err}
               profileComplete={profileComplete}
@@ -170,9 +176,14 @@ export default async function MarkaProfilePage({
           <h2 className="dash-section__title">Portföy / medya</h2>
           <EmptyStateCard
             icon={<EmptyGlyphListBullet />}
-            title="Yakında"
-            description="Marka portföyü ve medya kütüphanesi için yükleme ve vitrin alanı eklenecek. Şimdilik teklif ve sohbet üzerinden içerik paylaşımını sürdürebilirsiniz."
-          />
+            hint="Yakında"
+            title="Portföy alanı hazırlanıyor"
+            description="Marka vitrini ve medya kütüphanesi eklendiğinde burada yönetilecek. Şimdilik teklif ve sohbet üzerinden içerik akışını sürdürün."
+          >
+            <Link className="btn" href="/marka/offers">
+              Tekliflere git
+            </Link>
+          </EmptyStateCard>
         </section>
       )}
 
@@ -181,9 +192,14 @@ export default async function MarkaProfilePage({
           <h2 className="dash-section__title">Değerlendirmeler</h2>
           <EmptyStateCard
             icon={<EmptyGlyphListBullet />}
-            title="Yakında"
-            description="Tamamlanan iş birliklerinden gelen herkese açık değerlendirmeler burada özetlenecek."
-          />
+            hint="Tamamlanan iş birlikleri"
+            title="Henüz özet yok"
+            description="Tamamlanan iş birliklerinden gelen herkese açık değerlendirmeler burada listelenecek. Önce teklif süreçlerini ilerletin."
+          >
+            <Link className="btn" href="/marka/offers">
+              Tekliflere git
+            </Link>
+          </EmptyStateCard>
         </section>
       )}
     </div>

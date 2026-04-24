@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { PublicBrandProfileView } from "@/components/profile/public/PublicBrandProfileView";
 import { isOwnBrandPublicProfile } from "@/lib/publicProfile/isOwnBrandPublicProfile";
 import { getCurrentUser, getDashboardBackHref } from "@/lib/me";
+import { findLatestConversationBetweenBrandAndInfluencer } from "@/lib/conversations/findLatestConversationBetweenBrandAndInfluencer";
 import { getPublicBrandProfileByUserId } from "@/lib/publicProfile/getPublicBrandProfileByUserId";
 
 type Props = { params: Promise<{ userId: string }> };
@@ -45,6 +46,14 @@ export default async function InfluencerPanelBrandProfilePage({
 
   const isOwnPublicProfile = isOwnBrandPublicProfile(viewer, data.id, data.username);
 
+  const viewerRole =
+    user && (user.role === "INFLUENCER" || user.role === "BRAND") ? user.role : null;
+  let chatHref: string | null = null;
+  if (user?.role === "INFLUENCER" && !isOwnPublicProfile) {
+    const cid = await findLatestConversationBetweenBrandAndInfluencer(data.id, user.id);
+    if (cid) chatHref = `/chat/${cid}`;
+  }
+
   return (
     <PublicBrandProfileView
       data={data}
@@ -52,6 +61,8 @@ export default async function InfluencerPanelBrandProfilePage({
       homeLinkLabel="Panele dön"
       appShell
       isOwnPublicProfile={isOwnPublicProfile}
+      chatHref={chatHref}
+      viewerRole={viewerRole}
       headerCta={
         <>
           <div className="public-profile-hero__cta-actions">

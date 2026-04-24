@@ -3,6 +3,7 @@
 import { Bookmark } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { trackFirstTimeOnce, trackProductEvent } from "@/lib/productTracking/productEvents";
 
 export type DiscoverySaveVariant = "influencer-saves-brand" | "brand-saves-influencer";
 
@@ -46,6 +47,17 @@ export function DiscoverySaveButton({ targetUserId, variant, initialSaved }: Dis
           setSaved(!next);
           return;
         }
+        trackProductEvent({
+          event: "save_click",
+          location: "discover",
+          label: variant,
+          targetUserId,
+        });
+        trackFirstTimeOnce(`influsepet_ft_save_${variant}`, {
+          event: "first_saved_profile",
+          location: "discover",
+          label: variant,
+        });
       } else {
         const q =
           variant === "influencer-saves-brand"

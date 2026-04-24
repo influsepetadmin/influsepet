@@ -117,15 +117,18 @@ export default async function MarkaOffersPage({
       />
 
       {!profile ? (
-        <EmptyStateCard
-          icon={<EmptyGlyphPaperAirplane />}
-          title="Önce marka profilinizi tamamlayın"
-          description="Teklif listesi ve oluşturma için şirket bilgilerinizin kayıtlı olması gerekir. Birkaç dakikada profilinizi oluşturabilirsiniz."
-        >
-          <Link className="btn" href="/marka/profile?tab=genel">
-            Profile git
-          </Link>
-        </EmptyStateCard>
+        <section className="dash-card dash-card--section">
+          <EmptyStateCard
+            icon={<EmptyGlyphPaperAirplane />}
+            hint="Teklifler için profil"
+            title="Önce marka profilinizi tamamlayın"
+            description="Şirket profiliniz olmadan teklif listesi açılmaz; genel bilgileri kaydederek devam edin."
+          >
+            <Link className="btn" href="/marka/profile?tab=genel">
+              Profili tamamla
+            </Link>
+          </EmptyStateCard>
+        </section>
       ) : (
         <>
           <ShellControlBar>
@@ -157,23 +160,40 @@ export default async function MarkaOffersPage({
           </ShellPanelHint>
 
           {filtered.length === 0 ? (
-            <EmptyStateCard
-              icon={tab === "gelen" ? <EmptyGlyphInbox /> : <EmptyGlyphPaperAirplane />}
-              title={tab === "gelen" ? "Bu görünümde teklif yok" : "Gönderilen teklif bulunmuyor"}
-              description={
-                tab === "gelen"
-                  ? durumKey !== "tumu"
-                    ? "Seçili duruma uyan kayıt yok. Filtreyi genişletin veya influencer isteklerini bekleyin."
-                    : "Influencer’lar size teklif gönderdiğinde burada listelenir. Keşfet ile profilleri inceleyebilirsiniz."
-                  : durumKey !== "tumu"
-                    ? "Bu durumda gönderilmiş teklif yok. Filtreyi değiştirin veya Keşfet’ten yeni teklif oluşturun."
-                    : "İçerik üreticisi seçip form doldurarak ilk teklifinizi gönderin."
-              }
-            >
-              <Link className="btn" href="/marka/discover">
-                Influencer keşfet
-              </Link>
-            </EmptyStateCard>
+            <section className="dash-card dash-card--section">
+              <EmptyStateCard
+                icon={tab === "gelen" ? <EmptyGlyphInbox /> : <EmptyGlyphPaperAirplane />}
+                hint={
+                  tabSourceList.length === 0 && durumKey === "tumu"
+                    ? tab === "gelen"
+                      ? "İlk iş birliğini başlat"
+                      : "İlk teklifini gönder"
+                    : durumKey !== "tumu"
+                      ? "Filtreyi genişletin"
+                      : undefined
+                }
+                title={tab === "gelen" ? "Bu görünümde teklif yok" : "Gönderilen teklif bulunmuyor"}
+                description={
+                  tab === "gelen"
+                    ? durumKey !== "tumu"
+                      ? "Seçili duruma uyan kayıt yok. Tüm durumları göstererek listeyi açın."
+                      : "Influencer istekleri burada birikir. Henüz yoksa keşfet ile süreç başlatın."
+                    : durumKey !== "tumu"
+                      ? "Bu durumda gönderilmiş teklif yok. Filtreyi sıfırlayın."
+                      : "Profil kartından form doldurarak teklif gönderin; durum burada güncellenir."
+                }
+              >
+                {durumKey !== "tumu" ? (
+                  <Link className="btn" href={tabLink(tab, "tumu")}>
+                    Tüm durumları göster
+                  </Link>
+                ) : (
+                  <Link className="btn" href="/marka/discover">
+                    Influencer keşfet
+                  </Link>
+                )}
+              </EmptyStateCard>
+            </section>
           ) : (
             <div className="dash-collab-list shell-list-stack">
               {filtered.map((o) => (

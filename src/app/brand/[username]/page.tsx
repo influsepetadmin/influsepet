@@ -3,6 +3,7 @@ import { PublicBrandProfileView } from "@/components/profile/public/PublicBrandP
 import { PublicProfileNotFound } from "@/components/profile/public/PublicProfileNotFound";
 import { isOwnBrandPublicProfile } from "@/lib/publicProfile/isOwnBrandPublicProfile";
 import { getCurrentUser, getDashboardBackHref } from "@/lib/me";
+import { findLatestConversationBetweenBrandAndInfluencer } from "@/lib/conversations/findLatestConversationBetweenBrandAndInfluencer";
 import { fetchPublicBrandProfileByUsername } from "@/lib/publicProfile/fetchPublicBrandProfileServer";
 
 type Props = { params: Promise<{ username: string }> };
@@ -47,5 +48,21 @@ export default async function PublicBrandProfilePage({ params }: Props) {
 
   const isOwnPublicProfile = isOwnBrandPublicProfile(viewer, data.id, data.username);
 
-  return <PublicBrandProfileView data={data} homeHref={homeHref} isOwnPublicProfile={isOwnPublicProfile} />;
+  const viewerRole =
+    user && (user.role === "INFLUENCER" || user.role === "BRAND") ? user.role : null;
+  let chatHref: string | null = null;
+  if (user?.role === "INFLUENCER" && !isOwnPublicProfile) {
+    const cid = await findLatestConversationBetweenBrandAndInfluencer(data.id, user.id);
+    if (cid) chatHref = `/chat/${cid}`;
+  }
+
+  return (
+    <PublicBrandProfileView
+      data={data}
+      homeHref={homeHref}
+      isOwnPublicProfile={isOwnPublicProfile}
+      chatHref={chatHref}
+      viewerRole={viewerRole}
+    />
+  );
 }

@@ -152,23 +152,40 @@ export default async function InfluencerOffersPage({
       </ShellPanelHint>
 
       {filtered.length === 0 ? (
-        <EmptyStateCard
-          icon={tab === "gelen" ? <EmptyGlyphInbox /> : <EmptyGlyphPaperAirplane />}
-          title={tab === "gelen" ? "Bu görünümde teklif yok" : "Gönderilen teklif bulunmuyor"}
-          description={
-            tab === "gelen"
-              ? durumKey !== "tumu"
-                ? "Seçili duruma uyan kayıt yok. Filtreyi genişletin veya markalardan gelen yeni istekleri bekleyin."
-                : "Henüz marka tarafından size teklif gelmedi. Keşfet üzerinden marka bularak iletişim kurabilirsiniz."
-              : durumKey !== "tumu"
-                ? "Bu durumda gönderilmiş teklif yok. Filtreyi değiştirin veya yeni teklif oluşturun."
-                : "Marka keşfet sayfasından teklif formu doldurarak ilk isteğinizi gönderebilirsiniz."
-          }
-        >
-          <Link className="btn" href="/influencer/discover">
-            Marka keşfet
-          </Link>
-        </EmptyStateCard>
+        <section className="dash-card dash-card--section">
+          <EmptyStateCard
+            icon={tab === "gelen" ? <EmptyGlyphInbox /> : <EmptyGlyphPaperAirplane />}
+            hint={
+              tabSourceList.length === 0 && durumKey === "tumu"
+                ? tab === "gelen"
+                  ? "İlk iş birliğini başlat"
+                  : "Markaya ilk teklifini gönder"
+                : durumKey !== "tumu"
+                  ? "Filtreyi genişletin"
+                  : undefined
+            }
+            title={tab === "gelen" ? "Bu görünümde teklif yok" : "Gönderilen teklif bulunmuyor"}
+            description={
+              tab === "gelen"
+                ? durumKey !== "tumu"
+                  ? "Seçili duruma uyan kayıt yok. Tüm durumları göstererek listeyi açın."
+                  : "Markalardan gelen istekler burada listelenir. Henüz kayıt yoksa keşfet ile süreç başlatın."
+                : durumKey !== "tumu"
+                  ? "Bu durumda gönderilmiş teklif yok. Filtreyi sıfırlayın."
+                  : "Marka kartından form doldurarak teklif gönderin; durum burada güncellenir."
+            }
+          >
+            {durumKey !== "tumu" ? (
+              <Link className="btn" href={tabLink(tab, "tumu")}>
+                Tüm durumları göster
+              </Link>
+            ) : (
+              <Link className="btn" href="/influencer/discover">
+                Marka keşfet
+              </Link>
+            )}
+          </EmptyStateCard>
+        </section>
       ) : (
         <div className="dash-collab-list shell-list-stack">
           {filtered.map((o) => (

@@ -3,6 +3,7 @@ import { PublicInfluencerProfileView } from "@/components/profile/public/PublicI
 import { PublicProfileNotFound } from "@/components/profile/public/PublicProfileNotFound";
 import { isOwnInfluencerPublicProfile } from "@/lib/publicProfile/isOwnInfluencerPublicProfile";
 import { getCurrentUser, getDashboardBackHref } from "@/lib/me";
+import { findLatestConversationBetweenBrandAndInfluencer } from "@/lib/conversations/findLatestConversationBetweenBrandAndInfluencer";
 import { fetchPublicProfileByUsername } from "@/lib/publicProfile/fetchPublicProfileServer";
 
 type Props = { params: Promise<{ username: string }> };
@@ -44,7 +45,20 @@ export default async function PublicProfilePage({ params }: Props) {
 
   const isOwnPublicProfile = isOwnInfluencerPublicProfile(viewer, data.id, data.username);
 
+  const canSendCollaborationRequest = user?.role === "BRAND";
+  let chatHref: string | null = null;
+  if (user?.role === "BRAND" && !isOwnPublicProfile) {
+    const cid = await findLatestConversationBetweenBrandAndInfluencer(user.id, data.id);
+    if (cid) chatHref = `/chat/${cid}`;
+  }
+
   return (
-    <PublicInfluencerProfileView data={data} homeHref={homeHref} isOwnPublicProfile={isOwnPublicProfile} />
+    <PublicInfluencerProfileView
+      data={data}
+      homeHref={homeHref}
+      isOwnPublicProfile={isOwnPublicProfile}
+      chatHref={chatHref}
+      canSendCollaborationRequest={canSendCollaborationRequest}
+    />
   );
 }

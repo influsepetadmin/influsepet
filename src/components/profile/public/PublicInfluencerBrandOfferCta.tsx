@@ -1,19 +1,19 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { submitInfluencerCollaborationRequest } from "@/lib/collaboration/submitInfluencerCollaborationRequest";
 import { getProfileCtaAbVariantForTrack, useProfileCtaAbVariant } from "@/lib/productTracking/profileCtaAb";
 import { trackFirstTimeOnce, trackProductEvent } from "@/lib/productTracking/productEvents";
 import { TrackedChatOpenLink } from "@/components/tracking/TrackedChatOpenLink";
 import { PublicProfileHeroTrustChips } from "@/components/profile/public/PublicProfileHeroTrustChips";
 
-function actionHintLine(
+function brandOfferHintLine(
   hasChat: boolean,
   completedCollaborationsCount: number,
   ratingCount: number,
 ): string {
   if (hasChat) {
-    return "Önce sohbeti açın; gerekirse aynı yerden yeni teklif de gönderebilirsiniz.";
+    return "Devam eden sohbetiniz var — önce sohbeti açın veya yeni teklif gönderin.";
   }
   if (completedCollaborationsCount > 0 || ratingCount > 0) {
     return "Markalar bu profil ile aktif çalışıyor. Hemen iş birliği başlat.";
@@ -21,32 +21,32 @@ function actionHintLine(
   return "Hemen iş birliği başlat.";
 }
 
-export function PublicCollaborationRequestCta({
-  influencerUserId,
-  defaultBudgetTRY,
+export function PublicInfluencerBrandOfferCta({
+  brandUserId,
   chatHref,
-  averageRating,
-  ratingCount,
-  completedCollaborationsCount,
+  averageRating = null,
+  ratingCount = 0,
+  completedCollaborationsCount = 0,
 }: {
-  influencerUserId: string;
-  defaultBudgetTRY: number;
+  brandUserId: string;
   chatHref?: string | null;
-  averageRating: number | null;
-  ratingCount: number;
-  completedCollaborationsCount: number;
+  averageRating?: number | null;
+  ratingCount?: number;
+  completedCollaborationsCount?: number;
 }) {
   const dialogId = useId();
   const titleId = `${dialogId}-modal-title`;
+  const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [toast, setToast] = useState(false);
   const [sending, setSending] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const defaultAmt =
-    defaultBudgetTRY > 0 ? Math.max(100, Math.ceil(defaultBudgetTRY / 100) * 100) : 100;
   const abVariant = useProfileCtaAbVariant();
 
-  const close = useCallback(() => setOpen(false), []);
+  const close = useCallback(() => {
+    setOpen(false);
+    setErr(null);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -63,49 +63,56 @@ export function PublicCollaborationRequestCta({
     el?.focus();
   }, [open]);
 
-  useEffect(() => {
-    if (!toast) return;
-    const t = window.setTimeout(() => setToast(false), 3800);
-    return () => window.clearTimeout(t);
-  }, [toast]);
-
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const title = (form.elements.namedItem("title") as HTMLInputElement).value.trim();
     const brief = (form.elements.namedItem("brief") as HTMLTextAreaElement).value.trim();
     const budgetRaw = (form.elements.namedItem("budget") as HTMLInputElement).value;
-    const budgetTry = Number.parseInt(budgetRaw, 10);
-    if (!title || !brief || !Number.isFinite(budgetTry)) return;
+    const offerAmountTRY = Number.parseInt(budgetRaw, 10);
+    if (!title || !brief || !Number.isFinite(offerAmountTRY) || offerAmountTRY < 100) return;
 
     setSending(true);
-    const res = await submitInfluencerCollaborationRequest(influencerUserId, {
-      campaignTitle: title,
-      description: brief,
-      budgetTry,
+    setErr(null);
+    const res = await fetch("/api/offers/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        brandId: brandUserId,
+        title,
+        brief,
+        offerAmountTRY,
+        budgetTRY: offerAmountTRY,
+      }),
     });
+    const json = (await res.json().catch(() => null)) as
+      | { ok?: boolean; conversationId?: string; error?: string }
+      | null;
     setSending(false);
-    if (!res.ok) return;
-
+    if (!res.ok || !json?.ok) {
+      setErr(typeof json?.error === "string" ? json.error : "Teklif gönderilemedi.");
+      return;
+    }
     trackProductEvent({
-      event: "collaboration_request_sent",
-      location: "public_profile_influencer",
-      label: "brand_to_influencer_flow",
-      influencerUserId,
+      event: "collaboration_created",
+      location: "public_profile_brand",
+      label: "influencer_to_brand_offer",
+      brandUserId,
+      variant: getProfileCtaAbVariantForTrack(),
     });
-    trackFirstTimeOnce("influsepet_ft_public_collab_request_brand", {
-      event: "first_collaboration_request_sent",
-      location: "public_profile_influencer",
+    trackFirstTimeOnce("influsepet_ft_collab_created_influencer_public", {
+      event: "first_collaboration_created",
+      location: "public_profile_brand",
     });
-
     close();
     form.reset();
-    setToast(true);
+    if (json.conversationId) {
+      router.push(`/chat/${json.conversationId}`);
+    }
   }
 
   const hasChat = Boolean(chatHref);
-  const hint = actionHintLine(hasChat, completedCollaborationsCount, ratingCount);
-  /** A: sohbet varsa sohbet önce (primary). B: teklif her zaman primary. */
+  const hint = brandOfferHintLine(hasChat, completedCollaborationsCount, ratingCount);
   const offerIsPrimary = !hasChat || abVariant === "B";
 
   const offerButton = (
@@ -115,9 +122,9 @@ export function PublicCollaborationRequestCta({
       onClick={() => {
         trackProductEvent({
           event: "cta_click",
-          location: "public_profile_influencer",
+          location: "public_profile_brand",
           label: "isu_birligi_teklifi_gonder",
-          influencerUserId,
+          brandUserId,
           variant: getProfileCtaAbVariantForTrack(),
         });
         setOpen(true);
@@ -132,7 +139,7 @@ export function PublicCollaborationRequestCta({
       <TrackedChatOpenLink
               href={chatHref}
               className={`btn public-profile-hero__cta-btn ${offerIsPrimary ? "secondary public-profile-hero__cta-btn--offer-when-chat" : "public-profile-hero__cta-btn--prominent public-profile-hero__cta-btn--chat-primary"}`}
-              location="public_profile_influencer"
+              location="public_profile_brand"
               label="sohbete_git"
             >
         Sohbete git
@@ -197,20 +204,14 @@ export function PublicCollaborationRequestCta({
             aria-labelledby={titleId}
           >
             <h2 id={titleId} className="public-collab-modal__title">
-              İş birliği teklifi gönder
+              Markaya teklif gönder
             </h2>
             <form className="public-collab-modal__form" onSubmit={onSubmit}>
-              <label htmlFor={`${dialogId}-campaign-title`}>Kampanya başlığı</label>
-              <input
-                id={`${dialogId}-campaign-title`}
-                name="title"
-                type="text"
-                required
-                autoComplete="off"
-              />
+              <label htmlFor={`${dialogId}-title`}>Kampanya başlığı</label>
+              <input id={`${dialogId}-title`} name="title" type="text" required autoComplete="off" />
               <label htmlFor={`${dialogId}-brief`}>Kısa açıklama</label>
               <textarea id={`${dialogId}-brief`} name="brief" required rows={3} />
-              <label htmlFor={`${dialogId}-budget`}>Bütçe (TRY)</label>
+              <label htmlFor={`${dialogId}-budget`}>Teklif tutarı (TRY)</label>
               <input
                 id={`${dialogId}-budget`}
                 name="budget"
@@ -218,24 +219,19 @@ export function PublicCollaborationRequestCta({
                 required
                 min={100}
                 step={100}
-                defaultValue={defaultAmt}
+                defaultValue={5000}
               />
+              {err ? <p className="public-collab-modal__error">{err}</p> : null}
               <div className="public-collab-modal__actions">
                 <button type="button" className="btn secondary" onClick={close} disabled={sending}>
                   İptal
                 </button>
                 <button type="submit" className="btn public-collab-modal__submit" disabled={sending}>
-                  {sending ? "Gönderiliyor…" : "İsteği gönder"}
+                  {sending ? "Gönderiliyor…" : "Teklifi gönder"}
                 </button>
               </div>
             </form>
           </div>
-        </div>
-      ) : null}
-
-      {toast ? (
-        <div className="public-collab-toast" role="status" aria-live="polite">
-          İş birliği teklifi gönderildi
         </div>
       ) : null}
     </>

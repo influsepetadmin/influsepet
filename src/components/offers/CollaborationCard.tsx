@@ -9,6 +9,8 @@ import { PublicProfileIconStar } from "@/components/profile/public/publicProfile
 import type { CollaborationCardOffer } from "./collaborationCardOffer";
 import { CollabMetaChipIcon } from "./collabMetaChipIcon";
 import { StatusBadge } from "./StatusBadge";
+import { getProfileCtaAbVariantForTrack } from "@/lib/productTracking/profileCtaAb";
+import { trackProductEvent } from "@/lib/productTracking/productEvents";
 
 export type { CollaborationCardOffer } from "./collaborationCardOffer";
 
@@ -318,12 +320,35 @@ export function CollaborationCard({
 
       <div className="collab-card__actions collab-card__actions--primary">
         {chatHref ? (
-          <a className="btn" href={chatHref}>
+          <a
+            className="btn"
+            href={chatHref}
+            onClick={() =>
+              trackProductEvent({
+                event: "chat_open",
+                location: "offers_or_collab_card",
+                label: "sohbete_git",
+                offerId: offer.id,
+              })
+            }
+          >
             Sohbete git
           </a>
         ) : null}
         {profileHref ? (
-          <a className="btn secondary" href={profileHref}>
+          <a
+            className="btn secondary"
+            href={profileHref}
+            onClick={() =>
+              trackProductEvent({
+                event: "profile_cta_click",
+                location: "offers_or_collab_card",
+                label: "profili_goruntule",
+                offerId: offer.id,
+                variant: getProfileCtaAbVariantForTrack(),
+              })
+            }
+          >
             Profili görüntüle
           </a>
         ) : null}

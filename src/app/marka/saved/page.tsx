@@ -70,11 +70,12 @@ export default async function MarkaSavedPage() {
         <section className="dash-card dash-card--section">
           <EmptyStateCard
             icon={<Bookmark strokeWidth={1.25} />}
+            hint="Liste için profil"
             title="Marka profili gerekli"
-            description="Kayıtlı listeyi kullanmak için önce marka profilinizi tamamlayın."
+            description="Kayıtlıları kullanmak ve teklif göndermek için şirket profilinizi tamamlayın."
           >
             <Link className="btn" href="/marka/profile?tab=genel">
-              Profile git
+              Profili tamamla
             </Link>
           </EmptyStateCard>
         </section>
@@ -82,11 +83,12 @@ export default async function MarkaSavedPage() {
         <section className="dash-card dash-card--section">
           <EmptyStateCard
             icon={<Bookmark strokeWidth={1.25} />}
-            title="Henüz kayıtlı profil yok"
-            description="Keşfet’te veya arama sonuçlarında beğendiğiniz içerik üreticilerinin kartındaki “Kaydet” ile buraya ekleyin."
+            hint="Teklif öncesi kısayol"
+            title="Kayıtlı profil yok"
+            description="Keşfet’te kartlardan “Kaydet” ile listeyi oluşturun; ardından buradan teklife geçin."
           >
-            <Link className="btn" href="/marka/discover">
-              İçerik üreticisi keşfet
+            <Link className="btn" href="/marka/discover#marka-influencer-ara">
+              Keşfede profil bul
             </Link>
           </EmptyStateCard>
         </section>

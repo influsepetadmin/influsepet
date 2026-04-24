@@ -75,6 +75,7 @@ export default async function InfluencerCollaborationsPage({
     : [];
 
   const filtered = allOffers.filter((o) => tabDef.statuses.includes(o.status));
+  const noOffersEver = allOffers.length === 0;
 
   const completedBrandIds = [
     ...new Set(allOffers.filter((o) => o.status === "COMPLETED").map((o) => o.brandId)),
@@ -127,29 +128,42 @@ export default async function InfluencerCollaborationsPage({
       </ShellPanelHint>
 
       {filtered.length === 0 ? (
-        <EmptyStateCard
-          icon={<EmptyGlyphInbox />}
-          title={
-            tabKey === "aktif"
-              ? "Aktif süreçte kayıt yok"
-              : tabKey === "tamamlanan"
-                ? "Henüz tamamlanan iş birliği yok"
-                : "Bu aşamada kayıt yok"
-          }
-          description={
-            tabKey === "aktif"
-              ? "Kabul edilmiş veya devam eden iş birliği olmadığında liste boş kalır. Önce gelen teklifleri yanıtlayın."
-              : tabKey === "teslim"
-                ? "Teslim bekleyen aşamaya geçen iş birliği olunca burada görünür."
-                : tabKey === "tamamlanan"
-                  ? "Tamamlanan iş birlikleri burada özetlenir; süreçler ilerledikçe dolar."
-                  : "Revize istenen teklifler bu sekmede toplanır."
-          }
-        >
-          <Link className="btn" href="/influencer/offers">
-            Tekliflere git
-          </Link>
-        </EmptyStateCard>
+        <section className="dash-card dash-card--section">
+          <EmptyStateCard
+            icon={<EmptyGlyphInbox />}
+            hint={
+              noOffersEver
+                ? "İlk iş birliğini başlat"
+                : tabKey === "aktif"
+                  ? undefined
+                  : "Bu sekmede henüz kayıt yok"
+            }
+            title={
+              noOffersEver && tabKey === "aktif"
+                ? "Henüz iş birliği yok"
+                : tabKey === "aktif"
+                  ? "Aktif süreçte kayıt yok"
+                  : tabKey === "tamamlanan"
+                    ? "Henüz tamamlanan iş birliği yok"
+                    : "Bu aşamada kayıt yok"
+            }
+            description={
+              noOffersEver && tabKey === "aktif"
+                ? "Kabul edilmiş bir teklif olunca süreçler burada görünür. Önce marka bulup teklif gönderin veya gelen teklifi yanıtlayın."
+                : tabKey === "aktif"
+                  ? "Kabul sonrası üretim veya teslim aşamasındaki kayıtlar burada listelenir. Açık teklifleriniz için Teklifler’e bakın."
+                  : tabKey === "teslim"
+                    ? "Teslim bekleyen aşamaya geçen iş birliği olunca burada görünür."
+                    : tabKey === "tamamlanan"
+                      ? "Tamamlanan iş birlikleri zamanla burada birikir."
+                      : "Revize istenen teklifler bu sekmede toplanır."
+            }
+          >
+            <Link className="btn" href={noOffersEver && tabKey === "aktif" ? "/influencer/discover" : "/influencer/offers"}>
+              {noOffersEver && tabKey === "aktif" ? "Marka keşfet" : "Tekliflere git"}
+            </Link>
+          </EmptyStateCard>
+        </section>
       ) : (
         <div className="dash-collab-list shell-list-stack">
           {filtered.map((o) => (

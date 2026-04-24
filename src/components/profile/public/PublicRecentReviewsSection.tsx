@@ -26,17 +26,19 @@ function reviewerAttribution(label: string): string {
 
 type Props = {
   reviews: PublicProfileRecentReviewJson[];
+  /** Güven sütununda kısa liste (en fazla 2 yorum). */
+  compact?: boolean;
 };
 
 /**
  * Review (metin + yıldız) satırları — hero’daki CollaborationRating ortalamasından ayrı.
  */
-export function PublicRecentReviewsSection({ reviews }: Props) {
+export function PublicRecentReviewsSection({ reviews, compact }: Props) {
+  const list = compact ? reviews.slice(0, 2) : reviews;
+  const rootClass = `public-profile-recent-reviews${compact ? " public-profile-recent-reviews--compact" : ""}`;
+
   return (
-    <section
-      className="public-profile-recent-reviews"
-      aria-labelledby="public-recent-reviews-heading"
-    >
+    <section className={rootClass} aria-labelledby="public-recent-reviews-heading">
       <h2 id="public-recent-reviews-heading" className="public-profile-recent-reviews__title">
         Son değerlendirmeler
       </h2>
@@ -50,7 +52,7 @@ export function PublicRecentReviewsSection({ reviews }: Props) {
         </div>
       ) : (
         <ul className="public-profile-recent-reviews__list">
-          {reviews.map((item, index) => {
+          {list.map((item, index) => {
             const comment = item.comment?.trim() ?? "";
             const hasComment = comment.length > 0;
             return (

@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { getAvatarUrl } from "@/lib/avatar";
+import { DiscoverProfileFromDiscoverLink } from "@/components/marketplace/DiscoverProfileFromDiscoverLink";
 import { DiscoverySaveButton } from "./DiscoverySaveButton";
+import { TrackedOfferCreateForm } from "@/components/marketplace/TrackedOfferCreateForm";
 
 export type MarketplaceBrandOfferCardProps = {
   /** Benzersiz form alanı id’leri (örn. brand profile id veya saved row id). */
@@ -58,14 +59,24 @@ export function MarketplaceBrandOfferCard({
             variant="influencer-saves-brand"
             initialSaved={initialSaved}
           />
-          <Link className="btn secondary btn--sm" href={`/profil/marka/${brandUserId}`}>
+          <DiscoverProfileFromDiscoverLink
+            className="btn secondary btn--sm"
+            href={`/profil/marka/${brandUserId}`}
+            profileRole="brand"
+            targetUserId={brandUserId}
+          >
             {profileLinkLabel}
-          </Link>
+          </DiscoverProfileFromDiscoverLink>
         </div>
       </div>
 
       {!exploreRail ? (
-        <form className="brand-result-card__form" action="/api/offers/create" method="post">
+        <TrackedOfferCreateForm
+          className="brand-result-card__form"
+          action="/api/offers/create"
+          method="post"
+          cardKind="brand_card"
+        >
           <input type="hidden" name="brandId" value={brandUserId} />
           <label htmlFor={`brand-offer-title-${formIdKey}`}>Kampanya başlığı</label>
           <input id={`brand-offer-title-${formIdKey}`} name="title" type="text" required />
@@ -84,7 +95,7 @@ export function MarketplaceBrandOfferCard({
           <button className="btn" type="submit">
             {submitButtonLabel}
           </button>
-        </form>
+        </TrackedOfferCreateForm>
       ) : null}
     </article>
   );

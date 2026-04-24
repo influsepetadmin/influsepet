@@ -83,6 +83,9 @@ export default async function InfluencerProfilePage({
         <p className="influencer-panel-page__lede muted">
           Görünür bilgilerinizi ve bağlı hesaplarınızı yönetin.
         </p>
+        <p className="profile-page__context-hint muted">
+          Tamamlanan genel bilgiler ve doğrulanmış hesaplar keşfette daha güçlü görünmenizi sağlar.
+        </p>
       </header>
 
       <div className="influencer-tab-bar influencer-tab-bar--scroll" role="tablist" aria-label="Profil bölümleri">
@@ -124,6 +127,9 @@ export default async function InfluencerProfilePage({
         <>
           <section className="dash-card dash-card--section">
             <h2 className="dash-section__title">Profil bilgileri</h2>
+            <p className="dash-section__microhint muted">
+              Kullanıcı adı, şehir ve kategoriler keşfette görünür; eksik bırakmayın.
+            </p>
             <InfluencerProfilePanel
               err={err}
               profileComplete={profileComplete}
@@ -200,15 +206,18 @@ export default async function InfluencerProfilePage({
       )}
 
       {tab === "portfoy" && !profile && (
-        <EmptyStateCard
-          icon={<EmptyGlyphListBullet />}
-          title="Profil gerekli"
-          description="Portföy eklemek için önce genel profil bilgilerinizi tamamlayın."
-        >
-          <Link className="btn" href="/influencer/profile?tab=genel">
-            Genel profile git
-          </Link>
-        </EmptyStateCard>
+        <section className="dash-card dash-card--section">
+          <EmptyStateCard
+            icon={<EmptyGlyphListBullet />}
+            hint="Portföy için profil"
+            title="Profil gerekli"
+            description="Önce genel sekmesinde kullanıcı adı ve temel bilgileri kaydedin; ardından portföy ekleyebilirsiniz."
+          >
+            <Link className="btn" href="/influencer/profile?tab=genel">
+              Genel profile git
+            </Link>
+          </EmptyStateCard>
+        </section>
       )}
 
       {tab === "degerlendirme" && (
@@ -216,9 +225,14 @@ export default async function InfluencerProfilePage({
           <h2 className="dash-section__title">Değerlendirmeler</h2>
           <EmptyStateCard
             icon={<EmptyGlyphListBullet />}
-            title="Yakında"
-            description="Tamamlanan iş birliklerinden gelen herkese açık değerlendirmeler burada özetlenecek."
-          />
+            hint="Tamamlanan iş birlikleri"
+            title="Henüz özet yok"
+            description="Tamamlanan iş birliklerinden gelen herkese açık değerlendirmeler burada listelenecek. Önce teklif süreçlerini ilerletin."
+          >
+            <Link className="btn" href="/influencer/offers">
+              Tekliflere git
+            </Link>
+          </EmptyStateCard>
         </section>
       )}
     </div>

@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { getAvatarUrl } from "@/lib/avatar";
 import { truncateText } from "@/lib/dashboardProfileCompletion";
+import { DiscoverProfileFromDiscoverLink } from "@/components/marketplace/DiscoverProfileFromDiscoverLink";
 import { DiscoverySaveButton } from "./DiscoverySaveButton";
+import { TrackedOfferCreateForm } from "@/components/marketplace/TrackedOfferCreateForm";
 
 export type MarketplaceInfluencerOfferCardProps = {
   formIdKey: string;
@@ -67,9 +68,14 @@ export function MarketplaceInfluencerOfferCard({
             variant="brand-saves-influencer"
             initialSaved={initialSaved}
           />
-          <Link className="btn secondary btn--sm" href={`/profil/influencer/${influencerUserId}`}>
+          <DiscoverProfileFromDiscoverLink
+            className="btn secondary btn--sm"
+            href={`/profil/influencer/${influencerUserId}`}
+            profileRole="influencer"
+            targetUserId={influencerUserId}
+          >
             {profileLinkLabel}
-          </Link>
+          </DiscoverProfileFromDiscoverLink>
         </div>
       </div>
       <p className="muted influencer-result-card__meta influencer-result-card__stats">
@@ -82,7 +88,12 @@ export function MarketplaceInfluencerOfferCard({
       ) : null}
 
       {!exploreRail ? (
-        <form className="influencer-result-card__form" action="/api/offers/create" method="post">
+        <TrackedOfferCreateForm
+          className="influencer-result-card__form"
+          action="/api/offers/create"
+          method="post"
+          cardKind="influencer_card"
+        >
           <input type="hidden" name="influencerId" value={influencerUserId} />
           <label htmlFor={`inf-offer-title-${formIdKey}`}>Kampanya başlığı</label>
           <input id={`inf-offer-title-${formIdKey}`} name="title" type="text" required />
@@ -101,7 +112,7 @@ export function MarketplaceInfluencerOfferCard({
           <button className="btn" type="submit">
             {submitButtonLabel}
           </button>
-        </form>
+        </TrackedOfferCreateForm>
       ) : null}
     </article>
   );

@@ -6,6 +6,7 @@ import {
   netPayoutTRYFromOfferAmount,
 } from "@/lib/platformCommission";
 import { prisma } from "@/lib/prisma";
+import { logServerProductEvent } from "@/lib/productTracking/logServerProductEvent";
 import { sameOriginRedirect } from "@/lib/sameOriginRedirect";
 import { getSessionPayload } from "@/lib/session";
 
@@ -232,6 +233,16 @@ export async function POST(request: Request) {
       include: {
         conversation: true,
       },
+    });
+
+    logServerProductEvent({
+      event: "collaboration_created",
+      location: "api_offers_create",
+      label: "influencer_initiated",
+      uid: user.id,
+      offerId: offer.id,
+      conversationId: offer.conversation?.id,
+      brandId: targetBrand.id,
     });
 
     const conversationId = offer.conversation?.id;

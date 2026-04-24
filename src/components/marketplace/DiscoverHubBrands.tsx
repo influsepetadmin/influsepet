@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
+import { ExploreFilterLink } from "@/components/marketplace/ExploreFilterLink";
 import { EmptyGlyphListBullet } from "@/components/icons/emptyStateGlyphs";
 import { CATEGORY_KEYS, getCategoryLabel } from "@/lib/categories";
 import { discoverCardWhy } from "@/lib/discovery/discoverCardWhy";
@@ -83,9 +83,15 @@ export function PopularCategoriesChips({ hrefBase }: { hrefBase: string }) {
       <p className="discover-popular-cats__lede muted">Hızlı filtre — arama formuyla birleştirebilirsiniz.</p>
       <div className="discover-popular-cats__chips">
         {keys.map((key) => (
-          <Link key={key} className="discover-chip" href={`${hrefBase}?categories=${encodeURIComponent(key)}`}>
+          <ExploreFilterLink
+            key={key}
+            className="discover-chip"
+            href={`${hrefBase}?categories=${encodeURIComponent(key)}`}
+            filterKind="category"
+            value={key}
+          >
             {getCategoryLabel(key)}
-          </Link>
+          </ExploreFilterLink>
         ))}
       </div>
     </div>

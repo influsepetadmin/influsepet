@@ -15,6 +15,7 @@ import {
   workspaceDeliveryPill,
   workspaceOfferPill,
 } from "@/lib/chat/workspaceMilestones";
+import { trackFirstTimeOnce, trackProductEvent } from "@/lib/productTracking/productEvents";
 
 const WORKFLOW_EVENT_ICON_PX = 12;
 const WORKFLOW_EVENT_ICON_STROKE = 1.65;
@@ -429,6 +430,7 @@ export default function ChatClient({
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
   const [uploadErr, setUploadErr] = useState<string | null>(null);
+  const [sendErr, setSendErr] = useState<string | null>(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [ratingChatEpoch, setRatingChatEpoch] = useState(0);
   const [threadReady, setThreadReady] = useState(false);
@@ -496,14 +498,32 @@ export default function ChatClient({
     const text = body.trim();
     if (!text || sending) return;
     setSending(true);
+    setSendErr(null);
     try {
-      await fetch("/api/chat/messages", {
+      const res = await fetch("/api/chat/messages", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ conversationId, body: text }),
       });
+      if (!res.ok) {
+        setSendErr("Mesaj gonderilemedi, tekrar deneyin.");
+        return;
+      }
+      trackProductEvent({
+        event: "message_sent",
+        location: "chat_thread",
+        label: "text",
+        conversationId,
+      });
+      trackFirstTimeOnce("influsepet_ft_first_chat_message", {
+        event: "first_message_sent",
+        location: "chat_thread",
+        conversationId,
+      });
       setBody("");
       await load();
+    } catch {
+      setSendErr("Mesaj gonderilemedi, tekrar deneyin.");
     } finally {
       setSending(false);
     }
@@ -839,6 +859,19 @@ export default function ChatClient({
       </div>
 
       {uploadErr ? <p className="alert-inline alert-inline--error chat-composer-alert">{uploadErr}</p> : null}
+      {sendErr ? (
+        <div className="alert-inline alert-inline--error chat-composer-alert" role="status" aria-live="polite">
+          <span>{sendErr}</span>
+          <button
+            type="button"
+            className="btn secondary btn--sm"
+            disabled={sending || !body.trim()}
+            onClick={() => void send()}
+          >
+            Tekrar dene
+          </button>
+        </div>
+      ) : null}
       {uploading ? (
         <div className="chat-upload-progress" aria-live="polite">
           <span className="muted">Yükleniyor… {uploadPct}%</span>
@@ -900,7 +933,10 @@ export default function ChatClient({
           <input
             type="text"
             value={body}
-            onChange={(e) => setBody(e.target.value)}
+            onChange={(e) => {
+              setBody(e.target.value);
+              if (sendErr) setSendErr(null);
+            }}
             placeholder="Mesaj yazın…"
             className="chat-composer-input"
             onKeyDown={(e) => {

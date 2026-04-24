@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { getCategoryLabel } from "@/lib/categories";
+import { ExploreFilterLink } from "@/components/marketplace/ExploreFilterLink";
 import type {
   DiscoverBrandSectionRow,
   DiscoverInfluencerSectionRow,
@@ -91,17 +91,19 @@ export function DiscoverExploreInfluencers({
         >
           <ExplorePills>
             {popularCategories.map(({ key, count }) => (
-              <Link
+              <ExploreFilterLink
                 key={key}
                 role="listitem"
                 className="discover-chip discover-explore__pill"
                 href={`${hrefBase}?categories=${encodeURIComponent(key)}`}
+                filterKind="category"
+                value={key}
               >
                 <span>{getCategoryLabel(key)}</span>
                 <span className="discover-explore__pill-n" aria-hidden="true">
                   {count}
                 </span>
-              </Link>
+              </ExploreFilterLink>
             ))}
           </ExplorePills>
         </ExploreBlock>
@@ -115,17 +117,19 @@ export function DiscoverExploreInfluencers({
         >
           <ExplorePills>
             {trendingCities.map(({ city, count }) => (
-              <Link
+              <ExploreFilterLink
                 key={city}
                 role="listitem"
                 className="discover-chip discover-explore__pill"
                 href={`${hrefBase}?city=${encodeURIComponent(city)}`}
+                filterKind="city"
+                value={city}
               >
                 <span>{city}</span>
                 <span className="discover-explore__pill-n" aria-hidden="true">
                   {count}
                 </span>
-              </Link>
+              </ExploreFilterLink>
             ))}
           </ExplorePills>
         </ExploreBlock>
@@ -249,17 +253,19 @@ export function DiscoverExploreBrands({
         >
           <ExplorePills>
             {popularSectors.map(({ key, count }) => (
-              <Link
+              <ExploreFilterLink
                 key={key}
                 role="listitem"
                 className="discover-chip discover-explore__pill"
                 href={`${hrefBase}?categories=${encodeURIComponent(key)}`}
+                filterKind="category"
+                value={key}
               >
                 <span>{getCategoryLabel(key)}</span>
                 <span className="discover-explore__pill-n" aria-hidden="true">
                   {count}
                 </span>
-              </Link>
+              </ExploreFilterLink>
             ))}
           </ExplorePills>
         </ExploreBlock>
@@ -273,17 +279,19 @@ export function DiscoverExploreBrands({
         >
           <ExplorePills>
             {activeCities.map(({ city, count }) => (
-              <Link
+              <ExploreFilterLink
                 key={city}
                 role="listitem"
                 className="discover-chip discover-explore__pill"
                 href={`${hrefBase}?city=${encodeURIComponent(city)}`}
+                filterKind="city"
+                value={city}
               >
                 <span>{city}</span>
                 <span className="discover-explore__pill-n" aria-hidden="true">
                   {count}
                 </span>
-              </Link>
+              </ExploreFilterLink>
             ))}
           </ExplorePills>
         </ExploreBlock>

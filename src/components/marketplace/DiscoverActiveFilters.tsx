@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { getCategoryLabel } from "@/lib/categories";
+import { getProfileCtaAbVariantForTrack } from "@/lib/productTracking/profileCtaAb";
+import { trackProductEvent } from "@/lib/productTracking/productEvents";
 
 function buildHref(
   basePath: string,
@@ -33,7 +37,7 @@ export function DiscoverActiveFilters({
   categoryKeys: string[];
 }) {
   const state = { q, city, categories: categoryKeys };
-  const chips: { key: string; label: string; href: string; aria: string }[] = [];
+  const chips: { key: string; label: string; href: string; aria: string; trackLabel: string }[] = [];
 
   if (q.trim()) {
     chips.push({
@@ -41,6 +45,7 @@ export function DiscoverActiveFilters({
       label: `“${q.trim().slice(0, 48)}${q.trim().length > 48 ? "…" : ""}”`,
       href: buildHref(basePath, state, { kind: "q" }),
       aria: "Arama metnini kaldır",
+      trackLabel: "remove_query",
     });
   }
   if (city.trim()) {
@@ -49,6 +54,7 @@ export function DiscoverActiveFilters({
       label: `Şehir: ${city.trim()}`,
       href: buildHref(basePath, state, { kind: "city" }),
       aria: "Şehir filtresini kaldır",
+      trackLabel: "remove_city",
     });
   }
   for (const key of categoryKeys) {
@@ -57,19 +63,35 @@ export function DiscoverActiveFilters({
       label: getCategoryLabel(key),
       href: buildHref(basePath, state, { kind: "category", key }),
       aria: "Bu kategoriyi kaldır",
+      trackLabel: `remove_category:${key}`,
     });
   }
 
   if (chips.length === 0) return null;
 
   const clearAllHref = basePath;
+  const location = basePath.includes("marka") ? "marka_discover" : "influencer_discover";
 
   return (
     <div className="discovery-active-filters" aria-label="Etkin filtreler">
       <span className="discovery-active-filters__label">Filtreler</span>
       <div className="discovery-active-filters__chips">
         {chips.map((c) => (
-          <Link key={c.key} className="discovery-filter-chip" href={c.href} aria-label={c.aria}>
+          <Link
+            key={c.key}
+            className="discovery-filter-chip"
+            href={c.href}
+            aria-label={c.aria}
+            onClick={() =>
+              trackProductEvent({
+                event: "discover_filter_click",
+                location,
+                label: "active_filter_chip",
+                action: c.trackLabel,
+                variant: getProfileCtaAbVariantForTrack(),
+              })
+            }
+          >
             <span>{c.label}</span>
             <span className="discovery-filter-chip__x" aria-hidden>
               ×
@@ -77,7 +99,18 @@ export function DiscoverActiveFilters({
           </Link>
         ))}
       </div>
-      <Link className="discovery-active-filters__clear" href={clearAllHref}>
+      <Link
+        className="discovery-active-filters__clear"
+        href={clearAllHref}
+        onClick={() =>
+          trackProductEvent({
+            event: "discover_filter_click",
+            location,
+            label: "clear_all_filters",
+            variant: getProfileCtaAbVariantForTrack(),
+          })
+        }
+      >
         Tümünü temizle
       </Link>
     </div>

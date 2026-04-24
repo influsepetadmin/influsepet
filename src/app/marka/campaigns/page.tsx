@@ -128,15 +128,18 @@ export default async function MarkaCampaignsPage({
       />
 
       {!profile ? (
-        <EmptyStateCard
-          icon={<EmptyGlyphBuildingOffice />}
-          title="Marka profili gerekli"
-          description="Özet ve listeler için önce şirket profilinizi oluşturun. Teklifler ve keşfet bu profile bağlıdır."
-        >
-          <Link className="btn" href="/marka/profile?tab=genel">
-            Profile git
-          </Link>
-        </EmptyStateCard>
+        <section className="dash-card dash-card--section">
+          <EmptyStateCard
+            icon={<EmptyGlyphBuildingOffice />}
+            hint="Kampanyalar için profil"
+            title="Marka profili gerekli"
+            description="Özet ve listeler şirket profilinize bağlıdır. Önce genel sekmesini doldurun."
+          >
+            <Link className="btn" href="/marka/profile?tab=genel">
+              Profili tamamla
+            </Link>
+          </EmptyStateCard>
+        </section>
       ) : (
         <>
           <ShellControlBar>
@@ -155,15 +158,18 @@ export default async function MarkaCampaignsPage({
           </ShellControlBar>
 
           {tabDef.statuses === "placeholder" ? (
-            <EmptyStateCard
-              icon={<EmptyGlyphBuildingOffice />}
-              title="Taslak kampanyalar yakında"
-              description="Bağımsız kampanya taslağı ve yayın akışı eklendiğinde bu sekme dolar. Şimdilik teklif oluşturarak süreçleri Teklifler ve buradaki aktif görünümden yönetebilirsiniz."
-            >
-              <Link className="btn" href="/marka/discover">
-                Keşfet ile teklif oluştur
-              </Link>
-            </EmptyStateCard>
+            <section className="dash-card dash-card--section">
+              <EmptyStateCard
+                icon={<EmptyGlyphBuildingOffice />}
+                hint="Yakında"
+                title="Taslak kampanyalar yakında"
+                description="Şimdilik teklif oluşturup aktif sekmeden süreci yönetin; bu sekme ileride dolar."
+              >
+                <Link className="btn" href="/marka/discover">
+                  Influencer keşfet
+                </Link>
+              </EmptyStateCard>
+            </section>
           ) : offers.length === 0 ? (
             <>
               <ShellPanelHint>
@@ -171,27 +177,30 @@ export default async function MarkaCampaignsPage({
                 {tabKey === "tamamlanan" && "Tamamlanan iş birlikleri; raporlama ve arşiv için referans."}
                 {tabKey === "arsiv" && "Reddedilen veya iptal edilen kayıtlar."}
               </ShellPanelHint>
-              <EmptyStateCard
-                icon={<EmptyGlyphInbox />}
-                title={
-                  tabKey === "aktif"
-                    ? "Aktif süreçte kayıt yok"
-                    : tabKey === "tamamlanan"
-                      ? "Tamamlanan iş birliği yok"
-                      : "Arşivde kayıt yok"
-                }
-                description={
-                  tabKey === "aktif"
-                    ? "Kabul sonrası süreçler burada listelenir. Önce Keşfet’ten teklif gönderin veya gelen teklifleri yanıtlayın."
-                    : tabKey === "tamamlanan"
-                      ? "Tamamlanan iş birlikleri zamanla burada birikir."
-                      : "İptal veya red sonrası kayıtlar bu sekmede tutulur."
-                }
-              >
-                <Link className="btn" href="/marka/discover">
-                  Influencer keşfet
-                </Link>
-              </EmptyStateCard>
+              <section className="dash-card dash-card--section">
+                <EmptyStateCard
+                  icon={<EmptyGlyphInbox />}
+                  hint={tabKey === "aktif" ? "İlk iş birliğini başlat" : undefined}
+                  title={
+                    tabKey === "aktif"
+                      ? "Aktif süreçte kayıt yok"
+                      : tabKey === "tamamlanan"
+                        ? "Tamamlanan iş birliği yok"
+                        : "Arşivde kayıt yok"
+                  }
+                  description={
+                    tabKey === "aktif"
+                      ? "Kabul sonrası süreçler burada listelenir. Keşfet’ten teklif gönderin veya Teklifler’den gelen isteği yanıtlayın."
+                      : tabKey === "tamamlanan"
+                        ? "Tamamlanan iş birlikleri zamanla burada birikir."
+                        : "İptal veya red sonrası kayıtlar bu sekmede tutulur."
+                  }
+                >
+                  <Link className="btn" href="/marka/discover">
+                    Influencer keşfet
+                  </Link>
+                </EmptyStateCard>
+              </section>
             </>
           ) : (
             <>

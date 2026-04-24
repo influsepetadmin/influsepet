@@ -76,8 +76,9 @@ export function SocialAccountsSection() {
           {accounts.length === 0 && (
             <EmptyStateCard
               icon={<EmptyGlyphDevicePhone />}
+              hint="Güven sinyali"
               title="Bağlı sosyal hesap yok"
-              description="Aşağıdaki formdan hesap ekleyerek doğrulama adımına geçebilirsiniz."
+              description="Hesap ekleyip doğrulayın; markalar profilinizde doğrulanmış kanalları görür."
             />
           )}
           {accounts.length > 0 && (

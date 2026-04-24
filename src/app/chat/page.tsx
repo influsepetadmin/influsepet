@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { OfferStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/app-shell/PageHeader";
+import { ChatInboxThreadLink } from "@/components/tracking/ChatInboxThreadLink";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { getSessionPayload } from "@/lib/session";
 import { StatusBadge } from "@/components/offers/StatusBadge";
@@ -105,10 +106,7 @@ export default async function ChatIndexPage() {
     );
   }
 
-  const panelHref =
-    me.role === "BRAND" ? "/marka/overview" : me.role === "INFLUENCER" ? "/influencer/overview" : "/";
   const discoverHref = me.role === "BRAND" ? "/marka/discover" : "/influencer/discover";
-  const offersHref = me.role === "BRAND" ? "/marka/offers" : "/influencer/offers";
 
   const conversations = await prisma.conversation.findMany({
     where: {
@@ -174,14 +172,9 @@ export default async function ChatIndexPage() {
         title="Görüşmeler"
         description="İş birliği akışınızdaki tüm konuşmalar."
         action={
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "flex-end" }}>
-            <Link className="btn btn--sm" href={discoverHref}>
-              {me.role === "BRAND" ? "Influencer keşfet" : "Keşfet"}
-            </Link>
-            <Link className="btn secondary btn--sm" href={offersHref}>
-              Teklifler
-            </Link>
-          </div>
+          <Link className="btn btn--sm" href={discoverHref}>
+            {me.role === "BRAND" ? "Influencer keşfet" : "Marka keşfet"}
+          </Link>
         }
       />
 
@@ -189,22 +182,13 @@ export default async function ChatIndexPage() {
         <section className="dash-card dash-card--section chat-inbox-empty-card">
           <EmptyStateCard
             icon={<EmptyGlyphChatBubble />}
+            hint="İlk mesajın sohbet ekranında — önce bir teklif gönderin veya kabul edin."
             title="Henüz sohbet yok"
-            description="Sohbetler, iş birliği teklifleri kabul edildikten sonra açılır. Keşfede yeni iş ortakları bulun veya teklif kutunuzu kontrol edin."
+            description="Konuşmalar, teklif kabul edildikten sonra burada listelenir. Açık bir teklifiniz varsa Teklifler sayfasından ilgili karta girip sohbete geçebilirsiniz."
           >
-            <div className="chat-inbox-empty-card__stack">
-              <div className="chat-inbox-empty-card__actions">
-                <Link className="btn" href={discoverHref}>
-                  {me.role === "BRAND" ? "Influencer keşfet" : "Keşfet"}
-                </Link>
-                <Link className="btn secondary" href={offersHref}>
-                  Tekliflere git
-                </Link>
-              </div>
-              <Link className="chat-inbox-empty-card__panel muted" href={panelHref}>
-                Panele dön
-              </Link>
-            </div>
+            <Link className="btn" href={discoverHref}>
+              İlk iş birliğini başlat
+            </Link>
           </EmptyStateCard>
         </section>
       ) : (
@@ -225,7 +209,7 @@ export default async function ChatIndexPage() {
               const rowClass = inboxRowClass(o.status, unread);
               return (
                 <li key={c.id}>
-                  <Link className={rowClass} href={`/chat/${c.id}`}>
+                  <ChatInboxThreadLink className={rowClass} href={`/chat/${c.id}`}>
                     <div className="chat-inbox__row-inner">
                       <div className="chat-inbox__avatar" aria-hidden>
                         {initialFromName(otherName)}
@@ -252,7 +236,7 @@ export default async function ChatIndexPage() {
                         </span>
                       ) : null}
                     </div>
-                  </Link>
+                  </ChatInboxThreadLink>
                 </li>
               );
             })}

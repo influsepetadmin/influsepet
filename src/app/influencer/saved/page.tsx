@@ -69,11 +69,12 @@ export default async function InfluencerSavedPage() {
         <section className="dash-card dash-card--section">
           <EmptyStateCard
             icon={<Bookmark strokeWidth={1.25} />}
-            title="Henüz kayıtlı marka yok"
-            description="Keşfet’te beğendiğiniz markaların kartındaki “Kaydet” ile listeyi oluşturun. Böylece kampanya düşünürken profillere tek tıkla dönebilirsiniz."
+            hint="Teklif öncesi kısayol"
+            title="Kayıtlı marka yok"
+            description="Keşfet’te kartlardan “Kaydet” ile listeyi oluşturun; teklif yazmadan önce buradan açın."
           >
-            <Link className="btn" href="/influencer/discover">
-              Marka keşfet
+            <Link className="btn" href="/influencer/discover#influencer-marka-ara">
+              Keşfede marka bul
             </Link>
           </EmptyStateCard>
         </section>

@@ -4,6 +4,7 @@ import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import CitySelect from "@/components/CitySelect";
 import { DiscoverActiveFilters } from "@/components/marketplace/DiscoverActiveFilters";
+import { TrackedDiscoverSubmitButton } from "@/components/marketplace/TrackedDiscoverSubmitButton";
 import { DiscoverExploreBrands } from "@/components/marketplace/DiscoverExplore";
 import { DiscoverySearchQueryField } from "@/components/marketplace/DiscoverySearchQueryField";
 import { MarketplaceBrandOfferCard } from "@/components/marketplace/MarketplaceBrandOfferCard";
@@ -109,6 +110,9 @@ export default async function InfluencerDiscoverPage({
             <p className="dash-section__lede muted discovery-search-card__lede">
               Şehir, kategori veya metin ile daraltın; yakın yazımlar ve kısmi eşleşmeler desteklenir.
             </p>
+            <p className="discovery-context-hint muted">
+              Sonuç çıkmazsa kriterleri tek tek gevşetin; ardından <strong>Sonuçları göster</strong> ile yenileyin.
+            </p>
           </header>
 
           <div className="discovery-search-panel">
@@ -175,9 +179,7 @@ export default async function InfluencerDiscoverPage({
               </div>
 
               <div className="influencer-search-form__actions discovery-search-actions">
-                <button className="btn discovery-search-actions__submit" type="submit">
-                  Sonuçları göster
-                </button>
+                <TrackedDiscoverSubmitButton location="influencer_discover" />
                 <a className="btn secondary discovery-search-actions__reset" href="/influencer/discover">
                   Sıfırla
                 </a>
@@ -195,12 +197,14 @@ export default async function InfluencerDiscoverPage({
           ) : null}
 
           {showExploreRail && exploreData && profile ? (
-            <DiscoverExploreBrands
-              data={exploreData}
-              hrefBase="/influencer/discover"
-              savedBrandUserIds={savedBrandUserIds}
-              influencerBasePriceTRY={profile.basePriceTRY}
-            />
+            <div id="influencer-discover-oneriler">
+              <DiscoverExploreBrands
+                data={exploreData}
+                hrefBase="/influencer/discover"
+                savedBrandUserIds={savedBrandUserIds}
+                influencerBasePriceTRY={profile.basePriceTRY}
+              />
+            </div>
           ) : null}
 
           <div className="discovery-search-results">
@@ -208,15 +212,31 @@ export default async function InfluencerDiscoverPage({
             {!hasBrandSearch ? (
               <EmptyStateCard
                 icon={<EmptyGlyphBuildingOffice />}
+                hint="Sonraki adım"
                 title="Aramayı başlatın veya filtre seçin"
-                description="Yukarıdaki önerilerden bir etikete tıklayın veya şehir, kategori ve arama kutusu ile sonuçları daraltın."
-              />
+                description="Önerilen markalara tıklayın ya da şehir ve kategori seçip arama kutusuna birkaç kelime yazın."
+              >
+                {showExploreRail && exploreData && profile ? (
+                  <a className="btn" href="#influencer-discover-oneriler">
+                    Önerilenlere göz at
+                  </a>
+                ) : (
+                  <a className="btn" href="#influencer-marka-ara">
+                    Arama formuna git
+                  </a>
+                )}
+              </EmptyStateCard>
             ) : brandResults.length === 0 ? (
               <EmptyStateCard
                 icon={<EmptyGlyphMapPin />}
+                hint="Kriterleri gevşetin"
                 title="Sonuç bulunamadı"
-                description="Bu kriterlere uygun marka bulunamadı. Yazımı kontrol edin, şehri veya kategorileri değiştirip yeniden deneyin veya sıfırlayın."
-              />
+                description="Bu kombinasyonda marka yok. Metni kısaltın veya filtreleri kaldırıp tekrar deneyin."
+              >
+                <a className="btn" href="/influencer/discover">
+                  Filtreleri sıfırla
+                </a>
+              </EmptyStateCard>
             ) : (
               <div className="influencer-results-stack brand-results-stack">
                 {brandResults.map((b) => {
@@ -252,18 +272,32 @@ export default async function InfluencerDiscoverPage({
             )}
           </div>
         </section>
-      ) : null}
+      ) : (
+        <section className="dash-card dash-card--section">
+          <EmptyStateCard
+            icon={<EmptyGlyphBuildingOffice />}
+            hint="Keşfet için profil"
+            title="Önce influencer profilinizi tamamlayın"
+            description="Marka araması ve teklif göndermek için profil bilgileriniz kayıtlı olmalı."
+          >
+            <Link className="btn" href="/influencer/profile?tab=genel">
+              Profile git
+            </Link>
+          </EmptyStateCard>
+        </section>
+      )}
 
       <section className="dash-card dash-card--section">
         <h2 className="dash-section__title">Kayıtlı markalar</h2>
         {savedBrandCount === 0 ? (
           <EmptyStateCard
             icon={<Bookmark strokeWidth={1.25} />}
-            title="Listeniz boş"
-            description="Keşfet veya arama sonuçlarında marka kartlarındaki “Kaydet” ile buraya ekleyin; teklif öncesi hızlıca dönün."
+            hint="Teklif öncesi kısayol"
+            title="Kayıtlı marka yok"
+            description="İlginizi çeken markaları kart üzerinden kaydedin; teklif yazmadan önce buradan hızlıca açın."
           >
-            <Link className="btn" href="/influencer/discover">
-              Keşfet
+            <Link className="btn" href="/influencer/discover#influencer-marka-ara">
+              Keşfede marka bul
             </Link>
           </EmptyStateCard>
         ) : (

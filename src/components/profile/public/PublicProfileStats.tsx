@@ -9,17 +9,15 @@ export function PublicProfileStats({ data }: { data: PublicProfileByUsernameResp
       value: data.averageRating != null ? data.averageRating.toFixed(1) : "—",
     },
     { label: "Puanlama sayısı", value: String(data.ratingCount) },
-  ];
-
-  if (data.followerCount > 0) {
-    items.push({ label: "Takipçi", value: data.followerCount.toLocaleString("tr-TR") });
-  }
-  if (data.basePriceTRY > 0) {
-    items.push({
+    {
+      label: "Takipçi",
+      value: data.followerCount > 0 ? data.followerCount.toLocaleString("tr-TR") : "—",
+    },
+    {
       label: "Baz fiyat",
-      value: `${data.basePriceTRY.toLocaleString("tr-TR")} TRY`,
-    });
-  }
+      value: data.basePriceTRY > 0 ? `${data.basePriceTRY.toLocaleString("tr-TR")} TRY` : "—",
+    },
+  ];
 
   return <PublicProfileStatCards items={items} iconTreatment="line" />;
 }
