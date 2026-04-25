@@ -1038,24 +1038,10 @@ main:has(.public-profile-page--app) {
   position: sticky;
   top: 58px;
   z-index: 14;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 10px;
-  padding: 6px 0 10px;
+  margin-bottom: 6px;
+  padding: 4px 0 6px;
   background: var(--dash-page-tint);
   isolation: isolate;
-}
-
-.chat-workspace-top--sticky::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 12px;
-  pointer-events: none;
-  background: var(--dash-page-tint);
 }
 
 .chat-workspace-summary-card {
@@ -1328,8 +1314,8 @@ main:has(.public-profile-page--app) {
 @media (max-width: 640px) {
   .chat-workspace-top--sticky {
     top: 54px;
-    margin-bottom: 8px;
-    padding: 4px 0 8px;
+    margin-bottom: 5px;
+    padding: 3px 0 5px;
   }
 
   .chat-delivery-anchor {

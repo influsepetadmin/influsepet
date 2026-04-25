@@ -566,98 +566,98 @@ export default function ChatClient({
     <div className="chat-conversation chat-conversation--workspace">
       <div className="chat-workspace-top chat-workspace-top--sticky">
         <ChatWorkspaceNav {...workspaceNav} />
-        <header
-          className="chat-workflow-card chat-workflow-card--workspace chat-workspace-summary-card"
-          id="chat-workspace-header"
-        >
-          <div className="chat-workspace-summary-card__intro">
-            <p className="chat-workspace-summary-card__eyebrow muted">Kampanya ve teslim özeti</p>
-            <div className="chat-workflow-card__title-row chat-workflow-card__title-row--workspace">
-              <div className="chat-workflow-card__title-block">
-                <span className="chat-workflow-card__kicker">İş birliği çalışma alanı</span>
-                <h2 className="chat-workflow-card__title">{chatContext.offerTitle}</h2>
-                <ChatWorkspacePills
-                  offerStatus={offer.status}
-                  latestDelivery={workspaceSummary.latestDelivery}
-                />
-                {chatContext.brief.trim() ? (
-                  <p className="chat-workflow-card__brief muted">{chatContext.brief}</p>
-                ) : null}
-              </div>
-            </div>
-            <ChatWorkspaceTimeline offerStatus={offer.status} />
-          </div>
-
-          <div className="chat-workflow-card__identity chat-workflow-card__identity--workspace">
-            <Link
-              className="chat-workflow-card__avatar-hit"
-              href={chatContext.profileHref}
-              title="Herkese açık profil"
-            >
-              <div className="chat-workflow-card__avatar-wrap" aria-hidden>
-                <div className="chat-workflow-card__avatar-ring">
-                  <img
-                    className="chat-workflow-card__avatar"
-                    src={chatContext.otherSideAvatarSrc}
-                    alt=""
-                    width={44}
-                    height={44}
-                  />
-                </div>
-              </div>
-            </Link>
-            <div className="chat-workflow-card__identity-main">
-              <span className="chat-workflow-card__identity-role">{chatContext.otherSideRole}</span>
-              <span className="chat-workflow-card__identity-name">{chatContext.otherSideName}</span>
-              {chatContext.otherSideHandleLine ? (
-                <span className="chat-workflow-card__identity-handle muted">{chatContext.otherSideHandleLine}</span>
+      </div>
+      <header
+        className="chat-workflow-card chat-workflow-card--workspace chat-workspace-summary-card"
+        id="chat-workspace-header"
+      >
+        <div className="chat-workspace-summary-card__intro">
+          <p className="chat-workspace-summary-card__eyebrow muted">Kampanya ve teslim özeti</p>
+          <div className="chat-workflow-card__title-row chat-workflow-card__title-row--workspace">
+            <div className="chat-workflow-card__title-block">
+              <span className="chat-workflow-card__kicker">İş birliği çalışma alanı</span>
+              <h2 className="chat-workflow-card__title">{chatContext.offerTitle}</h2>
+              <ChatWorkspacePills
+                offerStatus={offer.status}
+                latestDelivery={workspaceSummary.latestDelivery}
+              />
+              {chatContext.brief.trim() ? (
+                <p className="chat-workflow-card__brief muted">{chatContext.brief}</p>
               ) : null}
             </div>
-            <Link className="chat-workflow-card__profile-quick" href={chatContext.profileHref}>
-              Profili görüntüle
-            </Link>
           </div>
+          <ChatWorkspaceTimeline offerStatus={offer.status} />
+        </div>
 
-          <dl className="chat-workflow-card__metrics" aria-label="Özet rakamlar">
-            <div className="chat-workflow-metric">
-              <dt className="chat-workflow-metric__label">Bütçe</dt>
-              <dd className="chat-workflow-metric__value">{workflowMeta.budgetLabel}</dd>
+        <div className="chat-workflow-card__identity chat-workflow-card__identity--workspace">
+          <Link
+            className="chat-workflow-card__avatar-hit"
+            href={chatContext.profileHref}
+            title="Herkese açık profil"
+          >
+            <div className="chat-workflow-card__avatar-wrap" aria-hidden>
+              <div className="chat-workflow-card__avatar-ring">
+                <img
+                  className="chat-workflow-card__avatar"
+                  src={chatContext.otherSideAvatarSrc}
+                  alt=""
+                  width={44}
+                  height={44}
+                />
+              </div>
             </div>
-            <div className="chat-workflow-metric">
-              <dt className="chat-workflow-metric__label">Son teslim</dt>
-              <dd
-                className={`chat-workflow-metric__value${workflowMeta.dueDateLabel ? "" : " chat-workflow-metric__value--muted"}`}
-              >
-                {workflowMeta.dueDateLabel ?? "—"}
-              </dd>
-            </div>
-            <div className="chat-workflow-metric">
-              <dt className="chat-workflow-metric__label">Başlangıç</dt>
-              <dd className="chat-workflow-metric__value chat-workflow-metric__value--muted">
-                {workflowMeta.createdAtLabel}
-              </dd>
-            </div>
-          </dl>
-
-          <ChatOfferWorkflowActions
-            offerId={offer.id}
-            availableNextTransitions={availableNextTransitions}
-            profileHref={chatContext.profileHref}
-            offersPanelHref={offersPanelHref}
-            showDeliveryShortcut={
-              offer.status === "IN_PROGRESS" ||
-              offer.status === "REVISION_REQUESTED" ||
-              offer.status === "DELIVERED"
-            }
-          />
-
-          <div className="chat-workflow-card__workspace-foot">
-            <p className="chat-workflow-card__workspace-hint muted">
-              Teslim ve puanlama aşağıda; mesajlar bu özetin altında devam eder.
-            </p>
+          </Link>
+          <div className="chat-workflow-card__identity-main">
+            <span className="chat-workflow-card__identity-role">{chatContext.otherSideRole}</span>
+            <span className="chat-workflow-card__identity-name">{chatContext.otherSideName}</span>
+            {chatContext.otherSideHandleLine ? (
+              <span className="chat-workflow-card__identity-handle muted">{chatContext.otherSideHandleLine}</span>
+            ) : null}
           </div>
-        </header>
-      </div>
+          <Link className="chat-workflow-card__profile-quick" href={chatContext.profileHref}>
+            Profili görüntüle
+          </Link>
+        </div>
+
+        <dl className="chat-workflow-card__metrics" aria-label="Özet rakamlar">
+          <div className="chat-workflow-metric">
+            <dt className="chat-workflow-metric__label">Bütçe</dt>
+            <dd className="chat-workflow-metric__value">{workflowMeta.budgetLabel}</dd>
+          </div>
+          <div className="chat-workflow-metric">
+            <dt className="chat-workflow-metric__label">Son teslim</dt>
+            <dd
+              className={`chat-workflow-metric__value${workflowMeta.dueDateLabel ? "" : " chat-workflow-metric__value--muted"}`}
+            >
+              {workflowMeta.dueDateLabel ?? "—"}
+            </dd>
+          </div>
+          <div className="chat-workflow-metric">
+            <dt className="chat-workflow-metric__label">Başlangıç</dt>
+            <dd className="chat-workflow-metric__value chat-workflow-metric__value--muted">
+              {workflowMeta.createdAtLabel}
+            </dd>
+          </div>
+        </dl>
+
+        <ChatOfferWorkflowActions
+          offerId={offer.id}
+          availableNextTransitions={availableNextTransitions}
+          profileHref={chatContext.profileHref}
+          offersPanelHref={offersPanelHref}
+          showDeliveryShortcut={
+            offer.status === "IN_PROGRESS" ||
+            offer.status === "REVISION_REQUESTED" ||
+            offer.status === "DELIVERED"
+          }
+        />
+
+        <div className="chat-workflow-card__workspace-foot">
+          <p className="chat-workflow-card__workspace-hint muted">
+            Teslim ve puanlama aşağıda; mesajlar bu özetin altında devam eder.
+          </p>
+        </div>
+      </header>
 
       <section className="chat-workspace-block" aria-labelledby="chat-delivery-section-label">
         <div className="chat-workspace-block__head">
