@@ -21,6 +21,7 @@ export function PublicBrandProfileView({
   isOwnPublicProfile,
   chatHref,
   viewerRole,
+  cameFromDiscover = false,
 }: {
   data: PublicBrandProfileResponse;
   homeHref: string;
@@ -33,6 +34,7 @@ export function PublicBrandProfileView({
   isOwnPublicProfile: boolean;
   chatHref?: string | null;
   viewerRole?: "INFLUENCER" | "BRAND" | null;
+  cameFromDiscover?: boolean;
 }) {
   return (
     <div
@@ -49,6 +51,7 @@ export function PublicBrandProfileView({
                 isOwnPublicProfile={isOwnPublicProfile}
                 chatHref={chatHref}
                 viewerRole={viewerRole}
+                cameFromDiscover={cameFromDiscover}
               />
               <PublicBrandProfileStats data={data} />
               <div className="public-profile-trust-stack">

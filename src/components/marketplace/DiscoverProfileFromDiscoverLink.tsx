@@ -5,6 +5,15 @@ import type { ReactNode } from "react";
 import { getProfileCtaAbVariantForTrack } from "@/lib/productTracking/profileCtaAb";
 import { trackFirstTimeOnce, trackProductEvent } from "@/lib/productTracking/productEvents";
 
+function withDiscoverSource(href: string): string {
+  const [baseWithQuery, hash = ""] = href.split("#");
+  const [basePath, query = ""] = baseWithQuery.split("?");
+  const params = new URLSearchParams(query);
+  if (!params.has("from")) params.set("from", "discover");
+  const next = `${basePath}?${params.toString()}`;
+  return hash ? `${next}#${hash}` : next;
+}
+
 export function DiscoverProfileFromDiscoverLink({
   href,
   className,
@@ -18,9 +27,10 @@ export function DiscoverProfileFromDiscoverLink({
   targetUserId: string;
   children: ReactNode;
 }) {
+  const discoverHref = withDiscoverSource(href);
   return (
     <Link
-      href={href}
+      href={discoverHref}
       className={className}
       onClick={() => {
         trackProductEvent({

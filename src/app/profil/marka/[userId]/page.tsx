@@ -7,7 +7,10 @@ import { getCurrentUser, getDashboardBackHref } from "@/lib/me";
 import { findLatestConversationBetweenBrandAndInfluencer } from "@/lib/conversations/findLatestConversationBetweenBrandAndInfluencer";
 import { getPublicBrandProfileByUserId } from "@/lib/publicProfile/getPublicBrandProfileByUserId";
 
-type Props = { params: Promise<{ userId: string }> };
+type Props = {
+  params: Promise<{ userId: string }>;
+  searchParams?: Promise<{ from?: string }>;
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { userId } = await params;
@@ -23,8 +26,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function InfluencerPanelBrandProfilePage({
   params,
+  searchParams,
 }: Props) {
   const { userId } = await params;
+  const urlSearchParams = searchParams ? await searchParams : undefined;
+  const cameFromDiscover = (urlSearchParams?.from ?? "").toLowerCase() === "discover";
   const [data, backHref, user] = await Promise.all([
     getPublicBrandProfileByUserId(userId),
     getDashboardBackHref(),
@@ -63,6 +69,7 @@ export default async function InfluencerPanelBrandProfilePage({
       isOwnPublicProfile={isOwnPublicProfile}
       chatHref={chatHref}
       viewerRole={viewerRole}
+      cameFromDiscover={cameFromDiscover}
       headerCta={
         <>
           <div className="public-profile-hero__cta-actions">

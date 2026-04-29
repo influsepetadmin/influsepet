@@ -18,6 +18,17 @@ import { parseMarketplaceSearchQuery } from "@/lib/marketplaceTextSearch";
 import { prisma } from "@/lib/prisma";
 import { EmptyGlyphMagnifyingGlass, EmptyGlyphMapPin } from "@/components/icons/emptyStateGlyphs";
 
+const NEW_JOINED_WINDOW_DAYS = 21;
+const POPULAR_FOLLOWER_THRESHOLD = 50_000;
+
+function getDefaultSuggestedWhyLine(row: { createdAt: Date; followerCount: number }): string {
+  const ageMs = Date.now() - row.createdAt.getTime();
+  const ageDays = ageMs / (1000 * 60 * 60 * 24);
+  if (ageDays <= NEW_JOINED_WINDOW_DAYS) return "Yeni katıldı";
+  if (row.followerCount >= POPULAR_FOLLOWER_THRESHOLD) return "Popüler profil";
+  return "Sizin için önerildi";
+}
+
 export default async function MarkaDiscoverPage({
   searchParams,
 }: {
@@ -91,6 +102,12 @@ export default async function MarkaDiscoverPage({
 
   const savedInfluencerUserIds = new Set(savedInfluencerRows.map((r) => r.influencerUserId));
   const savedInfluencerCount = savedInfluencerUserIds.size;
+  const suggestedDefaultInfluencers =
+    !hasActiveSearch && exploreData
+      ? [...exploreData.suggested, ...exploreData.newest]
+          .filter((row, idx, arr) => arr.findIndex((x) => x.id === row.id) === idx)
+          .slice(0, 10)
+      : [];
 
   return (
     <div className="dashboard-page influencer-panel-page marka-discover">
@@ -227,22 +244,60 @@ export default async function MarkaDiscoverPage({
           <div className="discovery-search-results">
             <h3 className="discovery-search-results__title">Sonuçlar</h3>
             {!hasActiveSearch ? (
-              <EmptyStateCard
-                icon={<EmptyGlyphMagnifyingGlass />}
-                hint="Sonraki adım"
-                title="Aramayı başlatın veya filtre seçin"
-                description="Önerilen etiketlere tıklayın ya da şehir ve kategori seçip arama kutusuna birkaç kelime yazın. Uygun eşleşmeler aşağıda listelenir."
-              >
-                {showExploreRail && exploreData ? (
-                  <a className="btn" href="#marka-discover-oneriler">
-                    Önerilenlere göz at
-                  </a>
-                ) : (
-                  <a className="btn" href="#marka-influencer-ara">
-                    Arama formuna git
-                  </a>
-                )}
-              </EmptyStateCard>
+              suggestedDefaultInfluencers.length > 0 ? (
+                <div className="influencer-results-stack">
+                  <header className="discover-results-suggested__head">
+                    <h4 className="discovery-search-results__title">Önerilen içerik üreticiler</h4>
+                    <p className="dash-section__lede muted">
+                      Filtreleyerek veya arama yaparak daha spesifik sonuçlar bulabilirsiniz.
+                    </p>
+                  </header>
+                  {suggestedDefaultInfluencers.map((p) => {
+                    const categories = p.selectedCategories.map((c) => getCategoryLabel(c.categoryKey)).join(", ");
+                    const defaultAmt =
+                      p.basePriceTRY > 0 ? Math.max(100, Math.ceil(p.basePriceTRY / 100) * 100) : 100;
+                    return (
+                      <MarketplaceInfluencerOfferCard
+                        key={p.id}
+                        formIdKey={`default-sug-${p.id}`}
+                        influencerUserId={p.userId}
+                        username={p.username}
+                        city={p.city}
+                        profileImageUrl={p.profileImageUrl}
+                        categoriesLine={categories}
+                      whyLine={getDefaultSuggestedWhyLine(p)}
+                        followerCount={p.followerCount}
+                        basePriceTRY={p.basePriceTRY}
+                        nicheText={p.nicheText}
+                        nicheTruncateLen={100}
+                        initialSaved={savedInfluencerUserIds.has(p.userId)}
+                        defaultOfferAmountTRY={defaultAmt}
+                        cardClassName="influencer-result-card influencer-result-card--hub"
+                        profileLinkLabel="Profili incele"
+                        submitButtonLabel="İş birliği isteği gönder"
+                        briefRows={3}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyStateCard
+                  icon={<EmptyGlyphMagnifyingGlass />}
+                  hint="Sonraki adım"
+                  title="Aramayı başlatın veya filtre seçin"
+                  description="Önerilen etiketlere tıklayın ya da şehir ve kategori seçip arama kutusuna birkaç kelime yazın. Uygun eşleşmeler aşağıda listelenir."
+                >
+                  {showExploreRail && exploreData ? (
+                    <a className="btn" href="#marka-discover-oneriler">
+                      Önerilenlere göz at
+                    </a>
+                  ) : (
+                    <a className="btn" href="#marka-influencer-ara">
+                      Arama formuna git
+                    </a>
+                  )}
+                </EmptyStateCard>
+              )
             ) : influencerResults.length === 0 ? (
               <EmptyStateCard
                 icon={<EmptyGlyphMapPin />}

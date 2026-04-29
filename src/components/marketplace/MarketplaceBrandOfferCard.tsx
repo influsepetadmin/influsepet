@@ -1,3 +1,8 @@
+"use client";
+
+import type { MouseEvent } from "react";
+import { useRouter } from "next/navigation";
+import { trackFirstTimeOnce, trackProductEvent } from "@/lib/productTracking/productEvents";
 import { getAvatarUrl } from "@/lib/avatar";
 import { DiscoverProfileFromDiscoverLink } from "@/components/marketplace/DiscoverProfileFromDiscoverLink";
 import { DiscoverySaveButton } from "./DiscoverySaveButton";
@@ -37,8 +42,30 @@ export function MarketplaceBrandOfferCard({
   briefRows,
   exploreRail = false,
 }: MarketplaceBrandOfferCardProps) {
+  const router = useRouter();
+  const profileHref = `/profil/marka/${brandUserId}?from=discover`;
+
+  function onCardClick(e: MouseEvent<HTMLElement>) {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+    if (target.closest("a,button,input,textarea,select,label,[role='button']")) return;
+    trackProductEvent({
+      event: "profile_cta_click",
+      location: "discover",
+      label: "profile_brand",
+      targetUserId: brandUserId,
+    });
+    trackFirstTimeOnce("influsepet_ft_profile_from_discover_brand", {
+      event: "first_profile_visit_from_discover",
+      location: "discover",
+      label: "profile_brand",
+      targetUserId: brandUserId,
+    });
+    router.push(profileHref);
+  }
+
   return (
-    <article className={cardClassName}>
+    <article className={`${cardClassName} discover-card-clickable`} onClick={onCardClick}>
       <div className="brand-result-card__head brand-result-card__head--hub">
         <img
           className="brand-result-card__avatar"
@@ -61,7 +88,7 @@ export function MarketplaceBrandOfferCard({
           />
           <DiscoverProfileFromDiscoverLink
             className="btn secondary btn--sm"
-            href={`/profil/marka/${brandUserId}`}
+            href={profileHref}
             profileRole="brand"
             targetUserId={brandUserId}
           >

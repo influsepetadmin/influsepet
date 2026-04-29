@@ -22,6 +22,7 @@ export function PublicInfluencerProfileView({
   isOwnPublicProfile,
   chatHref,
   canSendCollaborationRequest = true,
+  cameFromDiscover = false,
 }: {
   data: PublicProfileByUsernameResponse;
   homeHref: string;
@@ -35,6 +36,7 @@ export function PublicInfluencerProfileView({
   chatHref?: string | null;
   /** Marka oturumu yoksa giriş CTA’sı gösterilir. */
   canSendCollaborationRequest?: boolean;
+  cameFromDiscover?: boolean;
 }) {
   return (
     <div
@@ -51,6 +53,7 @@ export function PublicInfluencerProfileView({
                 isOwnPublicProfile={isOwnPublicProfile}
                 chatHref={chatHref}
                 canSendCollaborationRequest={canSendCollaborationRequest}
+                cameFromDiscover={cameFromDiscover}
               />
               <PublicProfileStats data={data} />
               <div className="public-profile-trust-stack">

@@ -33,6 +33,7 @@ export function PublicBrandProfileHeader({
   isOwnPublicProfile,
   chatHref,
   viewerRole,
+  cameFromDiscover = false,
 }: {
   data: PublicBrandProfileResponse;
   /** Dahili profil vb.: varsayılan CTA yerine özel aksiyonlar. */
@@ -41,6 +42,7 @@ export function PublicBrandProfileHeader({
   isOwnPublicProfile: boolean;
   chatHref?: string | null;
   viewerRole?: "INFLUENCER" | "BRAND" | null;
+  cameFromDiscover?: boolean;
 }) {
   const avatarSrc = data.avatarUrl?.trim() || getAvatarUrl(data.id);
   const socialVerifiedCount = data.verifiedSocialAccounts.length;
@@ -127,6 +129,7 @@ export function PublicBrandProfileHeader({
               averageRating={data.averageRating}
               ratingCount={data.ratingCount}
               completedCollaborationsCount={data.completedCollaborationsCount}
+              cameFromDiscover={cameFromDiscover}
             />
           ) : viewerRole === "BRAND" ? (
             <p className="public-profile-hero__cta-hint public-profile-hero__cta-hint--solo">

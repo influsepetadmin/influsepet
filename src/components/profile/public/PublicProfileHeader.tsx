@@ -24,6 +24,7 @@ export function PublicProfileHeader({
   isOwnPublicProfile,
   chatHref,
   canSendCollaborationRequest = true,
+  cameFromDiscover = false,
 }: {
   data: PublicProfileByUsernameResponse;
   /** Marka paneli: herkese açık link vb. (isteğe bağlı; iş birliği CTA’sından ayrı). */
@@ -34,6 +35,7 @@ export function PublicProfileHeader({
   chatHref?: string | null;
   /** Oturumdaki marka bu influencer’a istek gönderebilir mi (giriş + rol). */
   canSendCollaborationRequest?: boolean;
+  cameFromDiscover?: boolean;
 }) {
   const avatarSrc = data.avatarUrl?.trim() || getAvatarUrl(data.id);
   const socialVerifiedCount = data.verifiedSocialAccounts.length;
@@ -93,6 +95,7 @@ export function PublicProfileHeader({
             averageRating={data.averageRating}
             ratingCount={data.ratingCount}
             completedCollaborationsCount={data.completedCollaborationsCount}
+            cameFromDiscover={cameFromDiscover}
           />
         ) : (
           <div className="public-profile-hero__cta-row public-profile-hero__cta-row--solo">

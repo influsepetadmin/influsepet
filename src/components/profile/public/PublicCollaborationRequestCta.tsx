@@ -7,6 +7,9 @@ import { trackFirstTimeOnce, trackProductEvent } from "@/lib/productTracking/pro
 import { TrackedChatOpenLink } from "@/components/tracking/TrackedChatOpenLink";
 import { PublicProfileHeroTrustChips } from "@/components/profile/public/PublicProfileHeroTrustChips";
 
+const CTA_ENTRY_HIGHLIGHT_MS = 2400;
+const CTA_ENTRY_HIGHLIGHT_SESSION_KEY = "influsepet_profile_cta_highlight_seen";
+
 function actionHintLine(
   hasChat: boolean,
   completedCollaborationsCount: number,
@@ -21,6 +24,13 @@ function actionHintLine(
   return "Hemen iş birliği başlat.";
 }
 
+function microTrustLine(completedCollaborationsCount: number, ratingCount: number): string {
+  if (completedCollaborationsCount > 0 || ratingCount > 0) {
+    return "Markalar bu profil ile aktif çalışıyor.";
+  }
+  return "Yeni katıldı, erken fırsat.";
+}
+
 export function PublicCollaborationRequestCta({
   influencerUserId,
   defaultBudgetTRY,
@@ -28,6 +38,7 @@ export function PublicCollaborationRequestCta({
   averageRating,
   ratingCount,
   completedCollaborationsCount,
+  cameFromDiscover = false,
 }: {
   influencerUserId: string;
   defaultBudgetTRY: number;
@@ -35,12 +46,14 @@ export function PublicCollaborationRequestCta({
   averageRating: number | null;
   ratingCount: number;
   completedCollaborationsCount: number;
+  cameFromDiscover?: boolean;
 }) {
   const dialogId = useId();
   const titleId = `${dialogId}-modal-title`;
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState(false);
   const [sending, setSending] = useState(false);
+  const [highlightOfferCta, setHighlightOfferCta] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const defaultAmt =
     defaultBudgetTRY > 0 ? Math.max(100, Math.ceil(defaultBudgetTRY / 100) * 100) : 100;
@@ -68,6 +81,26 @@ export function PublicCollaborationRequestCta({
     const t = window.setTimeout(() => setToast(false), 3800);
     return () => window.clearTimeout(t);
   }, [toast]);
+
+  useEffect(() => {
+    if (!cameFromDiscover) return;
+    try {
+      if (sessionStorage.getItem(CTA_ENTRY_HIGHLIGHT_SESSION_KEY)) return;
+      sessionStorage.setItem(CTA_ENTRY_HIGHLIGHT_SESSION_KEY, "1");
+    } catch {
+      return;
+    }
+    let mounted = true;
+    queueMicrotask(() => {
+      if (!mounted) return;
+      setHighlightOfferCta(true);
+    });
+    const t = window.setTimeout(() => setHighlightOfferCta(false), CTA_ENTRY_HIGHLIGHT_MS);
+    return () => {
+      mounted = false;
+      window.clearTimeout(t);
+    };
+  }, [cameFromDiscover]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -105,13 +138,14 @@ export function PublicCollaborationRequestCta({
 
   const hasChat = Boolean(chatHref);
   const hint = actionHintLine(hasChat, completedCollaborationsCount, ratingCount);
+  const trustLine = microTrustLine(completedCollaborationsCount, ratingCount);
   /** A: sohbet varsa sohbet önce (primary). B: teklif her zaman primary. */
   const offerIsPrimary = !hasChat || abVariant === "B";
 
   const offerButton = (
     <button
       type="button"
-      className={`btn public-profile-hero__cta-btn ${offerIsPrimary ? "public-profile-hero__cta-btn--prominent" : "secondary public-profile-hero__cta-btn--offer-when-chat"}`}
+      className={`btn public-profile-hero__cta-btn ${offerIsPrimary ? "public-profile-hero__cta-btn--prominent" : "secondary public-profile-hero__cta-btn--offer-when-chat"}${highlightOfferCta ? " public-profile-hero__cta-btn--entry-highlight" : ""}`}
       onClick={() => {
         trackProductEvent({
           event: "cta_click",
@@ -152,6 +186,7 @@ export function PublicCollaborationRequestCta({
   return (
     <>
       <div className="public-profile-cta-conversion-belt">
+        {cameFromDiscover ? <p className="public-profile-hero__entry-context">Keşfet’ten geldiniz</p> : null}
         <PublicProfileHeroTrustChips
           averageRating={averageRating}
           ratingCount={ratingCount}
@@ -178,6 +213,7 @@ export function PublicCollaborationRequestCta({
           )}
         </div>
 
+        <p className="public-profile-hero__cta-micro-trust">{trustLine}</p>
         <p className="public-profile-hero__cta-action-hint">{hint}</p>
       </div>
 

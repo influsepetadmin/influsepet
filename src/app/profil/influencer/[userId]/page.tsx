@@ -8,7 +8,10 @@ import { prisma } from "@/lib/prisma";
 import { findLatestConversationBetweenBrandAndInfluencer } from "@/lib/conversations/findLatestConversationBetweenBrandAndInfluencer";
 import { getPublicProfileByUserId } from "@/lib/publicProfile/getPublicProfileByUserId";
 
-type Props = { params: Promise<{ userId: string }> };
+type Props = {
+  params: Promise<{ userId: string }>;
+  searchParams?: Promise<{ from?: string }>;
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { userId } = await params;
@@ -29,8 +32,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function BrandPanelInfluencerProfilePage({ params }: Props) {
+export default async function BrandPanelInfluencerProfilePage({ params, searchParams }: Props) {
   const { userId } = await params;
+  const urlSearchParams = searchParams ? await searchParams : undefined;
+  const cameFromDiscover = (urlSearchParams?.from ?? "").toLowerCase() === "discover";
   const [data, backHref, user] = await Promise.all([
     getPublicProfileByUserId(userId),
     getDashboardBackHref(),
@@ -68,6 +73,7 @@ export default async function BrandPanelInfluencerProfilePage({ params }: Props)
       isOwnPublicProfile={isOwnPublicProfile}
       chatHref={chatHref}
       canSendCollaborationRequest={canSendCollaborationRequest}
+      cameFromDiscover={cameFromDiscover}
       headerCta={
         <div className="public-profile-hero__panel-tools">
           <Link className="btn secondary btn--sm public-profile-hero__cta-btn" href={publicProfileHref}>

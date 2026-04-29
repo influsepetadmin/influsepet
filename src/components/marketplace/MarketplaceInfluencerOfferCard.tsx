@@ -1,3 +1,8 @@
+"use client";
+
+import type { MouseEvent } from "react";
+import { useRouter } from "next/navigation";
+import { trackFirstTimeOnce, trackProductEvent } from "@/lib/productTracking/productEvents";
 import { getAvatarUrl } from "@/lib/avatar";
 import { truncateText } from "@/lib/dashboardProfileCompletion";
 import { DiscoverProfileFromDiscoverLink } from "@/components/marketplace/DiscoverProfileFromDiscoverLink";
@@ -47,9 +52,30 @@ export function MarketplaceInfluencerOfferCard({
   exploreRail = false,
 }: MarketplaceInfluencerOfferCardProps) {
   const nicheTrimmed = nicheText?.trim() ?? "";
+  const router = useRouter();
+  const profileHref = `/profil/influencer/${influencerUserId}?from=discover`;
+
+  function onCardClick(e: MouseEvent<HTMLElement>) {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+    if (target.closest("a,button,input,textarea,select,label,[role='button']")) return;
+    trackProductEvent({
+      event: "profile_cta_click",
+      location: "discover",
+      label: "profile_influencer",
+      targetUserId: influencerUserId,
+    });
+    trackFirstTimeOnce("influsepet_ft_profile_from_discover_influencer", {
+      event: "first_profile_visit_from_discover",
+      location: "discover",
+      label: "profile_influencer",
+      targetUserId: influencerUserId,
+    });
+    router.push(profileHref);
+  }
 
   return (
-    <article className={cardClassName}>
+    <article className={`${cardClassName} discover-card-clickable`} onClick={onCardClick}>
       <div className="influencer-result-card__head influencer-result-card__head--hub">
         <img
           className="influencer-result-card__avatar"
@@ -70,7 +96,7 @@ export function MarketplaceInfluencerOfferCard({
           />
           <DiscoverProfileFromDiscoverLink
             className="btn secondary btn--sm"
-            href={`/profil/influencer/${influencerUserId}`}
+            href={profileHref}
             profileRole="influencer"
             targetUserId={influencerUserId}
           >
