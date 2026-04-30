@@ -761,7 +761,7 @@ main:has(.app-shell) {
 }
 
 .app-shell-page-header {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   padding-bottom: 2px;
 }
 
@@ -908,7 +908,7 @@ main:has(.app-shell) {
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px 16px;
 }
 
 .app-shell-page-header__eyebrow {
