@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { SiteFooter } from "@/components/SiteFooter";
 
 /** Global marketing footer — only on auth entry routes. */
-const FOOTER_PATHS = new Set(["/giris", "/kayit"]);
+const FOOTER_PATHS = new Set(["/kayit"]);
 
 function normalizedPath(pathname: string): string {
   const t = pathname.trim();
