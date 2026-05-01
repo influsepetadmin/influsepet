@@ -27,25 +27,25 @@ export default async function MarkaSettingsPage() {
     <div className="dashboard-page influencer-panel-page marka-settings">
       <header className="influencer-panel-page__hero">
         <h1 className="influencer-panel-page__title">Ayarlar</h1>
-        <p className="influencer-panel-page__lede muted">Hesap ve tercihler (kademeli genişletilecek).</p>
+        <p className="influencer-panel-page__lede muted">Hesap yönetimi ve tercih alanları adım adım bu sayfaya yakında eklenecek.</p>
       </header>
 
       <div className="influencer-settings__grid">
         <section className="dash-card dash-card--section influencer-settings__card">
           <h2 className="dash-section__title">Hesap</h2>
-          <p className="muted dash-section__lede">E-posta ve oturum yönetimi yakında burada toplanacak.</p>
+          <p className="muted dash-section__lede">E-posta ve oturum bilgileri için detaylı yönetim seçenekleri bu alana yakında eklenecek.</p>
         </section>
 
         <section className="dash-card dash-card--section influencer-settings__card">
           <h2 className="dash-section__title">Bildirim tercihleri</h2>
           <p className="muted dash-section__lede">
-            Placeholder — e-posta ve uygulama bildirimleri için seçenekler eklenecek.
+            E-posta ve uygulama bildirim tercihlerini yönetme seçenekleri bu alana yakında eklenecek.
           </p>
         </section>
 
         <section className="dash-card dash-card--section influencer-settings__card">
           <h2 className="dash-section__title">Şifre</h2>
-          <p className="muted dash-section__lede">Şifre sıfırlama ve güvenlik için akış eklenecek.</p>
+          <p className="muted dash-section__lede">Gelişmiş güvenlik ve şifre yönetimi ayarları bu alana yakında eklenecek.</p>
           <Link className="btn secondary btn--sm" href="/sifremi-unuttum">
             Şifremi unuttum
           </Link>
