@@ -222,9 +222,136 @@ main:has(.dashboard-page) .category-multi-select__input {
   font-size: var(--text-small);
 }
 
+.influencer-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.influencer-profile-form__section {
+  padding: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: var(--radius-app-card);
+  background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+  box-shadow: var(--shadow-premium-sm);
+}
+
+.influencer-profile-form__section--image {
+  padding-bottom: 14px;
+}
+
+.influencer-profile-form__section-head {
+  margin-bottom: 14px;
+}
+
+.influencer-profile-form__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 5px;
+  color: var(--app-primary);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.influencer-profile-form__title {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.influencer-profile-form__hint {
+  margin: 8px 0 0;
+  max-width: 64ch;
+  font-size: 0.88rem;
+}
+
+.influencer-profile-form__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.influencer-profile-form__field {
+  min-width: 0;
+}
+
+.influencer-profile-form__field > label,
+.influencer-profile-form__categories > label {
+  display: block;
+  margin: 0 0 7px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.influencer-profile-form__field input,
+.influencer-profile-form__field textarea,
+.influencer-profile-form__field select {
+  width: 100%;
+  max-width: 100%;
+}
+
+.influencer-profile-form__categories .category-multi-select {
+  margin-bottom: 0;
+}
+
+.influencer-profile-form__categories .category-multi-select__grid {
+  gap: 8px;
+}
+
+.influencer-profile-form__categories .category-multi-select__item {
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 10px;
+  gap: 8px;
+  border-radius: 11px;
+  font-size: 0.86rem;
+}
+
+.influencer-profile-form__categories .category-multi-select__input {
+  margin-top: 0;
+  width: 0.92rem;
+  height: 0.92rem;
+}
+
+.influencer-profile-form__categories .category-multi-select__hint {
+  margin-top: 9px;
+  font-size: 0.8rem;
+}
+
+.influencer-profile-form__image-field {
+  padding: 2px 0 0;
+}
+
+.influencer-profile-form__image-field > div {
+  margin-bottom: 0 !important;
+}
+
+.influencer-profile-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 2px;
+}
+
+@media (min-width: 720px) {
+  .influencer-profile-form__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .influencer-profile-form__section {
+    padding: 18px;
+  }
+}
+
 .influencer-form-niche-label {
   display: block;
-  margin-top: 16px;
+  margin-top: 0;
 }
 
 .muted {
