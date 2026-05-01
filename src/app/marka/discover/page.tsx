@@ -114,10 +114,7 @@ export default async function MarkaDiscoverPage({
       <header className="influencer-panel-page__hero discover-page-hero">
         <h1 className="influencer-panel-page__title">Keşfet</h1>
         <p className="influencer-panel-page__lede muted">
-          Tek kutuda veya şehir / kategori ile birlikte: kullanıcı adı, ad soyad, şehir, kategori ve niş için
-          metin eşleşmesi (Türkçe büyük/küçük harf ve birleşik yazım destekli). Uzun sorgularda hafif yazım
-          toleransı devreye girer; güçlü tam/kısmi eşleşmeler her zaman önce gelir. Birden fazla kelimede her
-          kelime ayrı ayrı eşleşmelidir.
+          Markanıza uygun içerik üreticilerini arayın, filtreleyin ve teklif gönderin.
         </p>
       </header>
 
@@ -142,11 +139,10 @@ export default async function MarkaDiscoverPage({
           <header className="discovery-search-card__intro">
             <h2 className="dash-section__title discovery-search-card__title">İçerik üreticisi bul</h2>
             <p className="dash-section__lede muted discovery-search-card__lede">
-              Arama kutusu: isim, @kullanıcıadı, şehir adı, kategori veya niş metninde kısmi eşleşme. Şehir ve
-              kategori alanları aynı anda uygulanır (hepsi birlikte daraltır).
+              İsim, kullanıcı adı, şehir, kategori veya niş alanına göre hızlıca arayın.
             </p>
             <p className="discovery-context-hint muted">
-              Sonuç çıkmazsa kriterleri tek tek gevşetin; ardından <strong>Sonuçları göster</strong> ile yenileyin.
+              Daha net sonuçlar için şehir ve kategori filtrelerini ekleyebilirsiniz.
             </p>
           </header>
 
@@ -154,7 +150,7 @@ export default async function MarkaDiscoverPage({
             <form className="influencer-search-form discovery-search-form" method="get" action="/marka/discover">
               <div className="discovery-search-field discovery-search-field--query">
                 <label className="discovery-search-field__label" htmlFor="discovery-query-marka-discover">
-                  İsim, kullanıcı adı, kategori veya şehir (metin)
+                  İsim, kullanıcı adı, kategori veya şehir ara
                 </label>
                 <DiscoverySearchQueryField
                   id="discovery-query-marka-discover"
@@ -163,7 +159,7 @@ export default async function MarkaDiscoverPage({
                   debouncedAutoSubmitMs={480}
                 />
                 <p className="discovery-search-field__hint muted discovery-search-field__hint--debounce">
-                  Yazmayı bıraktığınızda arama kısa bir gecikmeyle otomatik yenilenir.
+                  Yazmayı bıraktığınızda sonuçlar otomatik yenilenir.
                 </p>
               </div>
 
@@ -209,7 +205,7 @@ export default async function MarkaDiscoverPage({
                   <option>Sıralama seçenekleri yakında</option>
                 </select>
                 <p className="discovery-search-field__hint muted">
-                  Önerilen ve alfabetik sıralama üzerinde çalışıyoruz.
+                  Sıralama seçenekleri yakında.
                 </p>
               </div>
 
@@ -249,7 +245,7 @@ export default async function MarkaDiscoverPage({
                   <header className="discover-results-suggested__head">
                     <h4 className="discovery-search-results__title">Önerilen içerik üreticiler</h4>
                     <p className="dash-section__lede muted">
-                      Filtreleyerek veya arama yaparak daha spesifik sonuçlar bulabilirsiniz.
+                      Daha spesifik sonuçlar için arama veya filtreleri kullanın.
                     </p>
                   </header>
                   {suggestedDefaultInfluencers.map((p) => {
@@ -265,7 +261,7 @@ export default async function MarkaDiscoverPage({
                         city={p.city}
                         profileImageUrl={p.profileImageUrl}
                         categoriesLine={categories}
-                      whyLine={getDefaultSuggestedWhyLine(p)}
+                        whyLine={getDefaultSuggestedWhyLine(p)}
                         followerCount={p.followerCount}
                         basePriceTRY={p.basePriceTRY}
                         nicheText={p.nicheText}
@@ -285,7 +281,7 @@ export default async function MarkaDiscoverPage({
                   icon={<EmptyGlyphMagnifyingGlass />}
                   hint="Sonraki adım"
                   title="Aramayı başlatın veya filtre seçin"
-                  description="Önerilen etiketlere tıklayın ya da şehir ve kategori seçip arama kutusuna birkaç kelime yazın. Uygun eşleşmeler aşağıda listelenir."
+                  description="Önerilen profillere bakın ya da arama kutusuna birkaç kelime yazın."
                 >
                   {showExploreRail && exploreData ? (
                     <a className="btn" href="#marka-discover-oneriler">

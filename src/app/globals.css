@@ -5324,12 +5324,11 @@ main:has(.dashboard-page) {
 
 /* Discovery / marketplace search — decision panel */
 .dashboard-page .discovery-search-card {
-  padding-top: 22px;
-  padding-bottom: 24px;
+  padding: 20px;
 }
 
 .dashboard-page .discovery-search-card__intro {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .dashboard-page .discovery-search-card__title {
@@ -5338,15 +5337,48 @@ main:has(.dashboard-page) {
 
 .dashboard-page .discovery-search-card__lede {
   margin-bottom: 0;
-  max-width: 62ch;
+  max-width: 48ch;
+}
+
+.dashboard-page .discovery-context-hint {
+  margin: 6px 0 0;
+  max-width: 48ch;
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 .dashboard-page .discovery-search-panel {
-  padding: 20px 20px 22px;
+  padding: 16px;
   border-radius: var(--radius-app-card);
-  border: 1px solid rgba(199, 210, 254, 0.5);
-  background: linear-gradient(165deg, #ffffff 0%, #f8fafc 48%, #f1f5f9 100%);
-  box-shadow: var(--shadow-premium-sm);
+  border: 1px solid rgba(165, 180, 252, 0.64);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 251, 255, 0.98) 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 10px 28px rgba(79, 70, 229, 0.08);
+}
+
+@media (min-width: 760px) {
+  .dashboard-page .discovery-search-panel {
+    padding: 18px;
+  }
+
+  .dashboard-page .discovery-search-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(190px, 0.34fr);
+    gap: 14px;
+    align-items: start;
+  }
+
+  .dashboard-page .discovery-search-field--query,
+  .dashboard-page .discovery-search-field--categories,
+  .dashboard-page .discovery-search-actions {
+    grid-column: 1 / -1;
+  }
+
+  .dashboard-page .discovery-search-field--sort {
+    align-self: stretch;
+  }
 }
 
 .dashboard-page .discovery-search-field {
@@ -5354,11 +5386,17 @@ main:has(.dashboard-page) {
 }
 
 .dashboard-page .discovery-search-field--query {
-  margin-bottom: 2px;
+  margin-bottom: 0;
 }
 
 .dashboard-page .discovery-search-field:not(.discovery-search-field--query) {
-  margin-top: 18px;
+  margin-top: 14px;
+}
+
+@media (min-width: 760px) {
+  .dashboard-page .discovery-search-field:not(.discovery-search-field--query) {
+    margin-top: 0;
+  }
 }
 
 .dashboard-page .discovery-search-field__label {
@@ -5387,13 +5425,14 @@ main:has(.dashboard-page) {
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(129, 140, 248, 0.48);
+  min-height: 58px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.58);
   background: #ffffff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 1px 3px rgba(15, 23, 42, 0.05);
+    0 3px 14px rgba(79, 70, 229, 0.1);
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
@@ -5419,8 +5458,8 @@ main:has(.dashboard-page) {
   margin: 0;
   padding: 0;
   background: transparent;
-  font-size: 0.94rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
   color: #0f172a;
   outline: none;
@@ -5697,7 +5736,7 @@ main:has(.dashboard-page) {
 /* Discover — hero accent (marka / influencer keşfet) */
 .dashboard-page .discover-page-hero {
   position: relative;
-  padding: 22px 22px 20px;
+  padding: 20px 22px;
   margin: 0 0 4px;
   border-radius: 18px;
   border: 1px solid rgba(199, 210, 254, 0.45);
@@ -5717,7 +5756,7 @@ main:has(.dashboard-page) {
 /* Discover Explore — compact rails + pills (shared marka / influencer) */
 .dashboard-page .discover-explore {
   margin: 0 0 8px;
-  padding: 14px 16px 6px;
+  padding: 12px 14px 6px;
   border-radius: 16px;
   border: 1px solid rgba(226, 232, 240, 0.95);
   background: rgba(248, 250, 252, 0.65);
@@ -5728,7 +5767,7 @@ main:has(.dashboard-page) {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 8px 14px;
-  margin: 0 0 12px;
+  margin: 0 0 10px;
 }
 
 .dashboard-page .discover-explore__eyebrow-k {
@@ -5747,7 +5786,7 @@ main:has(.dashboard-page) {
 }
 
 .dashboard-page .discover-explore__block {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .dashboard-page .discover-explore__block:last-child {
@@ -5999,8 +6038,8 @@ main:has(.dashboard-page) {
 }
 
 .dashboard-page .discovery-search-results {
-  margin-top: 24px;
-  padding-top: 22px;
+  margin-top: 20px;
+  padding-top: 18px;
   border-top: 1px solid rgba(226, 232, 240, 0.95);
 }
 
@@ -6045,8 +6084,8 @@ main:has(.dashboard-page) {
 .dashboard-page .influencer-search-form__actions {
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 4px;
-  padding-top: 16px;
+  margin-top: 2px;
+  padding-top: 14px;
   border-top: 1px solid rgba(226, 232, 240, 0.95);
   flex-wrap: wrap;
 }
@@ -6057,8 +6096,8 @@ main:has(.dashboard-page) {
 
 /* Brand dashboard: influencer search — city + filters feel intentional, not default admin */
 .dashboard-page .influencer-search-form__city {
-  padding: 14px 16px;
-  border-radius: 16px;
+  padding: 11px 12px;
+  border-radius: 14px;
   background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
   border: 1px solid rgba(199, 210, 254, 0.55);
   box-shadow:
@@ -6107,8 +6146,8 @@ main:has(.dashboard-page) {
 .dashboard-page .dash-card--emphasis .category-multi-select__filter {
   display: block;
   width: 100%;
-  margin-bottom: 12px;
-  padding: 10px 14px;
+  margin-bottom: 10px;
+  padding: 9px 12px;
   border-radius: 12px;
   border: 1px solid rgba(199, 210, 254, 0.55);
   font-size: 0.9rem;
@@ -6131,15 +6170,15 @@ main:has(.dashboard-page) {
 .dashboard-page .dash-card--emphasis .category-multi-select__grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 12px;
+  gap: 8px;
 }
 
 .dashboard-page .dash-card--emphasis .category-multi-select__item {
   flex: 1 1 auto;
-  min-width: min(100%, 200px);
+  min-width: min(100%, 154px);
   margin: 0;
-  min-height: 52px;
-  padding: 10px 16px 10px 12px;
+  min-height: 40px;
+  padding: 8px 12px 8px 10px;
   align-items: center;
   border-radius: 999px;
   border: 1px solid rgba(203, 213, 225, 0.95);
@@ -6172,13 +6211,13 @@ main:has(.dashboard-page) {
 
 .dashboard-page .dash-card--emphasis .category-multi-select__input {
   margin: 0;
-  width: 1.05rem;
-  height: 1.05rem;
+  width: 0.95rem;
+  height: 0.95rem;
 }
 
 .dashboard-page .dash-card--emphasis .category-multi-select__hint {
-  margin-top: 14px;
-  font-size: 0.82rem;
+  margin-top: 10px;
+  font-size: 0.78rem;
 }
 
 .dashboard-page .influencer-search-form__actions .btn[type="submit"] {

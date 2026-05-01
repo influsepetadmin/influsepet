@@ -93,10 +93,7 @@ export default async function InfluencerDiscoverPage({
       <header className="influencer-panel-page__hero discover-page-hero">
         <h1 className="influencer-panel-page__title">Keşfet</h1>
         <p className="influencer-panel-page__lede muted">
-          Tek kutuda veya şehir / kategori ile: firma adı, marka kullanıcı adı, hesap adı, şehir, kategori ve açıklama
-          için metin eşleşmesi (Türkçe büyük/küçük harf ve birleşik yazım destekli). Uzun sorgularda hafif yazım
-          toleransı vardır; güçlü tam/kısmi eşleşmeler önceliklidir. Birden fazla kelimede her kelime ayrı ayrı
-          eşleşmelidir.
+          Size uygun markaları arayın, filtreleyin ve iş birliği başlatın.
         </p>
       </header>
 
@@ -108,10 +105,10 @@ export default async function InfluencerDiscoverPage({
           <header className="discovery-search-card__intro">
             <h2 className="dash-section__title discovery-search-card__title">Marka bul</h2>
             <p className="dash-section__lede muted discovery-search-card__lede">
-              Şehir, kategori veya metin ile daraltın; yakın yazımlar ve kısmi eşleşmeler desteklenir.
+              Marka adı, şehir veya kategoriyle hızlıca eşleşme bulun.
             </p>
             <p className="discovery-context-hint muted">
-              Sonuç çıkmazsa kriterleri tek tek gevşetin; ardından <strong>Sonuçları göster</strong> ile yenileyin.
+              Sonuçları daraltmak için şehir ve kategori ekleyebilirsiniz.
             </p>
           </header>
 
@@ -119,7 +116,7 @@ export default async function InfluencerDiscoverPage({
             <form className="influencer-search-form discovery-search-form" method="get" action="/influencer/discover">
               <div className="discovery-search-field discovery-search-field--query">
                 <label className="discovery-search-field__label" htmlFor="discovery-query-influencer-discover">
-                  Firma adı, kullanıcı adı, kategori veya şehir (metin)
+                  Marka, kategori veya şehir ara
                 </label>
                 <DiscoverySearchQueryField
                   id="discovery-query-influencer-discover"
@@ -128,7 +125,7 @@ export default async function InfluencerDiscoverPage({
                   debouncedAutoSubmitMs={480}
                 />
                 <p className="discovery-search-field__hint muted discovery-search-field__hint--debounce">
-                  Yazmayı bıraktığınızda arama kısa bir gecikmeyle otomatik yenilenir.
+                  Yazmayı bıraktığınızda sonuçlar otomatik yenilenir.
                 </p>
               </div>
 
@@ -174,7 +171,7 @@ export default async function InfluencerDiscoverPage({
                   <option>Sıralama seçenekleri yakında</option>
                 </select>
                 <p className="discovery-search-field__hint muted">
-                  Önerilen ve alfabetik sıralama üzerinde çalışıyoruz.
+                  Sıralama seçenekleri yakında.
                 </p>
               </div>
 
@@ -214,7 +211,7 @@ export default async function InfluencerDiscoverPage({
                 icon={<EmptyGlyphBuildingOffice />}
                 hint="Sonraki adım"
                 title="Aramayı başlatın veya filtre seçin"
-                description="Önerilen markalara tıklayın ya da şehir ve kategori seçip arama kutusuna birkaç kelime yazın."
+                description="Önerilen markalara bakın ya da arama kutusuna birkaç kelime yazın."
               >
                 {showExploreRail && exploreData && profile ? (
                   <a className="btn" href="#influencer-discover-oneriler">
@@ -297,7 +294,7 @@ export default async function InfluencerDiscoverPage({
             description="İlginizi çeken markaları kart üzerinden kaydedin; teklif yazmadan önce buradan hızlıca açın."
           >
             <Link className="btn" href="/influencer/discover#influencer-marka-ara">
-              Keşfede marka bul
+              Marka keşfet
             </Link>
           </EmptyStateCard>
         ) : (
