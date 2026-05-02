@@ -1004,7 +1004,7 @@ main:has(.public-profile-page--app) {
 
 /* Sohbet sayfası: üst iş akışı + teslim bloklarını sıkılaştır, mesaj alanını yukarı çek */
 .chat-conversation--workspace {
-  gap: 11px;
+  gap: 9px;
 }
 
 /* Conversation: top nav (Sohbetler / breadcrumb / actions) — app-shell aligned */
@@ -1166,8 +1166,8 @@ main:has(.public-profile-page--app) {
   position: sticky;
   top: 58px;
   z-index: 14;
-  margin-bottom: 6px;
-  padding: 4px 0 6px;
+  margin-bottom: 4px;
+  padding: 3px 0 4px;
   background: var(--dash-page-tint);
   isolation: isolate;
 }
@@ -1180,12 +1180,12 @@ main:has(.public-profile-page--app) {
 }
 
 .chat-workspace-summary-card__intro {
-  padding: 12px 18px 10px;
+  padding: 10px 16px 9px;
   border-bottom: 1px solid rgba(241, 245, 249, 0.98);
 }
 
 .chat-workspace-summary-card__eyebrow {
-  margin: 0 0 8px;
+  margin: 0 0 5px;
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -1201,14 +1201,14 @@ main:has(.public-profile-page--app) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 6px;
+  margin-top: 8px;
 }
 
 .chat-workspace-pill {
   display: inline-flex;
   align-items: center;
-  padding: 4px 11px;
+  padding: 3px 9px;
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 800;
@@ -1265,13 +1265,13 @@ main:has(.public-profile-page--app) {
 }
 
 .chat-workspace-timeline {
-  margin-top: 12px;
-  padding-top: 10px;
+  margin-top: 9px;
+  padding-top: 8px;
   border-top: 1px dashed rgba(226, 232, 240, 0.95);
 }
 
 .chat-workspace-timeline__label {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -1346,7 +1346,7 @@ main:has(.public-profile-page--app) {
 }
 
 .chat-workspace-timeline__text {
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   font-weight: 700;
   line-height: 1.25;
   color: #64748b;
@@ -1402,12 +1402,12 @@ main:has(.public-profile-page--app) {
 .chat-workspace-block {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 6px;
+  margin-top: 2px;
 }
 
 .chat-workspace-block--rating {
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .chat-workspace-block__head {
@@ -1515,7 +1515,7 @@ main:has(.public-profile-page--app) {
 
 .chat-workflow-card__title {
   margin: 0;
-  font-size: clamp(1.12rem, 2.1vw, 1.42rem);
+  font-size: clamp(1.04rem, 1.65vw, 1.24rem);
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.18;
@@ -1525,9 +1525,9 @@ main:has(.public-profile-page--app) {
 }
 
 .chat-workflow-card__brief {
-  margin: 6px 0 0;
-  font-size: 0.84rem;
-  line-height: 1.42;
+  margin: 5px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.38;
   max-width: 62ch;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1560,7 +1560,7 @@ main:has(.public-profile-page--app) {
 
 .chat-workflow-metric {
   margin: 0;
-  padding: 10px 14px;
+  padding: 8px 12px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.92) 100%);
 }
 
@@ -1575,7 +1575,7 @@ main:has(.public-profile-page--app) {
 
 .chat-workflow-metric__value {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #0f172a;
@@ -1598,8 +1598,8 @@ main:has(.public-profile-page--app) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 14px;
-  padding: 10px 16px 11px;
+  gap: 8px 12px;
+  padding: 8px 14px 9px;
   border-top: 1px solid rgba(241, 245, 249, 0.98);
 }
 
@@ -1618,8 +1618,8 @@ main:has(.public-profile-page--app) {
 
 .chat-workflow-card__avatar {
   display: block;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   background: #f1f5f9;
@@ -1673,7 +1673,7 @@ main:has(.public-profile-page--app) {
 }
 
 .chat-workflow-actions {
-  padding: 9px 14px 11px;
+  padding: 8px 14px 9px;
   border-top: 1px solid rgba(241, 245, 249, 0.98);
   display: flex;
   flex-direction: column;
@@ -1718,7 +1718,7 @@ main:has(.public-profile-page--app) {
 }
 
 .chat-rating-wrap .collab-rating-panel__form {
-  padding: 18px 20px;
+  padding: 14px 16px;
   border-radius: var(--radius-app-card);
   border: 1px solid rgba(199, 210, 254, 0.55);
   background: #ffffff;
@@ -1765,15 +1765,15 @@ main:has(.public-profile-page--app) {
 }
 
 .chat-workflow-card__workspace-foot {
-  padding: 7px 16px 10px;
+  padding: 6px 14px 8px;
   border-top: 1px solid rgba(241, 245, 249, 0.98);
   background: linear-gradient(180deg, rgba(248, 250, 252, 0.45) 0%, rgba(255, 255, 255, 0.4) 100%);
 }
 
 .chat-workflow-card__workspace-hint {
   margin: 0;
-  font-size: 0.72rem;
-  line-height: 1.42;
+  font-size: 0.7rem;
+  line-height: 1.35;
   max-width: 58ch;
   letter-spacing: 0.01em;
 }
@@ -1824,14 +1824,14 @@ main:has(.public-profile-page--app) {
 
 .chat-panel--delivery {
   margin-bottom: 8px;
-  padding: 12px 14px 13px;
+  padding: 10px 12px 11px;
   border-radius: var(--radius-app-card-lg);
   background: linear-gradient(165deg, #ffffff 0%, #fafbff 38%, #f8fafc 100%);
   border-color: rgba(165, 180, 252, 0.5);
   box-shadow: var(--shadow-premium-md);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .chat-delivery-intro {
@@ -1936,7 +1936,7 @@ main:has(.public-profile-page--app) {
 .chat-delivery-block {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .chat-delivery-block--form .chat-delivery-form {
@@ -1944,16 +1944,16 @@ main:has(.public-profile-page--app) {
 }
 
 .chat-delivery-block--timeline {
-  padding-top: 10px;
-  margin-top: 8px;
+  padding-top: 8px;
+  margin-top: 6px;
   border-top: 1px solid rgba(226, 232, 240, 0.9);
 }
 
 /* Clear band between active form / review and read-only history */
 .chat-delivery-block--form + .chat-delivery-block--timeline,
 .chat-delivery-review + .chat-delivery-block--timeline {
-  margin-top: 14px;
-  padding-top: 14px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid rgba(165, 180, 252, 0.42);
   background: linear-gradient(180deg, rgba(248, 250, 255, 0.65) 0%, transparent 28px);
   border-radius: 0 0 var(--radius-app-card-lg) var(--radius-app-card-lg);
@@ -1982,9 +1982,9 @@ main:has(.public-profile-page--app) {
 .chat-delivery-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 0;
-  padding: 14px 16px;
+  padding: 12px 14px;
   border-radius: var(--radius-app-card);
   border: 1px solid var(--app-indigo-muted-border);
   background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
@@ -2039,7 +2039,7 @@ main:has(.public-profile-page--app) {
 
 .chat-delivery-textarea {
   resize: vertical;
-  min-height: 88px;
+  min-height: 74px;
 }
 
 .chat-delivery-field-hint {
@@ -2075,8 +2075,8 @@ main:has(.public-profile-page--app) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 18px 16px 16px;
+  gap: 6px;
+  padding: 14px 14px 13px;
   text-align: center;
 }
 
@@ -2208,15 +2208,15 @@ main:has(.public-profile-page--app) {
 .chat-delivery-media-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 6px;
 }
 
 .chat-delivery-media-tile {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 104px;
+  width: 92px;
 }
 
 .chat-delivery-media-tile__link {
@@ -2226,14 +2226,14 @@ main:has(.public-profile-page--app) {
   border: 1px solid rgba(226, 232, 240, 0.95);
   background: #f8fafc;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
-  max-height: 88px;
+  max-height: 76px;
   aspect-ratio: 4 / 3;
 }
 
 .chat-delivery-media-tile__img {
   width: 100%;
   height: 100%;
-  max-height: 88px;
+  max-height: 76px;
   object-fit: cover;
   display: block;
 }
@@ -2242,14 +2242,14 @@ main:has(.public-profile-page--app) {
   position: relative;
   width: 100%;
   height: 100%;
-  max-height: 88px;
+  max-height: 76px;
   background: #0f172a;
 }
 
 .chat-delivery-media-tile__video {
   width: 100%;
   height: 100%;
-  max-height: 88px;
+  max-height: 76px;
   object-fit: cover;
   display: block;
   opacity: 0.92;
@@ -2310,7 +2310,7 @@ main:has(.public-profile-page--app) {
 }
 
 .chat-delivery-review--brand-pending {
-  padding: 13px 15px 15px;
+  padding: 11px 13px 13px;
   border-radius: var(--radius-app-card-lg);
   border: 1px solid rgba(251, 191, 36, 0.4);
   background: linear-gradient(180deg, #fffbeb 0%, #ffffff 55%, #fafaf9 100%);
@@ -2319,7 +2319,7 @@ main:has(.public-profile-page--app) {
     0 6px 20px rgba(15, 23, 42, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 9px;
 }
 
 .chat-delivery-review__head {
@@ -2486,14 +2486,14 @@ main:has(.public-profile-page--app) {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 9px;
 }
 
 .chat-delivery-timeline__item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 11px 12px 12px 14px;
+  gap: 7px;
+  padding: 9px 11px 10px 12px;
   border-radius: 14px;
   border: 1px solid rgba(226, 232, 240, 0.98);
   border-left: 3px solid #94a3b8;
@@ -3267,7 +3267,7 @@ main:has(.public-profile-page--app) {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 16px 0 12px;
+  margin: 12px 0 9px;
   user-select: none;
 }
 
@@ -3295,7 +3295,7 @@ main:has(.public-profile-page--app) {
 }
 
 .chat-msg {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   display: flex;
 }
 
@@ -3309,7 +3309,7 @@ main:has(.public-profile-page--app) {
 }
 
 .chat-msg--peer.chat-msg--cluster-end {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .chat-msg--them {
@@ -3340,7 +3340,7 @@ main:has(.public-profile-page--app) {
 
 .chat-bubble {
   display: inline-block;
-  padding: 8px 13px 9px;
+  padding: 7px 12px 8px;
   border-radius: 18px;
   max-width: min(100%, 420px, 52vw);
   vertical-align: top;
@@ -3404,13 +3404,13 @@ main:has(.public-profile-page--app) {
 .chat-bubble__body {
   margin: 0;
   white-space: pre-wrap;
-  line-height: 1.55;
-  font-size: 0.9rem;
+  line-height: 1.5;
+  font-size: 0.88rem;
   letter-spacing: -0.01em;
 }
 
 .chat-bubble__body--after-media {
-  margin: 8px 0 0;
+  margin: 7px 0 0;
 }
 
 .chat-bubble__system {
@@ -3424,8 +3424,8 @@ main:has(.public-profile-page--app) {
 /* Workflow / offer events — centered, compact; not peer conversation bubbles */
 .chat-msg--workflow-event {
   justify-content: center;
-  margin-bottom: 10px;
-  margin-top: 4px;
+  margin-bottom: 8px;
+  margin-top: 3px;
 }
 
 .chat-msg__inner--workflow-event {
@@ -3556,8 +3556,8 @@ main:has(.public-profile-page--app) {
 
 /* Media — bounded width so portrait does not dominate; aligned with bubble radius */
 .chat-media-card {
-  --chat-media-max-w: min(280px, 78vw);
-  --chat-media-max-h: min(200px, 36vh);
+  --chat-media-max-w: min(240px, 72vw);
+  --chat-media-max-h: min(172px, 30vh);
   max-width: min(100%, var(--chat-media-max-w));
   border-radius: 14px;
   overflow: hidden;
@@ -3601,9 +3601,9 @@ main:has(.public-profile-page--app) {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px;
-  min-height: 120px;
-  max-height: calc(var(--chat-media-max-h) + 12px);
+  padding: 5px;
+  min-height: 92px;
+  max-height: calc(var(--chat-media-max-h) + 10px);
   background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
   line-height: 0;
 }
@@ -3630,7 +3630,7 @@ main:has(.public-profile-page--app) {
   align-items: center;
   justify-content: space-between;
   gap: 6px 10px;
-  padding: 7px 10px;
+  padding: 6px 9px;
   background: #f8fafc;
   border-top: 1px solid rgba(226, 232, 240, 0.95);
   font-size: 0.74rem;
@@ -3773,8 +3773,8 @@ main:has(.public-profile-page--app) {
   position: sticky;
   bottom: 0;
   z-index: 30;
-  margin-top: 12px;
-  padding: 14px 14px 16px;
+  margin-top: 9px;
+  padding: 12px 12px 13px;
   border-radius: var(--radius-app-card-lg);
   border: 1px solid var(--app-indigo-muted-border);
   background: linear-gradient(180deg, #ffffff 0%, #fafbff 48%, #f8fafc 100%);
@@ -3787,8 +3787,8 @@ main:has(.public-profile-page--app) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .chat-composer-emoji-wrap {
@@ -3861,8 +3861,8 @@ main:has(.public-profile-page--app) {
 .chat-composer-input {
   flex: 1 1 200px;
   min-width: 0;
-  min-height: 48px;
-  padding: 11px 16px;
+  min-height: 44px;
+  padding: 10px 14px;
   border-radius: 14px;
   border: 1px solid rgba(203, 213, 225, 0.95);
   font-size: 0.94rem;
@@ -3886,7 +3886,7 @@ main:has(.public-profile-page--app) {
 
 .chat-composer-send {
   flex-shrink: 0;
-  min-height: 48px;
+  min-height: 44px;
   min-width: 96px;
   padding-left: 20px;
   padding-right: 20px;
@@ -3961,8 +3961,8 @@ main:has(.public-profile-page--app) {
   }
 
   .chat-media-card {
-    --chat-media-max-w: min(200px, 76vw);
-    --chat-media-max-h: min(180px, 32vh);
+    --chat-media-max-w: min(190px, 74vw);
+    --chat-media-max-h: min(160px, 28vh);
   }
 
   .chat-composer-shell {
