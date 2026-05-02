@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
 import { ProductDebugAnalyticsGate } from "@/components/productTracking/ProductDebugAnalyticsGate";
 import { SiteFooterGate } from "@/components/SiteFooterGate";
 import { getSiteOrigin } from "@/lib/siteUrl";
@@ -50,7 +49,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <main>{children}</main>
         <SiteFooterGate />
-        <FirstVisitGuidanceGate />
         <ProductDebugAnalyticsGate />
       </body>
     </html>

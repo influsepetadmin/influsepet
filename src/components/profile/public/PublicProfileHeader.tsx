@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import type { PublicProfileByUsernameResponse } from "@/lib/publicProfile/publicProfileByUsername";
 import { getAvatarUrl } from "@/lib/avatar";
+import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
 import { PublicCollaborationRequestCta } from "./PublicCollaborationRequestCta";
 import {
   PublicProfileIconMapPin,
@@ -107,6 +108,7 @@ export function PublicProfileHeader({
             </p>
           </div>
         )}
+        {!isOwnPublicProfile ? <FirstVisitGuidanceGate scope="profile" /> : null}
       </div>
     </header>
   );

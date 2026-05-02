@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import type { PublicBrandProfileResponse } from "@/lib/publicProfile/publicBrandProfileByUsername";
 import { getAvatarUrl } from "@/lib/avatar";
+import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
 import {
   PublicProfileIconArrowTopRightOnSquare,
   PublicProfileIconMapPin,
@@ -146,6 +147,7 @@ export function PublicBrandProfileHeader({
               </p>
             </div>
           )}
+          {!isOwnPublicProfile ? <FirstVisitGuidanceGate scope="profile" /> : null}
         </div>
       </header>
     </div>

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatOfferWorkflowActions } from "@/components/chat/ChatOfferWorkflowActions";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { EmptyGlyphChatBubble } from "@/components/icons/emptyStateGlyphs";
+import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
 import { CollaborationRatingPanel } from "@/components/offers/CollaborationRatingPanel";
 import { DeliveryPanel } from "@/components/offers/DeliveryPanel";
 import { AlertCircle, ArrowLeft, CheckCircle2, Compass, Info, LayoutDashboard } from "lucide-react";
@@ -567,6 +568,7 @@ export default function ChatClient({
       <div className="chat-workspace-top chat-workspace-top--sticky">
         <ChatWorkspaceNav {...workspaceNav} />
       </div>
+      <FirstVisitGuidanceGate scope="chat" className="first-visit-guidance--workspace" />
       <header
         className="chat-workflow-card chat-workflow-card--workspace chat-workspace-summary-card"
         id="chat-workspace-header"

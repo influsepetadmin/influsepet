@@ -3,6 +3,7 @@ import CategoryMultiSelect from "@/components/CategoryMultiSelect";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import CitySelect from "@/components/CitySelect";
+import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
 import { DiscoverActiveFilters } from "@/components/marketplace/DiscoverActiveFilters";
 import { TrackedDiscoverSubmitButton } from "@/components/marketplace/TrackedDiscoverSubmitButton";
 import { DiscoverExploreBrands } from "@/components/marketplace/DiscoverExplore";
@@ -111,6 +112,7 @@ export default async function InfluencerDiscoverPage({
               Sonuçları daraltmak için şehir ve kategori ekleyebilirsiniz.
             </p>
           </header>
+          <FirstVisitGuidanceGate scope="discover" />
 
           <div className="discovery-search-panel">
             <form className="influencer-search-form discovery-search-form" method="get" action="/influencer/discover">
