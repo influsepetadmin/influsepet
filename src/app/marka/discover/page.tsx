@@ -283,7 +283,7 @@ export default async function MarkaDiscoverPage({
                   icon={<EmptyGlyphMagnifyingGlass />}
                   hint="Sonraki adım"
                   title="Aramayı başlatın veya filtre seçin"
-                  description="Önerilen profillere bakın ya da arama kutusuna birkaç kelime yazın."
+                  description="Önerilen profillere bakın veya birkaç kelimeyle arayın."
                 >
                   {showExploreRail && exploreData ? (
                     <a className="btn" href="#marka-discover-oneriler">
@@ -301,7 +301,7 @@ export default async function MarkaDiscoverPage({
                 icon={<EmptyGlyphMapPin />}
                 hint="Kriterleri gevşetin"
                 title="Sonuç bulunamadı"
-                description="Bu kombinasyonda profil yok. Metni kısaltın, kategori veya şehri kaldırın; ardından tekrar deneyin."
+                description="Metni kısaltın veya filtrelerden birini kaldırıp tekrar deneyin."
               >
                 <a className="btn" href="/marka/discover">
                   Filtreleri sıfırla

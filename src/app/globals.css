@@ -5928,10 +5928,11 @@ main:has(.dashboard-page) {
 /* Discover Explore — compact rails + pills (shared marka / influencer) */
 .dashboard-page .discover-explore {
   margin: 0 0 8px;
-  padding: 12px 14px 6px;
+  padding: 14px 14px 8px;
   border-radius: 16px;
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  background: rgba(248, 250, 252, 0.65);
+  border: 1px solid rgba(199, 210, 254, 0.52);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.88) 55%, rgba(238, 242, 255, 0.55) 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
 }
 
 .dashboard-page .discover-explore__eyebrow {
@@ -6023,7 +6024,7 @@ main:has(.dashboard-page) {
 
 .dashboard-page .discover-explore__rail-track {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   padding: 2px 4px 2px;
   width: max-content;
   min-width: 100%;
@@ -6032,12 +6033,14 @@ main:has(.dashboard-page) {
 .dashboard-page .influencer-result-card--explore-rail,
 .dashboard-page .brand-result-card--explore-rail {
   flex: 0 0 auto;
-  width: min(280px, 78vw);
-  padding: 12px 14px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.85) inset;
+  width: min(304px, 82vw);
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(165deg, #ffffff 0%, #f8fafc 48%, #eef2ff 100%);
+  border: 1px solid rgba(199, 210, 254, 0.55);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 8px 22px rgba(79, 70, 229, 0.08);
 }
 
 .dashboard-page .influencer-result-card--explore-rail .influencer-result-card__stats,
@@ -6056,6 +6059,20 @@ main:has(.dashboard-page) {
   font-size: 0.78rem;
   line-height: 1.35;
   color: #64748b;
+}
+
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__why,
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__why {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: 7px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(199, 210, 254, 0.52);
+  background: rgba(238, 242, 255, 0.72);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #4f46e5;
 }
 
 .dashboard-page .brand-result-card--hub,
@@ -6097,6 +6114,16 @@ main:has(.dashboard-page) {
   gap: 12px 14px;
 }
 
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card--hub,
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card--hub {
+  padding: 18px;
+}
+
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__head--hub,
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__head--hub {
+  gap: 14px;
+}
+
 @media (max-width: 560px) {
   .dashboard-page .brand-result-card__head--hub,
   .dashboard-page .influencer-result-card__head--hub {
@@ -6127,6 +6154,20 @@ main:has(.dashboard-page) {
   color: #475569;
 }
 
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions,
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions {
+  gap: 7px;
+  min-width: 112px;
+}
+
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions .btn.secondary,
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .btn.secondary,
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions .discovery-save-btn,
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .discovery-save-btn {
+  width: 100%;
+  justify-content: center;
+}
+
 .dashboard-page .brand-result-card__actions .btn.secondary:hover:not(:disabled),
 .dashboard-page .influencer-result-card__actions .btn.secondary:hover:not(:disabled) {
   border-color: rgba(129, 140, 248, 0.45);
@@ -6140,6 +6181,15 @@ main:has(.dashboard-page) {
   margin-top: 2px;
   min-height: 44px;
   font-weight: 700;
+}
+
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card--hub .influencer-result-card__form,
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card--hub .brand-result-card__form {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .dashboard-page .discovery-search-sort {
@@ -6521,6 +6571,36 @@ main:has(.dashboard-page) {
   font-size: 0.8rem;
   line-height: 1.45;
   color: #94a3b8;
+}
+
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__avatar,
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__avatar {
+  width: 60px;
+  height: 60px;
+}
+
+.dashboard-page .brand-result-card--explore-rail .brand-result-card__actions,
+.dashboard-page .influencer-result-card--explore-rail .influencer-result-card__actions {
+  min-width: 94px;
+}
+
+@media (max-width: 560px) {
+  .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card--hub,
+  .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card--hub {
+    padding: 15px;
+  }
+
+  .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions,
+  .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions {
+    min-width: 0;
+  }
+
+  .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions .btn.secondary,
+  .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .btn.secondary,
+  .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions .discovery-save-btn,
+  .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .discovery-save-btn {
+    flex: 1 1 0;
+  }
 }
 
 .dashboard-page .profile-preview-cta__card {

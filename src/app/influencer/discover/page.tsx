@@ -213,7 +213,7 @@ export default async function InfluencerDiscoverPage({
                 icon={<EmptyGlyphBuildingOffice />}
                 hint="Sonraki adım"
                 title="Aramayı başlatın veya filtre seçin"
-                description="Önerilen markalara bakın ya da arama kutusuna birkaç kelime yazın."
+                description="Önerilen markalara bakın veya birkaç kelimeyle arayın."
               >
                 {showExploreRail && exploreData && profile ? (
                   <a className="btn" href="#influencer-discover-oneriler">
@@ -230,7 +230,7 @@ export default async function InfluencerDiscoverPage({
                 icon={<EmptyGlyphMapPin />}
                 hint="Kriterleri gevşetin"
                 title="Sonuç bulunamadı"
-                description="Bu kombinasyonda marka yok. Metni kısaltın veya filtreleri kaldırıp tekrar deneyin."
+                description="Metni kısaltın veya filtrelerden birini kaldırıp tekrar deneyin."
               >
                 <a className="btn" href="/influencer/discover">
                   Filtreleri sıfırla
