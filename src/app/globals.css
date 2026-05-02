@@ -9306,7 +9306,14 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary
 
 /* Five stats (full influencer): use a real minimum card width, then wrap cleanly. */
 .public-profile-stats[data-stat-count="5"] {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.public-profile-stats[data-stat-count="5"] .public-profile-stat-card {
+  flex: 1 1 150px;
+  max-width: 210px;
 }
 
 .public-profile-stat-card {
@@ -9365,6 +9372,7 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary
   color: var(--muted);
   line-height: 1.25;
   max-width: 100%;
+  white-space: normal;
   overflow-wrap: normal;
   word-break: normal;
   hyphens: none;
