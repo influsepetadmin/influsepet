@@ -1441,24 +1441,60 @@ main:has(.public-profile-page--app) {
 
 @media (max-width: 640px) {
   .chat-workspace-top--sticky {
-    top: 54px;
-    margin-bottom: 5px;
-    padding: 3px 0 5px;
+    top: 52px;
+    margin-bottom: 3px;
+    padding: 2px 0 3px;
   }
 
   .chat-delivery-anchor {
     scroll-margin-top: 138px;
   }
 
+  .chat-workspace-summary-card__intro {
+    padding: 8px 12px 7px;
+  }
+
+  .chat-workspace-summary-card__eyebrow {
+    margin-bottom: 4px;
+    font-size: 0.64rem;
+  }
+
+  .chat-workspace-pills {
+    gap: 5px;
+    margin-top: 6px;
+  }
+
+  .chat-workspace-pill {
+    padding: 2px 7px;
+    font-size: 0.68rem;
+  }
+
+  .chat-workspace-timeline {
+    margin-top: 7px;
+    padding-top: 6px;
+  }
+
+  .chat-workspace-timeline__label {
+    margin-bottom: 5px;
+    font-size: 0.58rem;
+  }
+
+  .chat-workspace-timeline__step {
+    gap: 4px;
+    padding: 0 2px;
+  }
+
   .chat-workflow-card__identity--workspace {
-    flex-direction: column;
-    align-items: flex-start;
+    gap: 7px 10px;
+    padding: 7px 12px 8px;
   }
 
   .chat-workflow-card__profile-quick {
     margin-left: 0;
     align-self: stretch;
     text-align: center;
+    padding: 5px 9px;
+    font-size: 0.76rem;
   }
 
   .chat-workspace-timeline__text {
@@ -1783,8 +1819,26 @@ main:has(.public-profile-page--app) {
     grid-template-columns: 1fr;
   }
 
+  .chat-workflow-card--workspace .chat-workflow-card__metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .chat-workflow-metric {
     padding: 9px 12px;
+  }
+
+  .chat-workflow-card--workspace .chat-workflow-metric {
+    padding: 7px 8px;
+  }
+
+  .chat-workflow-card--workspace .chat-workflow-metric__label {
+    font-size: 0.56rem;
+    letter-spacing: 0.05em;
+  }
+
+  .chat-workflow-card--workspace .chat-workflow-metric__value {
+    font-size: 0.76rem;
+    line-height: 1.22;
   }
 
   .chat-workflow-card__profile-btn {
@@ -1797,6 +1851,18 @@ main:has(.public-profile-page--app) {
 @media (max-width: 520px) {
   .chat-workflow-card__title-row {
     padding: 12px 14px 9px;
+  }
+
+  .chat-workflow-card--workspace .chat-workflow-card__title {
+    font-size: 1rem;
+    line-height: 1.16;
+  }
+
+  .chat-workflow-card--workspace .chat-workflow-card__brief {
+    margin-top: 4px;
+    font-size: 0.76rem;
+    line-height: 1.32;
+    -webkit-line-clamp: 1;
   }
 
   .chat-workflow-card__identity {
@@ -3910,6 +3976,16 @@ main:has(.public-profile-page--app) {
   opacity: 0.65;
 }
 
+@media (max-width: 767px) {
+  .app-shell__content:has(.chat-layout--conversation) {
+    padding-bottom: calc(184px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app-shell__content:has(.chat-layout--conversation) .chat-composer-shell {
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 @media (max-width: 520px) {
   .chat-workflow-nav {
     flex-direction: column;
@@ -3966,13 +4042,37 @@ main:has(.public-profile-page--app) {
   }
 
   .chat-composer-shell {
-    padding: 10px 12px 12px;
+    bottom: env(safe-area-inset-bottom, 0px);
+    padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px));
     margin-top: 8px;
   }
 
+  .app-shell__content:has(.chat-layout--conversation) .chat-composer-shell {
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: 12px;
+  }
+
+  .chat-composer-toolbar {
+    gap: 7px;
+    margin-bottom: 8px;
+  }
+
+  .chat-composer-row {
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  .chat-composer-input {
+    flex: 1 1 0;
+    min-height: 46px;
+  }
+
   .chat-composer-send {
-    flex: 1 1 auto;
-    min-width: 0;
+    flex: 0 0 auto;
+    min-width: 78px;
+    min-height: 46px;
+    padding-left: 14px;
+    padding-right: 14px;
   }
 
   .chat-inbox__preview {
