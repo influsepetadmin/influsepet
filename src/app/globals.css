@@ -9304,34 +9304,9 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary
   }
 }
 
-/* Five stats (full influencer): stack on tiny screens, 3+2 on tablet, one row on desktop */
+/* Five stats (full influencer): use a real minimum card width, then wrap cleanly. */
 .public-profile-stats[data-stat-count="5"] {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-@media (min-width: 520px) {
-  .public-profile-stats[data-stat-count="5"] {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  .public-profile-stats[data-stat-count="5"] .public-profile-stat-card {
-    grid-column: span 2;
-  }
-
-  .public-profile-stats[data-stat-count="5"] .public-profile-stat-card:nth-last-child(-n + 2) {
-    grid-column: span 3;
-  }
-}
-
-@media (min-width: 960px) {
-  .public-profile-stats[data-stat-count="5"] {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-
-  .public-profile-stats[data-stat-count="5"] .public-profile-stat-card,
-  .public-profile-stats[data-stat-count="5"] .public-profile-stat-card:nth-last-child(-n + 2) {
-    grid-column: auto;
-  }
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
 }
 
 .public-profile-stat-card {
@@ -9390,7 +9365,9 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary
   color: var(--muted);
   line-height: 1.25;
   max-width: 100%;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
 }
 
 /* First-visit onboarding helper (Discover / Profile / Chat) */
