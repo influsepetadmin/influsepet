@@ -9272,7 +9272,7 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary
 /* Stats grid — count-aware columns avoid a single card stranded on row 2 (e.g. 4+1). */
 .public-profile-stats {
   display: grid;
-  gap: 12px;
+  gap: 10px;
   align-items: stretch;
   min-width: 0;
 }
@@ -9311,7 +9311,15 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary
 
 @media (min-width: 520px) {
   .public-profile-stats[data-stat-count="5"] {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .public-profile-stats[data-stat-count="5"] .public-profile-stat-card {
+    grid-column: span 2;
+  }
+
+  .public-profile-stats[data-stat-count="5"] .public-profile-stat-card:nth-last-child(-n + 2) {
+    grid-column: span 3;
   }
 }
 
@@ -9319,16 +9327,21 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary
   .public-profile-stats[data-stat-count="5"] {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
+
+  .public-profile-stats[data-stat-count="5"] .public-profile-stat-card,
+  .public-profile-stats[data-stat-count="5"] .public-profile-stat-card:nth-last-child(-n + 2) {
+    grid-column: auto;
+  }
 }
 
 .public-profile-stat-card {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 10px 12px;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 10px;
   align-items: center;
   min-width: 0;
   min-height: 0;
-  padding: 12px 12px 11px;
+  padding: 11px 12px 10px;
   background: var(--card);
   border: 1px solid rgba(226, 232, 240, 0.95);
   border-radius: var(--radius-app-card);
@@ -9365,18 +9378,19 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary
 .public-profile-stat-card__body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
 }
 
 .public-profile-stat-card__label {
-  font-size: 0.625rem;
-  font-weight: 600;
+  font-size: 0.64rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.045em;
   color: var(--muted);
-  line-height: 1.35;
+  line-height: 1.25;
   max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 /* First-visit onboarding helper (Discover / Profile / Chat) */
@@ -9440,8 +9454,8 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary
 }
 
 .public-profile-stat-card__value {
-  font-size: clamp(0.94rem, 0.35vw + 0.88rem, 1.02rem);
-  font-weight: 700;
+  font-size: clamp(1rem, 0.4vw + 0.9rem, 1.12rem);
+  font-weight: 800;
   font-variant-numeric: tabular-nums lining-nums;
   color: var(--text);
   line-height: 1.22;
@@ -9452,8 +9466,20 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary
 }
 
 @media (max-width: 380px) {
+  .public-profile-stat-card {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .public-profile-stat-card__icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9px;
+  }
+
   .public-profile-stat-card__label {
-    letter-spacing: 0.05em;
+    font-size: 0.59rem;
+    letter-spacing: 0.035em;
   }
 }
 
