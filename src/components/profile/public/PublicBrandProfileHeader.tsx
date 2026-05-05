@@ -134,8 +134,7 @@ export function PublicBrandProfileHeader({
             />
           ) : viewerRole === "BRAND" ? (
             <p className="public-profile-hero__cta-hint public-profile-hero__cta-hint--solo">
-              Bu sayfa influencer teklifleri içindir; marka hesabınızla influencer profillerine teklif
-              gönderebilirsiniz.
+              Teklif göndermek için marka hesabınızla influencer profillerini ziyaret edin.
             </p>
           ) : (
             <div className="public-profile-hero__cta-row public-profile-hero__cta-row--solo">
