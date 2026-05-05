@@ -44,6 +44,16 @@ function isPrimaryAction(next: OfferStatus): boolean {
   return next === "ACCEPTED" || next === "IN_PROGRESS";
 }
 
+function workspaceCtaLabel(status: OfferStatus): string {
+  if (status === "ACCEPTED" || status === "IN_PROGRESS" || status === "DELIVERED" || status === "REVISION_REQUESTED") {
+    return "Teslim alanına git";
+  }
+  if (status === "COMPLETED" || status === "REJECTED" || status === "CANCELLED") {
+    return "Sohbeti gör";
+  }
+  return "Sohbete git";
+}
+
 function transitionButtonClass(next: OfferStatus): string {
   if (isPrimaryAction(next)) return "btn";
   if (next === "REJECTED" || next === "CANCELLED" || next === "DISPUTED") {
@@ -332,7 +342,7 @@ export function CollaborationCard({
               })
             }
           >
-            Sohbete git
+            {workspaceCtaLabel(offer.status)}
           </a>
         ) : null}
         {profileHref ? (
@@ -356,7 +366,7 @@ export function CollaborationCard({
 
       {showDeliveryNote ? (
         <p className="muted collab-card__hint">
-          Teslim ve inceleme işlemleri sohbet ekranından yönetilecektir.
+          İş teslimi, mesajlaşma ve inceleme aynı çalışma alanında ilerler.
         </p>
       ) : null}
 
