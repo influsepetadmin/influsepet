@@ -10402,6 +10402,51 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary
   gap: var(--app-section-gap);
 }
 
+.influencer-settings__card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.influencer-settings__card .dash-section__lede {
+  margin-bottom: 0;
+}
+
+.influencer-settings__card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.influencer-settings__status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(199, 210, 254, 0.75);
+  background: rgba(238, 242, 255, 0.72);
+  color: #3730a3;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.influencer-settings__card--action {
+  justify-content: space-between;
+}
+
+.influencer-settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.influencer-settings__card--logout {
+  border-color: rgba(226, 232, 240, 0.95);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
 @media (min-width: 720px) {
   .influencer-settings__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -27,33 +27,55 @@ export default async function InfluencerSettingsPage() {
     <div className="dashboard-page influencer-panel-page influencer-settings">
       <header className="influencer-panel-page__hero">
         <h1 className="influencer-panel-page__title">Ayarlar</h1>
-        <p className="influencer-panel-page__lede muted">Hesap yönetimi ve tercih alanları adım adım bu sayfaya yakında eklenecek.</p>
+        <p className="influencer-panel-page__lede muted">
+          Hesap ve güvenlik ayarları kademeli olarak eklenecek. Şimdilik temel işlemleri buradan yönetebilirsiniz.
+        </p>
       </header>
 
       <div className="influencer-settings__grid">
-        <section className="dash-card dash-card--section influencer-settings__card">
-          <h2 className="dash-section__title">Hesap</h2>
-          <p className="muted dash-section__lede">E-posta ve oturum bilgileri için detaylı yönetim seçenekleri bu alana yakında eklenecek.</p>
+        <section className="dash-card dash-card--section influencer-settings__card influencer-settings__card--info">
+          <div className="influencer-settings__card-head">
+            <h2 className="dash-section__title">Hesap bilgileri</h2>
+            <span className="influencer-settings__status">Planlandı</span>
+          </div>
+          <p className="muted dash-section__lede">
+            E-posta ve profil güvenliği yönetimi bu alana eklenecek.
+          </p>
         </section>
 
-        <section className="dash-card dash-card--section influencer-settings__card">
-          <h2 className="dash-section__title">Bildirim tercihleri</h2>
-          <p className="muted dash-section__lede">E-posta ve uygulama bildirim tercihlerini yönetme seçenekleri bu alana yakında eklenecek.</p>
+        <section className="dash-card dash-card--section influencer-settings__card influencer-settings__card--info">
+          <div className="influencer-settings__card-head">
+            <h2 className="dash-section__title">Bildirim tercihleri</h2>
+            <span className="influencer-settings__status">Yakında</span>
+          </div>
+          <p className="muted dash-section__lede">
+            Teklif, mesaj ve teslim bildirimleri için tercih yönetimi hazırlanıyor.
+          </p>
         </section>
 
-        <section className="dash-card dash-card--section influencer-settings__card">
-          <h2 className="dash-section__title">Şifre</h2>
-          <p className="muted dash-section__lede">Gelişmiş güvenlik ve şifre yönetimi ayarları bu alana yakında eklenecek.</p>
-          <Link className="btn secondary btn--sm" href="/sifremi-unuttum">
-            Şifremi unuttum
-          </Link>
+        <section className="dash-card dash-card--section influencer-settings__card influencer-settings__card--action">
+          <div>
+            <h2 className="dash-section__title">Şifre işlemleri</h2>
+            <p className="muted dash-section__lede">
+              Şifrenizi yenilemek için güvenli sıfırlama akışını başlatın.
+            </p>
+          </div>
+          <div className="influencer-settings__actions">
+            <Link className="btn secondary btn--sm" href="/sifremi-unuttum">
+              Şifre sıfırla
+            </Link>
+          </div>
         </section>
 
-        <section className="dash-card dash-card--section influencer-settings__card">
-          <h2 className="dash-section__title">Oturumu kapat</h2>
-          <p className="muted dash-section__lede">Güvenli çıkış için oturum çerezi silinir.</p>
+        <section className="dash-card dash-card--section influencer-settings__card influencer-settings__card--action influencer-settings__card--logout">
+          <div>
+            <h2 className="dash-section__title">Oturumu kapat</h2>
+            <p className="muted dash-section__lede">
+              Bu cihazdaki oturum kapatılır ve giriş ekranına yönlendirilirsiniz.
+            </p>
+          </div>
           <form action="/api/auth/logout" method="post">
-            <button className="btn secondary" type="submit">
+            <button className="btn secondary btn--sm" type="submit">
               Çıkış yap
             </button>
           </form>
