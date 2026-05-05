@@ -54,6 +54,16 @@ function workspaceCtaLabel(status: OfferStatus): string {
   return "Sohbete git";
 }
 
+function collaborationStageLabel(status: OfferStatus): string {
+  if (status === "PENDING") return "Teklif aşaması";
+  if (status === "ACCEPTED" || status === "IN_PROGRESS") return "Aktif iş birliği";
+  if (status === "DELIVERED") return "Teslim incelemede";
+  if (status === "REVISION_REQUESTED") return "Revize süreci";
+  if (status === "COMPLETED") return "Tamamlandı";
+  if (status === "REJECTED" || status === "CANCELLED") return "Kapalı süreç";
+  return "İş birliği süreci";
+}
+
 function transitionButtonClass(next: OfferStatus): string {
   if (isPrimaryAction(next)) return "btn";
   if (next === "REJECTED" || next === "CANCELLED" || next === "DISPUTED") {
@@ -260,6 +270,8 @@ export function CollaborationCard({
 
   const hasBrief = Boolean(offer.brief.trim());
   const ratingBadge = counterpartyRatingBadge(offer.status, counterpartyRating ?? null);
+  const stageLabel = collaborationStageLabel(offer.status);
+  const visibleOtherSideName = otherSideName.trim() === "-" ? "Profil bilgisi eksik" : otherSideName;
 
   return (
     <article
@@ -271,9 +283,13 @@ export function CollaborationCard({
         <StatusBadge status={offer.status} />
       </header>
 
+      <div className="collab-card__stage" aria-label="Süreç aşaması">
+        <span className="collab-card__stage-label">{stageLabel}</span>
+      </div>
+
       <div className="collab-card__party">
         <span className="collab-card__party-label">{otherSideLabel}</span>
-        <span className="collab-card__party-name">{otherSideName}</span>
+        <span className="collab-card__party-name">{visibleOtherSideName}</span>
         {ratingBadge ? (
           <div
             className="collab-card__rating-badge"

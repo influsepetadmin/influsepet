@@ -6889,6 +6889,26 @@ main:has(.dashboard-page) {
   color: var(--text);
 }
 
+.collab-card__stage {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px 0;
+}
+
+.collab-card__stage-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(199, 210, 254, 0.7);
+  background: rgba(238, 242, 255, 0.72);
+  color: #3730a3;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
 .collab-card__party {
   display: flex;
   flex-wrap: wrap;
