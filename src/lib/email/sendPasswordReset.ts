@@ -30,54 +30,81 @@ function buildPasswordResetEmail(resetUrl: string): { html: string; text: string
   return {
     html: `<!doctype html>
 <html lang="tr">
-  <body style="margin:0;padding:0;background:#f8fafc;color:#0f172a;font-family:Arial,Helvetica,sans-serif;">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8fafc;padding:28px 16px;">
+  <body style="margin:0;padding:0;background:#f6f7fb;color:#111827;font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
+      InfluSepet hesabınız için güvenli şifre sıfırlama bağlantınız.
+    </div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f6f7fb;padding:32px 16px;">
       <tr>
         <td align="center">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;overflow:hidden;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:580px;background:#ffffff;border:1px solid #e4e7f0;border-radius:22px;overflow:hidden;box-shadow:0 18px 48px rgba(15,23,42,0.08);">
             <tr>
-              <td style="padding:28px 28px 12px;">
-                <p style="margin:0 0 8px;color:#4f46e5;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;">InfluSepet</p>
-                <h1 style="margin:0;color:#111827;font-size:24px;line-height:1.25;">Şifre sıfırlama bağlantınız</h1>
+              <td style="padding:30px 32px 20px;background:linear-gradient(135deg,#fafaff 0%,#ffffff 58%,#f5f3ff 100%);border-bottom:1px solid #eef0f6;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td>
+                      <p style="margin:0;color:#4f46e5;font-size:18px;font-weight:800;letter-spacing:-0.01em;">InfluSepet</p>
+                      <p style="margin:6px 0 0;color:#64748b;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Hesap güvenliği</p>
+                    </td>
+                    <td align="right" style="vertical-align:top;">
+                      <span style="display:inline-block;padding:7px 11px;border-radius:999px;background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;font-size:12px;font-weight:700;">1 saat geçerli</span>
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
             <tr>
-              <td style="padding:0 28px 24px;">
-                <p style="margin:0 0 18px;color:#475569;font-size:15px;line-height:1.6;">
-                  InfluSepet hesabınız için şifre sıfırlama isteği aldık. Yeni şifre belirlemek için aşağıdaki bağlantıyı kullanın.
+              <td style="padding:30px 32px 10px;">
+                <h1 style="margin:0 0 14px;color:#111827;font-size:25px;line-height:1.25;letter-spacing:-0.02em;">Şifrenizi güvenle yenileyin</h1>
+                <p style="margin:0 0 22px;color:#475569;font-size:15px;line-height:1.65;">
+                  InfluSepet hesabınız için şifre sıfırlama isteği aldık. Yeni şifre belirlemek için aşağıdaki güvenli bağlantıyı kullanabilirsiniz.
                 </p>
-                <p style="margin:0 0 22px;">
-                  <a href="${safeResetUrl}" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:12px 18px;border-radius:12px;">
+                <p style="margin:0 0 24px;">
+                  <a href="${safeResetUrl}" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;font-size:15px;font-weight:800;padding:14px 20px;border-radius:13px;box-shadow:0 10px 24px rgba(79,70,229,0.24);">
                     Şifremi sıfırla
                   </a>
                 </p>
-                <p style="margin:0 0 12px;color:#64748b;font-size:13px;line-height:1.55;">
-                  Bu bağlantı 1 saat boyunca geçerlidir ve yalnızca bir kez kullanılabilir.
-                </p>
-                <p style="margin:0;color:#64748b;font-size:13px;line-height:1.55;">
-                  Bu isteği siz başlatmadıysanız bu e-postayı yok sayabilirsiniz.
-                </p>
               </td>
             </tr>
             <tr>
-              <td style="padding:18px 28px;background:#f8fafc;border-top:1px solid #e2e8f0;">
-                <p style="margin:0;color:#94a3b8;font-size:12px;line-height:1.5;">
-                  Buton çalışmazsa bu bağlantıyı tarayıcınıza yapıştırın:<br>
-                  <a href="${safeResetUrl}" style="color:#4f46e5;word-break:break-all;">${safeResetUrl}</a>
+              <td style="padding:0 32px 26px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;">
+                  <tr>
+                    <td style="padding:16px 18px;">
+                      <p style="margin:0 0 8px;color:#334155;font-size:13px;font-weight:800;">Güvenlik notu</p>
+                      <p style="margin:0;color:#64748b;font-size:13px;line-height:1.6;">
+                        Bu bağlantı 1 saat boyunca geçerlidir ve yalnızca bir kez kullanılabilir. Bu isteği siz başlatmadıysanız bu e-postayı yok sayabilirsiniz.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 32px 26px;background:#fbfcff;border-top:1px solid #eef0f6;">
+                <p style="margin:0 0 8px;color:#64748b;font-size:13px;line-height:1.55;">
+                  Buton çalışmazsa bağlantıyı tarayıcınıza yapıştırın:
+                </p>
+                <p style="margin:0;color:#94a3b8;font-size:12px;line-height:1.55;">
+                  <a href="${safeResetUrl}" style="color:#4f46e5;text-decoration:underline;word-break:break-all;">${safeResetUrl}</a>
                 </p>
               </td>
             </tr>
           </table>
+          <p style="max-width:520px;margin:16px 0 0;color:#94a3b8;font-size:12px;line-height:1.5;">
+            InfluSepet, marka ve influencer iş birlikleri için güvenli çalışma alanı.
+          </p>
         </td>
       </tr>
     </table>
   </body>
 </html>`,
     text: [
-      "InfluSepet şifre sıfırlama bağlantınız",
+      "InfluSepet | Şifre sıfırlama bağlantınız",
       "",
-      "InfluSepet hesabınız için şifre sıfırlama isteği aldık.",
-      "Yeni şifre belirlemek için bu bağlantıyı kullanın:",
+      "InfluSepet hesabınız için şifre sıfırlama isteği aldık. Yeni şifre belirlemek için aşağıdaki güvenli bağlantıyı kullanabilirsiniz.",
+      "",
+      "Şifremi sıfırla:",
       resetUrl,
       "",
       "Bu bağlantı 1 saat boyunca geçerlidir ve yalnızca bir kez kullanılabilir.",
