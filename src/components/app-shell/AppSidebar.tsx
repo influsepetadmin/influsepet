@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { LogOut, Settings } from "lucide-react";
+import { useState } from "react";
 import { SidebarNav } from "./SidebarNav";
 import type { ShellNavGroup } from "./navConfig";
 
@@ -42,6 +43,9 @@ export function AppSidebar({
   onMouseLeave?: () => void;
 }) {
   const brandAria = `${productName} — ${roleLabel} paneli`;
+  const [failedAvatarSrc, setFailedAvatarSrc] = useState<string | null>(null);
+  const showAvatarImage = Boolean(userAvatarSrc && failedAvatarSrc !== userAvatarSrc);
+
   return (
     <aside
       className="app-shell__sidebar app-shell__sidebar--desktop"
@@ -74,8 +78,15 @@ export function AppSidebar({
       <div className="app-shell__sidebar-footer">
         <Link href={profileHref} className="app-shell__user-block" aria-label={`Profil: ${userName}`}>
           <span className="app-shell__user-avatar">
-            {userAvatarSrc ? (
-              <img src={userAvatarSrc} alt="" width={40} height={40} className="app-shell__user-avatar-img" />
+            {showAvatarImage ? (
+              <img
+                src={userAvatarSrc}
+                alt=""
+                width={40}
+                height={40}
+                className="app-shell__user-avatar-img"
+                onError={() => setFailedAvatarSrc(userAvatarSrc)}
+              />
             ) : (
               <span className="app-shell__user-avatar-fallback" aria-hidden>
                 {userName.slice(0, 1).toUpperCase()}

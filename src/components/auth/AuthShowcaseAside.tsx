@@ -6,7 +6,7 @@ export function AuthShowcaseAside() {
       <div className="auth-showcase-logo">
         <Image
           src="/branding/logo-primary.png"
-          alt=""
+          alt="InfluSepet"
           width={268}
           height={80}
           priority
@@ -14,7 +14,6 @@ export function AuthShowcaseAside() {
           className="auth-showcase-logo-img"
         />
       </div>
-      <h1 className="auth-showcase-title">InfluSepet</h1>
       <p className="auth-showcase-lead">
         Influencer’lar ve markaları güvenli, düzenli iş birlikleri için bir araya getirir. Tekliften teslimata tek
         panel.
