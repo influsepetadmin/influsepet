@@ -18,7 +18,7 @@ export function SiteFooter() {
           <div className="site-footer-brand-block">
             <Link href="/" className="site-footer-brand">
               <Image
-                src="/branding/logo-primary.png"
+                src="/branding/influsepet-logo-icon.png"
                 alt=""
                 width={44}
                 height={44}

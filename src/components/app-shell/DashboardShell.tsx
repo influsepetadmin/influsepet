@@ -106,7 +106,7 @@ export function DashboardShell({
       ) : null}
 
       <AppSidebar
-        productName="Influsepet"
+        productName="InfluSepet"
         roleLabel={roleLabel}
         homeHref={homeHref}
         navGroups={navGroups}
@@ -129,7 +129,7 @@ export function DashboardShell({
         id="app-shell-drawer"
       >
         <div className="app-shell__drawer-inner">
-          <p className="app-shell__drawer-title">Influsepet · {roleLabel}</p>
+          <p className="app-shell__drawer-title">InfluSepet · {roleLabel}</p>
           <SidebarNav
             groups={navGroups}
             pathname={pathname}

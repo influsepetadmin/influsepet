@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   description: siteDescription,
   applicationName: "InfluSepet",
   authors: [{ name: "InfluSepet" }],
-  /** Favicons: `src/app/icon.png` + `apple-icon.png` (file convention; purple basket mark). Do not duplicate via `icons` here. */
+  /** Favicons: `src/app/icon.png` + `apple-icon.png` (file convention; icon-only InfluSepet mark). */
   openGraph: {
     type: "website",
     locale: "tr_TR",

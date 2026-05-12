@@ -13,7 +13,7 @@ export function LegalPageShell({
       <header className="legal-public-header">
         <Link href="/" className="legal-public-header-brand">
           <Image
-            src="/branding/logo-primary.png"
+            src="/branding/influsepet-logo-icon.png"
             alt=""
             width={44}
             height={44}

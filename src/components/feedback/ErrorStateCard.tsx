@@ -16,7 +16,7 @@ export function ErrorStateCard({
       <div className="error-state-card card">
         <div className="error-state-brand">
           <Image
-            src="/branding/logo-primary.png"
+            src="/branding/influsepet-logo-icon.png"
             alt=""
             width={56}
             height={56}

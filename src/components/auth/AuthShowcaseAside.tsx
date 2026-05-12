@@ -7,10 +7,10 @@ export function AuthShowcaseAside() {
         <Image
           src="/branding/logo-primary.png"
           alt=""
-          width={168}
-          height={168}
+          width={268}
+          height={80}
           priority
-          sizes="168px"
+          sizes="(max-width: 719px) 210px, 268px"
           className="auth-showcase-logo-img"
         />
       </div>
