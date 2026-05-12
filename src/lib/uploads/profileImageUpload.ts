@@ -5,6 +5,9 @@ import { join } from "path";
 /** Max upload size for profile images (5 MB). */
 export const PROFILE_UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
 
+// TODO(production-storage): This writes profile/logo uploads to the app's local
+// filesystem. Railway redeploys do not preserve runtime-created files; replace
+// with persistent object storage such as Cloudflare R2/S3 before production use.
 export const PROFILE_UPLOAD_DIR_SEGMENTS = ["public", "uploads", "profile-images"] as const;
 
 export const PROFILE_UPLOAD_PUBLIC_PREFIX = "/uploads/profile-images";
