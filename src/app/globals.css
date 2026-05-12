@@ -5628,30 +5628,33 @@ main:has(.dashboard-page) {
 .dashboard-page .discovery-search-card {
   position: relative;
   overflow: hidden;
-  padding: 22px;
+  padding: clamp(18px, 3vw, 30px);
   border-color: rgba(165, 180, 252, 0.6);
   background:
-    radial-gradient(80% 70% at 0% 0%, rgba(196, 181, 253, 0.22) 0%, transparent 54%),
-    radial-gradient(70% 60% at 100% 0%, rgba(45, 212, 191, 0.14) 0%, transparent 50%),
+    radial-gradient(70% 80% at 0% 0%, rgba(124, 58, 237, 0.18) 0%, transparent 58%),
+    radial-gradient(72% 76% at 100% 0%, rgba(20, 184, 166, 0.16) 0%, transparent 54%),
     linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 58%, rgba(238, 242, 255, 0.72) 100%);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.92) inset,
-    0 18px 48px rgba(49, 46, 129, 0.1);
+    0 24px 60px rgba(49, 46, 129, 0.13);
 }
 
 .dashboard-page .discovery-search-card__intro {
   position: relative;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
   z-index: 1;
 }
 
 .dashboard-page .discovery-search-card__title {
-  margin-bottom: 6px;
+  margin-bottom: 7px;
+  font-size: clamp(1.35rem, 2.6vw, 2rem);
+  letter-spacing: -0.045em;
 }
 
 .dashboard-page .discovery-search-card__lede {
   margin-bottom: 0;
-  max-width: 48ch;
+  max-width: 54ch;
+  font-size: 0.98rem;
 }
 
 .dashboard-page .discovery-context-hint {
@@ -5664,37 +5667,48 @@ main:has(.dashboard-page) {
 .dashboard-page .discovery-search-panel {
   position: relative;
   z-index: 1;
-  padding: 16px;
-  border-radius: 20px;
+  padding: clamp(14px, 2.4vw, 22px);
+  border-radius: 24px;
   border: 1px solid rgba(165, 180, 252, 0.7);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 251, 255, 0.94) 100%);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.95) inset,
-    0 14px 34px rgba(79, 70, 229, 0.11),
+    0 18px 42px rgba(79, 70, 229, 0.12),
     0 5px 18px rgba(20, 184, 166, 0.06);
 }
 
-@media (min-width: 760px) {
+@media (min-width: 860px) {
   .dashboard-page .discovery-search-panel {
-    padding: 18px;
+    padding: 22px;
   }
 
   .dashboard-page .discovery-search-form {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(190px, 0.34fr);
-    gap: 14px;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px;
     align-items: start;
   }
 
-  .dashboard-page .discovery-search-field--query,
-  .dashboard-page .discovery-search-field--categories,
-  .dashboard-page .discovery-search-actions {
+  .dashboard-page .discovery-search-field--query {
     grid-column: 1 / -1;
   }
 
+  .dashboard-page .discovery-search-field:not(.discovery-search-field--query):not(.discovery-search-field--categories):not(.discovery-search-field--sort) {
+    grid-column: span 3;
+  }
+
+  .dashboard-page .discovery-search-field--categories {
+    grid-column: span 6;
+  }
+
   .dashboard-page .discovery-search-field--sort {
+    grid-column: span 3;
     align-self: stretch;
+  }
+
+  .dashboard-page .discovery-search-actions {
+    grid-column: 1 / -1;
   }
 }
 
@@ -5707,10 +5721,14 @@ main:has(.dashboard-page) {
 }
 
 .dashboard-page .discovery-search-field:not(.discovery-search-field--query) {
-  margin-top: 14px;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.72);
 }
 
-@media (min-width: 760px) {
+@media (min-width: 860px) {
   .dashboard-page .discovery-search-field:not(.discovery-search-field--query) {
     margin-top: 0;
   }
@@ -5742,9 +5760,9 @@ main:has(.dashboard-page) {
   align-items: center;
   gap: 10px;
   width: 100%;
-  min-height: 62px;
-  padding: 15px 16px;
-  border-radius: 18px;
+  min-height: 68px;
+  padding: 17px 18px;
+  border-radius: 22px;
   border: 1px solid rgba(99, 102, 241, 0.66);
   background: #ffffff;
   box-shadow:
@@ -5775,7 +5793,7 @@ main:has(.dashboard-page) {
   margin: 0;
   padding: 0;
   background: transparent;
-  font-size: 1rem;
+  font-size: 1.08rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #0f172a;
@@ -6074,16 +6092,23 @@ main:has(.dashboard-page) {
 
 /* Discover Explore — compact rails + pills (shared marka / influencer) */
 .dashboard-page .discover-explore {
-  margin: 0 0 8px;
-  padding: 16px 16px 10px;
-  border-radius: 20px;
+  margin: 0;
+  padding: clamp(16px, 2.4vw, 24px);
+  border-radius: 24px;
   border: 1px solid rgba(199, 210, 254, 0.62);
   background:
     radial-gradient(80% 60% at 100% 0%, rgba(45, 212, 191, 0.1) 0%, transparent 54%),
     linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.9) 55%, rgba(238, 242, 255, 0.58) 100%);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 10px 30px rgba(49, 46, 129, 0.07);
+    0 16px 44px rgba(49, 46, 129, 0.09);
+}
+
+.dashboard-page .discover-showcase-card {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }
 
 .dashboard-page .discover-explore__eyebrow {
@@ -6110,7 +6135,7 @@ main:has(.dashboard-page) {
 }
 
 .dashboard-page .discover-explore__block {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .dashboard-page .discover-explore__block:last-child {
@@ -6123,7 +6148,7 @@ main:has(.dashboard-page) {
 
 .dashboard-page .discover-explore__block-title {
   margin: 0 0 2px;
-  font-size: 0.78rem;
+  font-size: 0.86rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -6167,16 +6192,16 @@ main:has(.dashboard-page) {
 
 .dashboard-page .discover-explore__rail {
   overflow-x: auto;
-  padding-bottom: 6px;
-  margin: 0 -4px;
+  padding: 2px 0 8px;
+  margin: 0 -2px;
   scrollbar-width: thin;
   -webkit-overflow-scrolling: touch;
 }
 
 .dashboard-page .discover-explore__rail-track {
   display: flex;
-  gap: 14px;
-  padding: 2px 4px 2px;
+  gap: 16px;
+  padding: 2px 2px 4px;
   width: max-content;
   min-width: 100%;
 }
@@ -6184,9 +6209,9 @@ main:has(.dashboard-page) {
 .dashboard-page .influencer-result-card--explore-rail,
 .dashboard-page .brand-result-card--explore-rail {
   flex: 0 0 auto;
-  width: min(420px, 88vw);
-  padding: 15px;
-  border-radius: 18px;
+  width: min(390px, 86vw);
+  padding: 16px;
+  border-radius: 20px;
   background:
     linear-gradient(165deg, #ffffff 0%, #f8fafc 46%, #eef2ff 100%);
   border: 1px solid rgba(199, 210, 254, 0.68);
@@ -6266,19 +6291,19 @@ main:has(.dashboard-page) {
 
 .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card--hub,
 .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card--hub {
-  padding: 18px;
+  padding: 20px;
   border-color: rgba(199, 210, 254, 0.62);
   background:
     linear-gradient(165deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 250, 252, 0.96) 45%, rgba(238, 242, 255, 0.64) 100%);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.92) inset,
     0 4px 12px rgba(15, 23, 42, 0.04),
-    0 16px 36px rgba(49, 46, 129, 0.09);
+    0 18px 42px rgba(49, 46, 129, 0.1);
 }
 
 .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__head--hub,
 .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__head--hub {
-  gap: 14px;
+  gap: 16px;
 }
 
 @media (max-width: 560px) {
@@ -6438,18 +6463,28 @@ main:has(.dashboard-page) {
 }
 
 .dashboard-page .discovery-search-results {
-  margin-top: 20px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(226, 232, 240, 0.95);
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 
 .dashboard-page .discovery-search-results__title {
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #94a3b8;
+}
+
+.dashboard-page .discover-results-card {
+  border-color: rgba(199, 210, 254, 0.58);
+  background:
+    radial-gradient(90% 70% at 100% 0%, rgba(20, 184, 166, 0.08) 0%, transparent 58%),
+    linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 16px 44px rgba(49, 46, 129, 0.08);
 }
 
 .dashboard-page .discovery-search-actions {
@@ -6478,15 +6513,15 @@ main:has(.dashboard-page) {
 }
 
 .dashboard-page .discovery-search-panel .influencer-search-form {
-  gap: 0;
+  gap: 12px;
 }
 
 .dashboard-page .influencer-search-form__actions {
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 2px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(226, 232, 240, 0.95);
+  margin-top: 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(226, 232, 240, 0.82);
   flex-wrap: wrap;
 }
 
@@ -6503,6 +6538,13 @@ main:has(.dashboard-page) {
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.95) inset,
     0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.dashboard-page .discovery-search-field .influencer-search-form__city {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }
 
 .dashboard-page .influencer-search-form__city select {
@@ -6546,8 +6588,8 @@ main:has(.dashboard-page) {
 .dashboard-page .dash-card--emphasis .category-multi-select__filter {
   display: block;
   width: 100%;
-  margin-bottom: 10px;
-  padding: 9px 12px;
+  margin-bottom: 8px;
+  padding: 8px 11px;
   border-radius: 12px;
   border: 1px solid rgba(199, 210, 254, 0.55);
   font-size: 0.9rem;
@@ -6570,15 +6612,15 @@ main:has(.dashboard-page) {
 .dashboard-page .dash-card--emphasis .category-multi-select__grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 7px;
 }
 
 .dashboard-page .dash-card--emphasis .category-multi-select__item {
   flex: 1 1 auto;
-  min-width: min(100%, 138px);
+  min-width: min(100%, 126px);
   margin: 0;
-  min-height: 40px;
-  padding: 8px 12px 8px 10px;
+  min-height: 34px;
+  padding: 7px 11px 7px 9px;
   align-items: center;
   border-radius: 999px;
   border: 1px solid rgba(203, 213, 225, 0.95);
@@ -6611,8 +6653,8 @@ main:has(.dashboard-page) {
 
 .dashboard-page .dash-card--emphasis .category-multi-select__input {
   margin: 0;
-  width: 0.95rem;
-  height: 0.95rem;
+  width: 0.88rem;
+  height: 0.88rem;
 }
 
 .dashboard-page .dash-card--emphasis .category-multi-select__hint {
@@ -6662,6 +6704,36 @@ main:has(.dashboard-page) {
     0 1px 0 rgba(255, 255, 255, 0.85) inset,
     0 2px 6px rgba(15, 23, 42, 0.04),
     0 12px 32px rgba(49, 46, 129, 0.08);
+}
+
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__form,
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__form {
+  display: grid;
+  gap: 8px;
+}
+
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__form label,
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__form label {
+  margin-top: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__form input,
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__form input,
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__form textarea,
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__form textarea {
+  border-color: rgba(203, 213, 225, 0.88);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__form textarea,
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__form textarea {
+  min-height: 76px;
 }
 
 .dashboard-page .influencer-result-card__head {

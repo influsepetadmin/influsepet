@@ -229,23 +229,31 @@ export default async function MarkaDiscoverPage({
             />
           ) : null}
 
-          {showExploreRail && exploreData ? (
-            <div id="marka-discover-oneriler">
-              <DiscoverExploreInfluencers
-                data={exploreData}
-                hrefBase="/marka/discover"
-                savedInfluencerUserIds={savedInfluencerUserIds}
-              />
-            </div>
-          ) : null}
+        </section>
+      )}
 
+      {canUseMarketplace && showExploreRail && exploreData ? (
+        <section
+          className="dash-card dash-card--section discover-showcase-card"
+          id="marka-discover-oneriler"
+        >
+          <DiscoverExploreInfluencers
+            data={exploreData}
+            hrefBase="/marka/discover"
+            savedInfluencerUserIds={savedInfluencerUserIds}
+          />
+        </section>
+      ) : null}
+
+      {canUseMarketplace ? (
+        <section className="dash-card dash-card--section discover-results-card">
           <div className="discovery-search-results">
             <h3 className="discovery-search-results__title">Sonuçlar</h3>
             {!hasActiveSearch ? (
               suggestedDefaultInfluencers.length > 0 ? (
                 <div className="influencer-results-stack">
                   <header className="discover-results-suggested__head">
-                    <h4 className="discovery-search-results__title">Önerilen içerik üreticiler</h4>
+                    <h4 className="discovery-search-results__title">Öne çıkan içerik üreticileri</h4>
                     <p className="dash-section__lede muted">
                       Daha spesifik sonuçlar için arama veya filtreleri kullanın.
                     </p>
@@ -344,7 +352,7 @@ export default async function MarkaDiscoverPage({
             )}
           </div>
         </section>
-      )}
+      ) : null}
 
       <section className="dash-card dash-card--section">
         <h2 className="dash-section__title">Kayıtlı içerik üreticileri</h2>

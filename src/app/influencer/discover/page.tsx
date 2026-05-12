@@ -106,7 +106,7 @@ export default async function InfluencerDiscoverPage({
           <header className="discovery-search-card__intro">
             <h2 className="dash-section__title discovery-search-card__title">Marka bul</h2>
             <p className="dash-section__lede muted discovery-search-card__lede">
-              Marka adı, şehir veya kategoriyle hızlıca eşleşme bulun.
+              Marka adı, şehir veya kategoriye göre hızlıca arayın.
             </p>
             <p className="discovery-context-hint muted">
               Sonuçları daraltmak için şehir ve kategori ekleyebilirsiniz.
@@ -195,17 +195,25 @@ export default async function InfluencerDiscoverPage({
             />
           ) : null}
 
-          {showExploreRail && exploreData && profile ? (
-            <div id="influencer-discover-oneriler">
-              <DiscoverExploreBrands
-                data={exploreData}
-                hrefBase="/influencer/discover"
-                savedBrandUserIds={savedBrandUserIds}
-                influencerBasePriceTRY={profile.basePriceTRY}
-              />
-            </div>
-          ) : null}
+        </section>
+      ) : null}
 
+      {profile && showExploreRail && exploreData ? (
+        <section
+          className="dash-card dash-card--section discover-showcase-card"
+          id="influencer-discover-oneriler"
+        >
+          <DiscoverExploreBrands
+            data={exploreData}
+            hrefBase="/influencer/discover"
+            savedBrandUserIds={savedBrandUserIds}
+            influencerBasePriceTRY={profile.basePriceTRY}
+          />
+        </section>
+      ) : null}
+
+      {profile ? (
+        <section className="dash-card dash-card--section discover-results-card">
           <div className="discovery-search-results">
             <h3 className="discovery-search-results__title">Sonuçlar</h3>
             {!hasBrandSearch ? (
@@ -215,7 +223,7 @@ export default async function InfluencerDiscoverPage({
                 title="Aramayı başlatın veya filtre seçin"
                 description="Önerilen markalara bakın veya birkaç kelimeyle arayın."
               >
-                {showExploreRail && exploreData && profile ? (
+                {showExploreRail && exploreData ? (
                   <a className="btn" href="#influencer-discover-oneriler">
                     Önerilenlere göz at
                   </a>

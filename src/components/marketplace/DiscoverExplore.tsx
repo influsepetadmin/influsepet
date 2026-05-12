@@ -138,7 +138,7 @@ export function DiscoverExploreInfluencers({
       {suggested.length > 0 ? (
         <ExploreBlock
           labelledBy="explore-inf-suggested"
-          title="Önerilen içerik üreticileri"
+          title="Öne çıkan içerik üreticileri"
           subtitle="Takipçi sayısı ve güncellik ile öne çıkan profiller."
         >
           <ExploreRail>
