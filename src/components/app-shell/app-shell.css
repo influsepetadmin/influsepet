@@ -14,6 +14,20 @@ main:has(.app-shell) {
   width: 100%;
   background: var(--dash-page-tint);
   position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+}
+
+.app-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 16%, rgba(124, 58, 237, 0.12), rgba(124, 58, 237, 0) 30%),
+    radial-gradient(circle at 88% 10%, rgba(45, 212, 191, 0.16), rgba(45, 212, 191, 0) 28%),
+    radial-gradient(circle at 72% 86%, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0) 30%);
 }
 
 .app-shell__sidebar--desktop {
@@ -23,13 +37,15 @@ main:has(.app-shell) {
   flex-shrink: 0;
   min-height: min(100vh, 100dvh);
   padding: 14px 12px 14px;
-  border-right: 1px solid rgba(203, 213, 225, 0.88);
-  background: linear-gradient(165deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 250, 252, 0.94) 42%, rgba(241, 245, 249, 0.92) 100%);
+  border-right: 1px solid rgba(199, 210, 254, 0.58);
+  background:
+    linear-gradient(165deg, rgba(255, 255, 255, 0.97) 0%, rgba(250, 251, 255, 0.94) 42%, rgba(241, 245, 249, 0.9) 100%);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   box-shadow:
     1px 0 0 rgba(255, 255, 255, 0.9) inset,
-    6px 0 32px rgba(15, 23, 42, 0.04);
+    10px 0 38px rgba(49, 46, 129, 0.08),
+    2px 0 10px rgba(15, 23, 42, 0.04);
   position: sticky;
   top: 0;
   align-self: flex-start;
@@ -54,15 +70,17 @@ main:has(.app-shell) {
 
 .app-shell__sidebar-head {
   margin-bottom: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+  padding: 8px 6px 14px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.78);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(248, 250, 252, 0.42) 100%);
 }
 
 .app-shell__brand {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 6px 6px 0;
+  padding: 6px;
   min-height: 40px;
   border-radius: 12px;
   text-decoration: none !important;
@@ -73,8 +91,10 @@ main:has(.app-shell) {
 }
 
 .app-shell__brand:hover {
-  background: rgba(255, 255, 255, 0.65);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 8px 22px rgba(79, 70, 229, 0.08);
 }
 
 .app-shell__brand-mark {
@@ -82,10 +102,11 @@ main:has(.app-shell) {
   height: 34px;
   border-radius: 11px;
   background:
-    rgba(255, 255, 255, 0.8) url("/branding/influsepet-logo-icon.png") center / 28px 28px no-repeat;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(238, 242, 255, 0.78)),
+    url("/branding/influsepet-logo-icon.png") center / 28px 28px no-repeat;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.35) inset,
-    0 6px 18px rgba(79, 70, 229, 0.32);
+    0 1px 0 rgba(255, 255, 255, 0.72) inset,
+    0 8px 22px rgba(79, 70, 229, 0.22);
   flex-shrink: 0;
 }
 
@@ -170,7 +191,7 @@ main:has(.app-shell) {
 .app-shell-sidebar__section--below {
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid rgba(226, 232, 240, 0.75);
+  border-top: 1px solid rgba(199, 210, 254, 0.5);
 }
 
 .app-shell--sidebar-collapsed .app-shell-sidebar__section--below {
@@ -198,9 +219,9 @@ main:has(.app-shell) {
   justify-content: center;
   width: 100%;
   min-height: 40px;
-  border: 1px solid rgba(203, 213, 225, 0.9);
+  border: 1px solid rgba(203, 213, 225, 0.78);
   border-radius: var(--radius-btn);
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.82);
   color: var(--text);
   cursor: pointer;
   transition:
@@ -212,7 +233,9 @@ main:has(.app-shell) {
 .app-shell-sidebar__collapse-btn:hover {
   background: #fff;
   border-color: rgba(165, 180, 252, 0.55);
-  box-shadow: 0 1px 3px rgba(79, 70, 229, 0.08);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.92) inset,
+    0 8px 22px rgba(79, 70, 229, 0.1);
 }
 
 /* Collapsed rail: delayed tooltips (nav + collapse control) */
@@ -290,7 +313,7 @@ main:has(.app-shell) {
 }
 
 .app-shell-sidebar-item:not(.app-shell-sidebar-item--active):hover {
-  background: linear-gradient(105deg, rgba(248, 250, 252, 0.95) 0%, rgba(238, 242, 255, 0.88) 100%);
+  background: linear-gradient(105deg, rgba(255, 255, 255, 0.95) 0%, rgba(238, 242, 255, 0.9) 100%);
   color: #312e81;
   transform: translateX(2px);
   box-shadow:
@@ -302,10 +325,11 @@ main:has(.app-shell) {
   padding-left: 14px;
   color: #1e1b4b;
   font-weight: 700;
-  background: linear-gradient(105deg, rgba(238, 242, 255, 0.99) 0%, rgba(224, 231, 255, 0.78) 48%, rgba(199, 210, 254, 0.42) 100%);
+  background:
+    linear-gradient(105deg, rgba(255, 255, 255, 0.98) 0%, rgba(238, 242, 255, 0.94) 48%, rgba(204, 251, 241, 0.38) 100%);
   box-shadow:
     inset 0 0 0 1px rgba(129, 140, 248, 0.55),
-    0 2px 10px rgba(79, 70, 229, 0.12);
+    0 8px 22px rgba(79, 70, 229, 0.13);
 }
 
 .app-shell-sidebar-item--active::before {
@@ -358,12 +382,12 @@ main:has(.app-shell) {
 .app-shell__sidebar-footer {
   margin-top: auto;
   padding-top: 14px;
-  border-top: 1px solid rgba(226, 232, 240, 0.92);
+  border-top: 1px solid rgba(199, 210, 254, 0.48);
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: linear-gradient(180deg, transparent 0%, rgba(248, 250, 252, 0.5) 100%);
-  border-radius: 0 0 4px 4px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(248, 250, 252, 0.62) 100%);
+  border-radius: 16px;
 }
 
 .app-shell--sidebar-collapsed .app-shell__user-meta {
@@ -378,11 +402,17 @@ main:has(.app-shell) {
   border-radius: 12px;
   text-decoration: none !important;
   color: inherit;
-  transition: background 0.15s ease;
+  border: 1px solid transparent;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .app-shell__user-block:hover {
-  background: rgba(248, 250, 252, 0.95);
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(199, 210, 254, 0.5);
+  box-shadow: 0 8px 22px rgba(79, 70, 229, 0.08);
 }
 
 .app-shell__user-avatar {
@@ -525,13 +555,13 @@ main:has(.app-shell) {
   gap: 12px;
   min-height: 50px;
   padding: 10px 20px 10px;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 250, 252, 0.86) 100%);
+  border-bottom: 1px solid rgba(199, 210, 254, 0.42);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.84) 0%, rgba(248, 250, 252, 0.72) 100%);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.92) inset,
-    0 6px 22px rgba(15, 23, 42, 0.04);
+    0 8px 28px rgba(49, 46, 129, 0.06);
   position: sticky;
   top: 0;
   z-index: 20;

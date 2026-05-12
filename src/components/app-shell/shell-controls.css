@@ -7,11 +7,13 @@
 
 .shell-control-bar {
   border-radius: var(--radius-app-card);
-  border: 1px solid rgba(203, 213, 225, 0.88);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.92) 100%);
+  border: 1px solid rgba(213, 221, 236, 0.86);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(250, 251, 255, 0.9) 100%);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 1px 2px rgba(15, 23, 42, 0.035);
+    0 1px 0 rgba(255, 255, 255, 0.92) inset,
+    0 2px 8px rgba(15, 23, 42, 0.035),
+    0 12px 30px rgba(79, 70, 229, 0.055);
   padding: 10px 11px 11px;
   margin-bottom: 12px;
 }
@@ -22,8 +24,8 @@
   gap: 6px;
   padding: 4px;
   border-radius: 12px;
-  background: rgba(241, 245, 249, 0.65);
-  border: 1px solid rgba(226, 232, 240, 0.75);
+  background: rgba(241, 245, 249, 0.5);
+  border: 1px solid rgba(226, 232, 240, 0.68);
 }
 
 .shell-control-bar__filters {
@@ -86,18 +88,18 @@
 
 .shell-tab:hover {
   color: #4338ca;
-  background: rgba(255, 255, 255, 0.75);
-  border-color: rgba(199, 210, 254, 0.4);
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(199, 210, 254, 0.52);
 }
 
 .shell-tab--active {
   color: #1e1b4b;
   font-weight: 800;
-  background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #eef2ff 100%);
   border-color: rgba(165, 180, 252, 0.75);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.95) inset,
-    0 2px 8px rgba(79, 70, 229, 0.1);
+    0 8px 18px rgba(79, 70, 229, 0.11);
 }
 
 .shell-tab__label {
