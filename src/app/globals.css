@@ -1,8 +1,8 @@
 
 :root {
   color-scheme: light;
-  --bg: #f4f7fb;
-  --bg-accent: #eef2ff;
+  --bg: #f6f7f9;
+  --bg-accent: #f1f5f9;
   --card: #ffffff;
   --text: #0f172a;
   --muted: #64748b;
@@ -71,15 +71,12 @@
   --app-danger: #b91c1c;
   --app-danger-light: #ef4444;
 
-  /* Premium dashboard — purple / slate accents (Bubble-inspired, app stays light overall) */
-  --dash-hero-bg: linear-gradient(155deg, #1e1b4b 0%, #312e81 38%, #4338ca 78%, #4c1d95 100%);
-  --dash-hero-border: rgba(165, 180, 252, 0.38);
-  --dash-hero-text: #f8fafc;
-  --dash-hero-muted: rgba(226, 232, 240, 0.9);
-  --dash-page-tint:
-    radial-gradient(circle at 14% 8%, rgba(124, 58, 237, 0.12) 0, rgba(124, 58, 237, 0) 32%),
-    radial-gradient(circle at 86% 12%, rgba(45, 212, 191, 0.14) 0, rgba(45, 212, 191, 0) 30%),
-    linear-gradient(180deg, #e8edf7 0%, #f2f5fb 38%, #f7f9fd 100%);
+  /* Marketplace shell — neutral page surfaces with restrained accent use. */
+  --dash-hero-bg: #ffffff;
+  --dash-hero-border: rgba(219, 227, 239, 0.95);
+  --dash-hero-text: #0f172a;
+  --dash-hero-muted: #64748b;
+  --dash-page-tint: #f6f7f9;
 }
 
 * {
@@ -91,10 +88,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  background:
-    radial-gradient(circle at 12% 8%, #e0e7ff 0%, transparent 28%),
-    radial-gradient(circle at 90% 10%, #dbeafe 0%, transparent 24%),
-    var(--bg);
+  background: var(--bg);
   color: var(--text);
   line-height: 1.5;
 }
@@ -402,22 +396,22 @@ main:has(.dashboard-page) .btn:not(.secondary):not(.btn--danger):not(.btn--succe
 main:has(.chat-layout) .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle),
 main:has(.public-profile-page--app) .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle) {
   border-color: var(--app-primary);
-  background: linear-gradient(180deg, var(--app-primary-light) 0%, var(--app-primary) 100%);
+  background: var(--app-primary);
   color: #fff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.18) inset,
-    0 8px 18px rgba(79, 70, 229, 0.18);
+    0 6px 14px rgba(79, 70, 229, 0.14);
 }
 
 main:has(.dashboard-page) .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle):hover,
 main:has(.chat-layout) .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle):hover,
 main:has(.public-profile-page--app) .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle):hover {
   border-color: var(--app-primary-hover);
-  background: linear-gradient(180deg, var(--app-primary) 0%, var(--app-primary-hover) 100%);
+  background: var(--app-primary-hover);
   color: #fff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.16) inset,
-    0 10px 24px rgba(79, 70, 229, 0.22);
+    0 8px 18px rgba(79, 70, 229, 0.16);
 }
 
 main:has(.dashboard-page) .btn.secondary,
@@ -425,7 +419,7 @@ main:has(.chat-layout) .btn.secondary,
 main:has(.public-profile-page--app) .btn.secondary {
   border-color: var(--app-outline-border);
   color: var(--text);
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  background: #ffffff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.92) inset,
     0 2px 6px rgba(15, 23, 42, 0.035);
@@ -5398,22 +5392,15 @@ main:has(.dashboard-page) {
   border: 1px solid var(--dash-hero-border);
   border-radius: 20px;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 18px 48px rgba(49, 46, 129, 0.34),
-    0 8px 24px rgba(15, 23, 42, 0.12);
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 8px 22px rgba(15, 23, 42, 0.06);
   color: var(--dash-hero-muted);
   position: relative;
   overflow: hidden;
 }
 
 .dashboard-page__header::after {
-  content: "";
-  position: absolute;
-  inset: auto -8% -42% 42%;
-  height: 150px;
-  pointer-events: none;
-  background: radial-gradient(circle, rgba(45, 212, 191, 0.28), rgba(45, 212, 191, 0));
-  filter: blur(4px);
+  content: none;
 }
 
 .dashboard-page__header > * {
@@ -5433,7 +5420,7 @@ main:has(.dashboard-page) {
   letter-spacing: -0.038em;
   line-height: 1.1;
   color: var(--dash-hero-text);
-  text-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+  text-shadow: none;
 }
 
 .dashboard-page__welcome {
@@ -5457,31 +5444,30 @@ main:has(.dashboard-page) {
   gap: 4px;
   padding: 13px 17px 14px;
   min-width: 128px;
-  background: rgba(255, 255, 255, 0.11);
-  border: 1px solid rgba(199, 210, 254, 0.38);
+  background: #ffffff;
+  border: 1px solid rgba(219, 227, 239, 0.95);
   border-radius: 16px;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.12) inset,
-    0 8px 22px rgba(15, 23, 42, 0.2);
-  backdrop-filter: blur(10px);
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 8px rgba(15, 23, 42, 0.045);
 }
 
 .dashboard-page__header .brand-stat-chip {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(199, 210, 254, 0.4);
+  background: #ffffff;
+  border-color: rgba(219, 227, 239, 0.95);
 }
 
 .brand-stat-chip__value {
   font-size: 1.45rem;
   font-weight: 800;
   letter-spacing: -0.04em;
-  color: #f8fafc;
+  color: #0f172a;
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
 }
 
 .dashboard-page__header .brand-stat-chip__value {
-  color: #ffffff;
+  color: #0f172a;
 }
 
 .brand-stat-chip__label {
@@ -5489,13 +5475,13 @@ main:has(.dashboard-page) {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.055em;
-  color: rgba(226, 232, 240, 0.82);
+  color: #64748b;
   max-width: 148px;
   line-height: 1.3;
 }
 
 .dashboard-page__header .brand-stat-chip__label {
-  color: rgba(226, 232, 240, 0.88);
+  color: #64748b;
 }
 
 .dashboard-page__logout {
@@ -5508,16 +5494,16 @@ main:has(.dashboard-page) {
   font-weight: 600;
   border-radius: 12px;
   padding: 10px 18px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(199, 210, 254, 0.45);
-  color: #f8fafc;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+  background: #ffffff;
+  border: 1px solid rgba(219, 227, 239, 0.95);
+  color: #334155;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .dashboard-page__logout .btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(224, 231, 255, 0.65);
-  color: #fff;
+  background: #f8fafc;
+  border-color: rgba(203, 213, 225, 0.95);
+  color: #0f172a;
 }
 
 .dash-card--section {
@@ -5534,12 +5520,11 @@ main:has(.dashboard-page) {
   border-radius: var(--radius-app-card);
   padding: 22px 24px 24px;
   border: 1px solid rgba(213, 221, 236, 0.9);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 251, 255, 0.96) 50%, rgba(247, 250, 252, 0.94) 100%);
+  background: #ffffff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.92) inset,
     0 2px 8px rgba(15, 23, 42, 0.04),
-    0 14px 34px rgba(79, 70, 229, 0.065);
+    0 10px 24px rgba(15, 23, 42, 0.055);
   transition:
     border-color 0.18s ease,
     box-shadow 0.18s ease,
@@ -5551,7 +5536,7 @@ main:has(.dashboard-page) {
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.96) inset,
     0 3px 10px rgba(15, 23, 42, 0.045),
-    0 18px 42px rgba(79, 70, 229, 0.085);
+    0 12px 28px rgba(15, 23, 42, 0.065);
 }
 
 .dashboard-page > .dash-card--section:last-of-type {
@@ -5568,12 +5553,11 @@ main:has(.dashboard-page) {
 
 .dashboard-page .dash-card--emphasis {
   border-color: rgba(165, 180, 252, 0.78);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 248, 255, 0.98) 100%);
+  background: #ffffff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.94) inset,
     0 0 0 1px rgba(99, 102, 241, 0.055),
-    0 14px 36px rgba(79, 70, 229, 0.09);
+    0 10px 24px rgba(15, 23, 42, 0.055);
 }
 
 .dash-section__title {
@@ -5629,14 +5613,11 @@ main:has(.dashboard-page) {
   position: relative;
   overflow: hidden;
   padding: clamp(18px, 3vw, 30px);
-  border-color: rgba(165, 180, 252, 0.6);
-  background:
-    radial-gradient(70% 80% at 0% 0%, rgba(124, 58, 237, 0.18) 0%, transparent 58%),
-    radial-gradient(72% 76% at 100% 0%, rgba(20, 184, 166, 0.16) 0%, transparent 54%),
-    linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 58%, rgba(238, 242, 255, 0.72) 100%);
+  border-color: rgba(219, 227, 239, 0.95);
+  background: #ffffff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.92) inset,
-    0 24px 60px rgba(49, 46, 129, 0.13);
+    0 12px 30px rgba(15, 23, 42, 0.06);
 }
 
 .dashboard-page .discovery-search-card__intro {
@@ -5669,13 +5650,11 @@ main:has(.dashboard-page) {
   z-index: 1;
   padding: clamp(14px, 2.4vw, 22px);
   border-radius: 24px;
-  border: 1px solid rgba(165, 180, 252, 0.7);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 251, 255, 0.94) 100%);
+  border: 1px solid rgba(219, 227, 239, 0.95);
+  background: #ffffff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.95) inset,
-    0 18px 42px rgba(79, 70, 229, 0.12),
-    0 5px 18px rgba(20, 184, 166, 0.06);
+    0 8px 22px rgba(15, 23, 42, 0.055);
 }
 
 @media (min-width: 860px) {
@@ -6019,8 +5998,8 @@ main:has(.dashboard-page) {
   margin: 18px 0 4px;
   padding: 16px 18px;
   border-radius: 16px;
-  border: 1px solid rgba(199, 210, 254, 0.5);
-  background: linear-gradient(155deg, #ffffff 0%, #f8fafc 55%, #f1f5f9 100%);
+  border: 1px solid rgba(219, 227, 239, 0.95);
+  background: #ffffff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.85) inset,
     0 4px 18px rgba(15, 23, 42, 0.05);
@@ -6076,11 +6055,8 @@ main:has(.dashboard-page) {
   padding: 20px 22px;
   margin: 0 0 4px;
   border-radius: 18px;
-  border: 1px solid rgba(199, 210, 254, 0.45);
-  background:
-    radial-gradient(120% 90% at 0% 0%, rgba(224, 231, 255, 0.55) 0%, transparent 55%),
-    radial-gradient(90% 70% at 100% 0%, rgba(254, 243, 199, 0.35) 0%, transparent 50%),
-    linear-gradient(165deg, #ffffff 0%, #f8fafc 48%, #f1f5f9 100%);
+  border: 1px solid rgba(219, 227, 239, 0.95);
+  background: #ffffff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.9) inset,
     0 10px 36px rgba(15, 23, 42, 0.06);
@@ -6095,13 +6071,11 @@ main:has(.dashboard-page) {
   margin: 0;
   padding: clamp(16px, 2.4vw, 24px);
   border-radius: 24px;
-  border: 1px solid rgba(199, 210, 254, 0.62);
-  background:
-    radial-gradient(80% 60% at 100% 0%, rgba(45, 212, 191, 0.1) 0%, transparent 54%),
-    linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.9) 55%, rgba(238, 242, 255, 0.58) 100%);
+  border: 1px solid rgba(219, 227, 239, 0.95);
+  background: #ffffff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 16px 44px rgba(49, 46, 129, 0.09);
+    0 10px 24px rgba(15, 23, 42, 0.055);
 }
 
 .dashboard-page .discover-showcase-card {
@@ -6212,12 +6186,11 @@ main:has(.dashboard-page) {
   width: min(390px, 86vw);
   padding: 16px;
   border-radius: 20px;
-  background:
-    linear-gradient(165deg, #ffffff 0%, #f8fafc 46%, #eef2ff 100%);
-  border: 1px solid rgba(199, 210, 254, 0.68);
+  background: #ffffff;
+  border: 1px solid rgba(219, 227, 239, 0.95);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 9px 24px rgba(79, 70, 229, 0.1);
+    0 8px 20px rgba(15, 23, 42, 0.055);
 }
 
 .dashboard-page .influencer-result-card--explore-rail .influencer-result-card__stats,
@@ -6267,11 +6240,11 @@ main:has(.dashboard-page) {
 @media (hover: hover) and (pointer: fine) {
   .dashboard-page .brand-result-card--hub:hover,
   .dashboard-page .influencer-result-card--hub:hover {
-    background: linear-gradient(165deg, #ffffff 0%, #f8fafc 38%, #eaf0ff 100%);
+    background: #ffffff;
     border-color: rgba(129, 140, 248, 0.65);
     box-shadow:
       0 1px 0 rgba(255, 255, 255, 0.9) inset,
-      0 10px 28px rgba(49, 46, 129, 0.14);
+      0 10px 24px rgba(15, 23, 42, 0.07);
     transform: translateY(-1px) scale(1.004);
   }
 }
@@ -6292,13 +6265,12 @@ main:has(.dashboard-page) {
 .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card--hub,
 .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card--hub {
   padding: 20px;
-  border-color: rgba(199, 210, 254, 0.62);
-  background:
-    linear-gradient(165deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 250, 252, 0.96) 45%, rgba(238, 242, 255, 0.64) 100%);
+  border-color: rgba(219, 227, 239, 0.95);
+  background: #ffffff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.92) inset,
     0 4px 12px rgba(15, 23, 42, 0.04),
-    0 18px 42px rgba(49, 46, 129, 0.1);
+    0 12px 28px rgba(15, 23, 42, 0.06);
 }
 
 .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__head--hub,
@@ -8239,12 +8211,12 @@ main:has(.dashboard-page) {
   --public-profile-accent-wash: rgba(250, 248, 255, 0.72);
   --public-profile-accent-border: rgba(168, 85, 247, 0.28);
   --public-profile-accent-shadow: rgba(124, 58, 237, 0.08);
-  --public-profile-hero-bg: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  --public-profile-avatar-ring: linear-gradient(145deg, #ffffff 0%, #f3e8ff 46%, #ddd6fe 100%);
+  --public-profile-hero-bg: #ffffff;
+  --public-profile-avatar-ring: #ede9fe;
   --public-profile-badge-bg: #faf5ff;
   --public-profile-chip-bg: #ffffff;
   --public-profile-section-bg: #ffffff;
-  --public-profile-cover-bg: linear-gradient(118deg, #6d28d9 0%, #8b5cf6 52%, #a78bfa 100%);
+  --public-profile-cover-bg: #f5f3ff;
 }
 
 .public-profile-page--brand {
@@ -8254,12 +8226,12 @@ main:has(.dashboard-page) {
   --public-profile-accent-wash: rgba(240, 253, 250, 0.58);
   --public-profile-accent-border: rgba(13, 148, 136, 0.28);
   --public-profile-accent-shadow: rgba(13, 148, 136, 0.07);
-  --public-profile-hero-bg: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  --public-profile-avatar-ring: linear-gradient(145deg, #ffffff 0%, #ccfbf1 48%, #99f6e4 100%);
+  --public-profile-hero-bg: #ffffff;
+  --public-profile-avatar-ring: #ccfbf1;
   --public-profile-badge-bg: #f0fdfa;
   --public-profile-chip-bg: #ffffff;
   --public-profile-section-bg: #ffffff;
-  --public-profile-cover-bg: linear-gradient(118deg, #0f766e 0%, #14b8a6 54%, #5eead4 100%);
+  --public-profile-cover-bg: #f0fdfa;
 }
 
 .public-profile-page__inner--influencer {
@@ -8351,7 +8323,7 @@ main:has(.dashboard-page) {
 .public-profile-aside-card--placeholder {
   border-style: dashed;
   border-color: rgba(203, 213, 225, 0.9);
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.75) 0%, #ffffff 100%);
+  background: #ffffff;
 }
 
 .public-profile-aside-card__label {
@@ -8435,7 +8407,7 @@ main:has(.dashboard-page) {
   text-align: center;
   gap: 20px;
   padding: 26px 20px 24px;
-  background: linear-gradient(165deg, #ffffff 0%, #fafbfc 55%, #f4f7fb 100%);
+  background: #ffffff;
   border: 1px solid rgba(219, 227, 239, 0.95);
   border-radius: var(--radius-app-card);
   box-shadow:
@@ -8445,7 +8417,7 @@ main:has(.dashboard-page) {
 
 .public-profile-hero--influencer {
   border-color: var(--public-profile-accent-border, rgba(199, 210, 254, 0.5));
-  background: var(--public-profile-hero-bg, linear-gradient(165deg, #ffffff 0%, #fafbfc 55%, #f4f7fb 100%));
+  background: var(--public-profile-hero-bg, #ffffff);
 }
 
 /* Premium hero — kimlik üstte, CTA ayrı bant; kart gölgeleri uygulama ile hizalı */
@@ -8476,7 +8448,7 @@ main:has(.dashboard-page) {
   width: 100%;
   height: 60px;
   flex: 0 0 auto;
-  background: var(--public-profile-cover-bg, linear-gradient(118deg, #4c1d95 0%, #7c3aed 48%, #a78bfa 100%));
+  background: var(--public-profile-cover-bg, #f5f3ff);
 }
 
 .public-profile-hero--influencer .public-profile-hero__identity {
@@ -8651,13 +8623,13 @@ main:has(.dashboard-page) {
 
 .public-profile-hero-trust-chips__pill--neutral {
   color: #475569;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #ffffff;
   border-color: rgba(148, 163, 184, 0.45);
 }
 
 .public-profile-hero-trust-chips__pill--success {
   color: #14532d;
-  background: linear-gradient(180deg, #ecfccb 0%, #d9f99d 100%);
+  background: #f0fdf4;
   border-color: rgba(101, 163, 13, 0.35);
 }
 
@@ -8703,7 +8675,7 @@ main:has(.dashboard-page) {
   letter-spacing: 0.01em;
   opacity: 1;
   border-color: var(--public-profile-accent, #2563eb);
-  background: linear-gradient(180deg, var(--public-profile-accent, #2563eb) 0%, var(--public-profile-accent-strong, #1d4ed8) 100%);
+  background: var(--public-profile-accent, #2563eb);
   color: #fff;
   box-shadow:
     0 4px 14px var(--public-profile-accent-shadow, rgba(37, 99, 235, 0.22)),
@@ -8744,7 +8716,7 @@ main:has(.dashboard-page) {
 
 main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not(.secondary) {
   border-color: var(--public-profile-accent, var(--app-primary));
-  background: linear-gradient(180deg, var(--public-profile-accent, var(--app-primary-light)) 0%, var(--public-profile-accent-strong, var(--app-primary)) 100%);
+  background: var(--public-profile-accent, var(--app-primary));
   box-shadow:
     0 4px 16px var(--public-profile-accent-shadow, rgba(79, 70, 229, 0.28)),
     0 1px 0 rgba(255, 255, 255, 0.18) inset;
@@ -8866,14 +8838,14 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
 .public-profile-hero__avatar-ring {
   padding: 4px;
   border-radius: 50%;
-  background: var(--public-profile-avatar-ring, linear-gradient(145deg, #e0e7ff 0%, #dbeafe 50%, #e2e8f0 100%));
+  background: var(--public-profile-avatar-ring, #e0e7ff);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.92) inset,
     0 4px 18px var(--public-profile-accent-shadow, rgba(37, 99, 235, 0.12));
 }
 
 .public-profile-hero__avatar-ring--brand {
-  background: var(--public-profile-avatar-ring, linear-gradient(145deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%));
+  background: var(--public-profile-avatar-ring, #e2e8f0);
   box-shadow: 0 4px 18px var(--public-profile-accent-shadow, rgba(15, 23, 42, 0.08));
 }
 
@@ -8961,13 +8933,13 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--public-profile-accent-strong, #3730a3);
-  background: var(--public-profile-badge-bg, linear-gradient(180deg, #eef2ff 0%, #e0e7ff 100%));
+  background: var(--public-profile-badge-bg, #f8fafc);
   border: 1px solid var(--public-profile-accent-border, rgba(129, 140, 248, 0.4));
   border-radius: 999px;
 }
 
 .public-profile-hero--brand {
-  background: var(--public-profile-hero-bg, linear-gradient(155deg, #ffffff 0%, #f8fafc 42%, #eef2ff 100%));
+  background: var(--public-profile-hero-bg, #ffffff);
   border-color: var(--public-profile-accent-border, rgba(199, 210, 254, 0.5));
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.05),
@@ -8980,7 +8952,7 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
 
 .public-profile-role-badge--brand {
   color: var(--public-profile-accent-strong, #3730a3);
-  background: var(--public-profile-badge-bg, linear-gradient(180deg, #eef2ff 0%, #e0e7ff 100%));
+  background: var(--public-profile-badge-bg, #f8fafc);
   border-color: var(--public-profile-accent-border, rgba(129, 140, 248, 0.42));
 }
 
@@ -9001,7 +8973,7 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
   height: 60px;
   width: 100%;
   flex-shrink: 0;
-  background: var(--public-profile-cover-bg, linear-gradient(118deg, #312e81 0%, #4f46e5 46%, #64748b 100%));
+  background: var(--public-profile-cover-bg, #f8fafc);
 }
 
 .public-profile-brand-hero-inner {
@@ -9685,7 +9657,7 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
 
 main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary) {
   border-color: var(--public-profile-accent, var(--app-primary));
-  background: linear-gradient(180deg, var(--public-profile-accent, var(--app-primary-light)) 0%, var(--public-profile-accent-strong, var(--app-primary)) 100%);
+  background: var(--public-profile-accent, var(--app-primary));
   box-shadow: 0 2px 8px var(--public-profile-accent-shadow, rgba(79, 70, 229, 0.18));
 }
 
@@ -9723,7 +9695,7 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn:not(.secondary
 .public-profile-page .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle),
 main:has(.public-profile-page--app) .public-profile-page .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle) {
   border-color: var(--public-profile-accent, var(--app-primary));
-  background: linear-gradient(180deg, var(--public-profile-accent, var(--app-primary-light)) 0%, var(--public-profile-accent-strong, var(--app-primary)) 100%);
+  background: var(--public-profile-accent, var(--app-primary));
   color: #fff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.18) inset,
@@ -9733,7 +9705,7 @@ main:has(.public-profile-page--app) .public-profile-page .btn:not(.secondary):no
 .public-profile-page .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle):hover,
 main:has(.public-profile-page--app) .public-profile-page .btn:not(.secondary):not(.btn--danger):not(.btn--success):not(.btn--ghost):not(.btn--subtle):hover {
   border-color: var(--public-profile-accent-strong, var(--app-primary-hover));
-  background: linear-gradient(180deg, var(--public-profile-accent, var(--app-primary)) 0%, var(--public-profile-accent-strong, var(--app-primary-hover)) 100%);
+  background: var(--public-profile-accent-strong, var(--app-primary-hover));
   color: #fff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.16) inset,
@@ -9887,14 +9859,14 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
 
 .public-collab-modal__submit {
   border-color: var(--public-profile-accent, var(--app-primary));
-  background: linear-gradient(180deg, var(--public-profile-accent, var(--app-primary-light)) 0%, var(--public-profile-accent-strong, var(--app-primary)) 100%);
+  background: var(--public-profile-accent, var(--app-primary));
   color: #fff;
   box-shadow: 0 2px 10px var(--public-profile-accent-shadow, rgba(79, 70, 229, 0.22));
 }
 
 .public-collab-modal__submit:hover:not(:disabled) {
   border-color: var(--public-profile-accent-strong, var(--app-primary-hover));
-  background: linear-gradient(180deg, var(--public-profile-accent, var(--app-primary)) 0%, var(--public-profile-accent-strong, var(--app-primary-hover)) 100%);
+  background: var(--public-profile-accent-strong, var(--app-primary-hover));
   color: #fff;
 }
 
@@ -9909,7 +9881,7 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
   font-size: 0.88rem;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(180deg, var(--public-profile-accent, var(--app-primary-light)) 0%, var(--public-profile-accent-strong, var(--app-primary)) 100%);
+  background: var(--public-profile-accent, var(--app-primary));
   box-shadow:
     0 8px 28px var(--public-profile-accent-shadow, rgba(79, 70, 229, 0.35)),
     0 0 0 1px rgba(255, 255, 255, 0.12) inset;
