@@ -6234,13 +6234,14 @@ main:has(.dashboard-page) {
     background-color 0.18s ease;
 }
 
-.dashboard-page .brand-result-card--hub::before,
-.dashboard-page .influencer-result-card--hub::before {
+.dashboard-page .brand-result-card::before,
+.dashboard-page .influencer-result-card::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
-  height: 3px;
+  height: 5px;
   background: var(--discover-card-accent, #cbd5e1);
+  pointer-events: none;
 }
 
 .dashboard-page .brand-result-card--hub.discover-card-clickable,
@@ -6790,7 +6791,10 @@ main:has(.dashboard-page) {
   object-fit: cover;
   object-position: center;
   border: 2px solid var(--discover-card-border-strong, rgba(199, 210, 254, 0.75));
-  background: var(--discover-card-soft, #eef2ff);
+  background: #ffffff;
+  filter: none;
+  mix-blend-mode: normal;
+  opacity: 1;
   box-shadow:
     0 0 0 4px rgba(255, 255, 255, 0.9),
     0 8px 20px rgba(124, 58, 237, 0.14);
@@ -6836,7 +6840,10 @@ main:has(.dashboard-page) {
   object-fit: cover;
   object-position: center;
   border: 2px solid var(--discover-card-border-strong, rgba(199, 210, 254, 0.55));
-  background: var(--discover-card-soft, #eef2ff);
+  background: #ffffff;
+  filter: none;
+  mix-blend-mode: normal;
+  opacity: 1;
   box-shadow:
     0 0 0 4px rgba(255, 255, 255, 0.9),
     0 8px 20px rgba(13, 148, 136, 0.13);
