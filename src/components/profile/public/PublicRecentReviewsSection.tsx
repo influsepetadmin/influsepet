@@ -26,6 +26,8 @@ function reviewerAttribution(label: string): string {
 
 type Props = {
   reviews: PublicProfileRecentReviewJson[];
+  /** Hero rating summary'deki yıldız puanı sayısı; yazılı yorum boş durumunu ayırmak için kullanılır. */
+  ratingCount?: number;
   /** Güven sütununda kısa liste (en fazla 2 yorum). */
   compact?: boolean;
 };
@@ -33,8 +35,11 @@ type Props = {
 /**
  * Review (metin + yıldız) satırları — hero’daki CollaborationRating ortalamasından ayrı.
  */
-export function PublicRecentReviewsSection({ reviews, compact }: Props) {
-  const list = compact ? reviews.slice(0, 2) : reviews;
+export function PublicRecentReviewsSection({ reviews, ratingCount = 0, compact }: Props) {
+  const writtenReviews = reviews.filter((item) => (item.comment?.trim() ?? "").length > 0);
+  const list = compact ? writtenReviews.slice(0, 2) : writtenReviews;
+  const hasRatingSignal = ratingCount > 0 || reviews.some((item) => item.rating > 0);
+  const emptyMessage = hasRatingSignal ? "Henüz yazılı değerlendirme yok." : "Henüz değerlendirme yok.";
   const rootClass = `public-profile-recent-reviews${compact ? " public-profile-recent-reviews--compact" : ""}`;
 
   return (
@@ -43,12 +48,9 @@ export function PublicRecentReviewsSection({ reviews, compact }: Props) {
         Son değerlendirmeler
       </h2>
 
-      {reviews.length === 0 ? (
+      {writtenReviews.length === 0 ? (
         <div className="public-profile-recent-reviews__empty-panel">
-          <p className="public-profile-recent-reviews__empty muted">
-            Henüz herkese açık değerlendirme yok. Tamamlanan iş birlikleri sonrası puanlar burada
-            görünecek.
-          </p>
+          <p className="public-profile-recent-reviews__empty muted">{emptyMessage}</p>
         </div>
       ) : (
         <ul className="public-profile-recent-reviews__list">

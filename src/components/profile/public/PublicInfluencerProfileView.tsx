@@ -62,7 +62,11 @@ export function PublicInfluencerProfileView({
                   averageRating={data.averageRating}
                   ratingCount={data.ratingCount}
                 />
-                <PublicRecentReviewsSection reviews={data.recentPublicReviews} compact />
+                <PublicRecentReviewsSection
+                  reviews={data.recentPublicReviews}
+                  ratingCount={data.ratingCount}
+                  compact
+                />
               </div>
             </div>
             <aside className="public-profile-split__aside">
