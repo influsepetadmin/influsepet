@@ -1,6 +1,6 @@
 "use client";
 
-import type { MouseEvent } from "react";
+import { useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { trackFirstTimeOnce, trackProductEvent } from "@/lib/productTracking/productEvents";
 import { getAvatarUrl } from "@/lib/avatar";
@@ -52,8 +52,10 @@ export function MarketplaceInfluencerOfferCard({
   exploreRail = false,
 }: MarketplaceInfluencerOfferCardProps) {
   const nicheTrimmed = nicheText?.trim() ?? "";
+  const [offerFormOpen, setOfferFormOpen] = useState(false);
   const router = useRouter();
   const profileHref = `/profil/influencer/${influencerUserId}?from=discover`;
+  const formPanelId = `inf-offer-form-panel-${formIdKey}`;
 
   function onCardClick(e: MouseEvent<HTMLElement>) {
     const target = e.target as HTMLElement | null;
@@ -102,6 +104,17 @@ export function MarketplaceInfluencerOfferCard({
           >
             {profileLinkLabel}
           </DiscoverProfileFromDiscoverLink>
+          {!exploreRail && !offerFormOpen ? (
+            <button
+              className="btn btn--sm marketplace-offer-toggle"
+              type="button"
+              aria-expanded={offerFormOpen}
+              aria-controls={formPanelId}
+              onClick={() => setOfferFormOpen(true)}
+            >
+              {submitButtonLabel}
+            </button>
+          ) : null}
         </div>
       </div>
       <p className="muted influencer-result-card__meta influencer-result-card__stats">
@@ -113,8 +126,9 @@ export function MarketplaceInfluencerOfferCard({
         </p>
       ) : null}
 
-      {!exploreRail ? (
+      {!exploreRail && offerFormOpen ? (
         <TrackedOfferCreateForm
+          id={formPanelId}
           className="influencer-result-card__form"
           action="/api/offers/create"
           method="post"

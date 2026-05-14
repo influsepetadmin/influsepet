@@ -6320,6 +6320,14 @@ main:has(.dashboard-page) {
   color: var(--discover-card-accent-strong, #475569);
 }
 
+.dashboard-page .brand-result-card__actions .marketplace-offer-toggle,
+.dashboard-page .influencer-result-card__actions .marketplace-offer-toggle {
+  border-color: var(--discover-card-accent, var(--app-primary));
+  background: var(--discover-card-accent, var(--app-primary));
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
+}
+
 .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions,
 .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions {
   gap: 7px;
@@ -6329,7 +6337,9 @@ main:has(.dashboard-page) {
 .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions .btn.secondary,
 .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .btn.secondary,
 .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions .discovery-save-btn,
-.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .discovery-save-btn {
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .discovery-save-btn,
+.dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions .marketplace-offer-toggle,
+.dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .marketplace-offer-toggle {
   width: 100%;
   justify-content: center;
 }
@@ -6882,7 +6892,9 @@ main:has(.dashboard-page) {
   .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions .btn.secondary,
   .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .btn.secondary,
   .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions .discovery-save-btn,
-  .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .discovery-save-btn {
+  .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .discovery-save-btn,
+  .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions .marketplace-offer-toggle,
+  .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .marketplace-offer-toggle {
     flex: 1 1 0;
   }
 }
