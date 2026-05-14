@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
+import type { OfferStatus } from "@prisma/client";
 import {
   PLATFORM_COMMISSION_RATE,
   commissionTRYFromOfferAmount,
@@ -10,6 +11,18 @@ import { logServerProductEvent } from "@/lib/productTracking/logServerProductEve
 import { sameOriginRedirect } from "@/lib/sameOriginRedirect";
 import { getSessionPayload } from "@/lib/session";
 
+const ACTIVE_OFFER_STATUSES: OfferStatus[] = [
+  "PENDING",
+  "ACCEPTED",
+  "IN_PROGRESS",
+  "DELIVERED",
+  "REVISION_REQUESTED",
+  "DISPUTED",
+];
+
+const ACTIVE_OFFER_MESSAGE =
+  "Bu içerik üreticisiyle zaten aktif bir teklifiniz var. Mevcut görüşmeye yönlendiriliyorsunuz.";
+
 function parseOptionalInt(v: unknown, opts?: { min?: number }): number | null {
   if (v === undefined || v === null || v === "") return null;
   const n = Number(v);
@@ -17,6 +30,21 @@ function parseOptionalInt(v: unknown, opts?: { min?: number }): number | null {
   const i = Math.floor(n);
   if (opts?.min !== undefined && i < opts.min) return null;
   return i;
+}
+
+async function findActiveOfferBetween(brandId: string, influencerId: string) {
+  return prisma.offer.findFirst({
+    where: {
+      brandId,
+      influencerId,
+      status: { in: ACTIVE_OFFER_STATUSES },
+    },
+    select: {
+      id: true,
+      conversation: { select: { id: true } },
+    },
+    orderBy: { updatedAt: "desc" },
+  });
 }
 
 function parseOptionalNonEmptyString(v: unknown): string | null {
@@ -96,6 +124,29 @@ export async function POST(request: Request) {
     return sameOriginRedirect(`${path}?${sp.toString()}`);
   };
 
+  const duplicateOfferResponse = (
+    existing: Awaited<ReturnType<typeof findActiveOfferBetween>>,
+    fallbackPath: string,
+  ) => {
+    const conversationId = existing?.conversation?.id ?? null;
+    if (wantsRedirect && conversationId) {
+      return sameOriginRedirect(`/chat/${conversationId}`);
+    }
+    if (wantsRedirect) {
+      return redirectWithErr(fallbackPath, ACTIVE_OFFER_MESSAGE);
+    }
+    return NextResponse.json(
+      {
+        ok: false,
+        code: "ACTIVE_OFFER_EXISTS",
+        error: ACTIVE_OFFER_MESSAGE,
+        offerId: existing?.id,
+        conversationId,
+      },
+      { status: 409 },
+    );
+  };
+
   if (!session) {
     if (wantsRedirect) return redirectWithErr("/", "Oturum bulunamadi.");
     return NextResponse.json({ error: "Oturum bulunamadi." }, { status: 401 });
@@ -171,6 +222,11 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Gecersiz influencer hedefi." }, { status: 400 });
       }
 
+      const existingActiveOffer = await findActiveOfferBetween(user.id, p.influencerId);
+      if (existingActiveOffer) {
+        return duplicateOfferResponse(existingActiveOffer, "/marka/discover");
+      }
+
       const offer = await prisma.offer.create({
         data: {
           id: crypto.randomUUID(),
@@ -215,6 +271,11 @@ export async function POST(request: Request) {
     if (targetBrand.id === user.id) {
       if (wantsRedirect) return redirectWithErr("/influencer/discover", "Gecersiz hedef.");
       return NextResponse.json({ error: "Gecersiz hedef." }, { status: 400 });
+    }
+
+    const existingActiveOffer = await findActiveOfferBetween(targetBrand.id, user.id);
+    if (existingActiveOffer) {
+      return duplicateOfferResponse(existingActiveOffer, "/influencer/discover");
     }
 
     const offer = await prisma.offer.create({
