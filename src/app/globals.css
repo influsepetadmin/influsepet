@@ -8648,11 +8648,11 @@ main:has(.dashboard-page) {
   }
 
   .public-profile-page--influencer .public-profile-split {
-    grid-template-columns: minmax(0, 720px) minmax(300px, 360px);
-    gap: 18px;
+    grid-template-columns: minmax(0, 840px);
+    gap: 12px;
     justify-content: center;
-    align-items: stretch;
-    padding: 14px;
+    align-items: start;
+    padding: 16px;
     border: 1px solid rgba(226, 232, 240, 0.9);
     border-radius: calc(var(--radius-app-card-lg) + 6px);
     background: rgba(255, 255, 255, 0.72);
@@ -8684,19 +8684,22 @@ main:has(.dashboard-page) {
 
 @media (min-width: 960px) {
   .public-profile-page--influencer .public-profile-split__main {
-    gap: 12px;
+    display: contents;
   }
 
   .public-profile-page--influencer .public-profile-split__aside {
-    gap: 14px;
+    order: 4;
+    width: 100%;
   }
 
   .public-profile-page--influencer .public-profile-aside-stack {
-    position: sticky;
-    top: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 12px;
   }
 
   .public-profile-page--influencer .public-profile-trust-stack {
+    order: 5;
     display: grid;
     grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
     gap: 12px;
@@ -8705,6 +8708,18 @@ main:has(.dashboard-page) {
 
   .public-profile-page--influencer .public-profile-trust-stack .public-profile-recent-reviews {
     grid-column: 1 / -1;
+  }
+
+  .public-profile-page--influencer .public-profile-hero--influencer {
+    order: 1;
+  }
+
+  .public-profile-page--influencer .public-profile-stats {
+    order: 2;
+  }
+
+  .public-profile-page--influencer .public-profile-section--social {
+    order: 3;
   }
 }
 
