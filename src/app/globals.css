@@ -10636,30 +10636,27 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
 /* Social cards */
 .public-profile-social-list {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-@media (min-width: 480px) {
-  .public-profile-social-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.public-profile-split__main > .public-profile-section--social .public-profile-social-list {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
 }
 
-@media (min-width: 900px) {
-  .public-profile-social-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+.public-profile-split__aside .public-profile-social-list {
+  grid-template-columns: 1fr;
 }
 
 .public-profile-social-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 15px 15px 13px;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px;
   background: var(--public-profile-section-bg, #ffffff);
   border: 1px solid var(--public-profile-accent-border, rgba(199, 210, 254, 0.55));
   border-radius: 16px;
@@ -10679,8 +10676,9 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
 
 .public-profile-social-card__header {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 
 .public-profile-social-card__glyph {
@@ -10717,10 +10715,9 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
   flex: 1;
   min-width: 0;
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 6px 8px;
-  align-items: center;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
 }
 
 .public-profile-social-card__platform {
@@ -10731,8 +10728,11 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
 }
 
 .public-profile-social-card .social-verification-badge {
-  transform: scale(0.92);
-  transform-origin: left center;
+  max-width: 100%;
+}
+
+.public-profile-social-card .social-verification-badge__text {
+  white-space: nowrap;
 }
 
 .public-profile-social-card__verified-badge {
@@ -10755,7 +10755,8 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
   font-size: 0.88rem;
   font-weight: 600;
   color: #475569;
-  word-break: break-all;
+  word-break: normal;
+  overflow-wrap: anywhere;
 }
 
 .public-profile-social-card__link {
