@@ -20,13 +20,16 @@ import { trackFirstTimeOnce, trackProductEvent } from "@/lib/productTracking/pro
 
 const WORKFLOW_EVENT_ICON_PX = 12;
 const WORKFLOW_EVENT_ICON_STROKE = 1.65;
-const OPEN_INFLUENCER_OFFER_REVIEW_STATUSES: OfferStatus[] = [
-  "PENDING",
-  "ACCEPTED",
-  "IN_PROGRESS",
-  "DELIVERED",
-  "REVISION_REQUESTED",
-];
+
+function influencerInitiatedBrandHint(status: OfferStatus): string {
+  if (status === "PENDING") {
+    return "Bu teklif influencer tarafından başlatıldı. Marka olarak teklifi inceleyebilir, kabul edebilir veya reddedebilirsiniz. Teslim süreci influencer tarafından yürütülür.";
+  }
+  if (status === "ACCEPTED" || status === "IN_PROGRESS" || status === "DELIVERED" || status === "REVISION_REQUESTED") {
+    return "Bu teklif influencer tarafından başlatıldı ve kabul edildi. Teslim süreci influencer tarafından yürütülür.";
+  }
+  return "Bu teklif influencer tarafından başlatıldı. Teslim süreci influencer tarafından yürütülür.";
+}
 
 type Msg = {
   id: string;
@@ -576,10 +579,8 @@ export default function ChatClient({
     offer.status === "IN_PROGRESS" ||
     offer.status === "REVISION_REQUESTED" ||
     offer.status === "DELIVERED";
-  const showInfluencerInitiatedBrandReviewCopy =
-    brandReviewingInfluencerOffer && OPEN_INFLUENCER_OFFER_REVIEW_STATUSES.includes(offer.status);
-  const deliverySectionHint = showInfluencerInitiatedBrandReviewCopy
-    ? "Bu teklif influencer tarafından başlatıldı. Marka olarak teklifi inceleyebilir, kabul edebilir veya reddedebilirsiniz. Teslim süreci influencer tarafından yürütülür."
+  const deliverySectionHint = brandReviewingInfluencerOffer
+    ? influencerInitiatedBrandHint(offer.status)
     : "Kanıt yükleyin veya teslim kayıtlarını buradan izleyin.";
 
   return (

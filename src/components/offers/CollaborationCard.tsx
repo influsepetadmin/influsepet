@@ -70,6 +70,16 @@ function workspaceCtaLabel(
   return "Sohbete git";
 }
 
+function influencerInitiatedBrandHint(status: OfferStatus): string {
+  if (status === "PENDING") {
+    return "Bu teklif influencer tarafından başlatıldı. Marka olarak teklifi inceleyebilir, kabul edebilir veya reddedebilirsiniz. Teslim süreci influencer tarafından yürütülür.";
+  }
+  if (status === "ACCEPTED" || status === "IN_PROGRESS" || status === "DELIVERED" || status === "REVISION_REQUESTED") {
+    return "Bu teklif influencer tarafından başlatıldı ve kabul edildi. Teslim süreci influencer tarafından yürütülür.";
+  }
+  return "Bu teklif influencer tarafından başlatıldı. Teslim süreci influencer tarafından yürütülür.";
+}
+
 function collaborationStageLabel(status: OfferStatus): string {
   if (status === "PENDING") return "Teklif aşaması";
   if (status === "ACCEPTED" || status === "IN_PROGRESS") return "Aktif iş birliği";
@@ -189,10 +199,8 @@ export function CollaborationCard({
   const showDeliveryNote =
     offer.status === "IN_PROGRESS" || offer.status === "DELIVERED" || offer.status === "REVISION_REQUESTED";
   const brandReviewingInfluencerOffer = isBrandReviewingInfluencerOffer(viewerRole, offer);
-  const showInfluencerInitiatedBrandReviewCopy =
-    brandReviewingInfluencerOffer && OPEN_REVIEW_STATUSES.includes(offer.status);
-  const deliveryHint = showInfluencerInitiatedBrandReviewCopy
-    ? "Bu teklif influencer tarafından başlatıldı. Marka olarak teklifi inceleyebilir, kabul edebilir veya reddedebilirsiniz. Teslim süreci influencer tarafından yürütülür."
+  const deliveryHint = brandReviewingInfluencerOffer
+    ? influencerInitiatedBrandHint(offer.status)
     : showDeliveryNote
       ? "İş teslimi, mesajlaşma ve inceleme aynı çalışma alanında ilerler."
       : null;
