@@ -1,4 +1,4 @@
-import type { OfferStatus } from "@prisma/client";
+import type { OfferInitiator, OfferStatus } from "@prisma/client";
 
 export type CollaborationCardOffer = {
   id: string;
@@ -8,6 +8,7 @@ export type CollaborationCardOffer = {
   offerAmountTRY: number;
   budgetTRY: number | null;
   status: OfferStatus;
+  initiatedBy: OfferInitiator;
   dueDate: string | null;
   deliverableType: string | null;
   deliverableCount: number | null;
@@ -29,6 +30,7 @@ export function toCollaborationCardOffer(o: {
   offerAmountTRY: number;
   budgetTRY: number | null;
   status: OfferStatus;
+  initiatedBy: OfferInitiator;
   dueDate: Date | null;
   deliverableType: string | null;
   deliverableCount: number | null;
@@ -48,6 +50,7 @@ export function toCollaborationCardOffer(o: {
     offerAmountTRY: o.offerAmountTRY,
     budgetTRY: o.budgetTRY,
     status: o.status,
+    initiatedBy: o.initiatedBy,
     dueDate: o.dueDate ? o.dueDate.toISOString() : null,
     deliverableType: o.deliverableType,
     deliverableCount: o.deliverableCount,

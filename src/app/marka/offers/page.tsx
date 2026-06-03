@@ -205,6 +205,7 @@ export default async function MarkaOffersPage({
                   profileHref={o.influencer?.id ? `/profil/influencer/${o.influencer.id}` : null}
                   chatHref={o.conversation?.id ? `/chat/${o.conversation.id}` : null}
                   counterpartyRating={rateeReputationByUserId.get(o.influencerId) ?? null}
+                  viewerRole="BRAND"
                   availableNextTransitions={getAvailableOfferTransitions({
                     offer: {
                       id: o.id,

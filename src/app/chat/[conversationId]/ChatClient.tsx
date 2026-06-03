@@ -1,6 +1,6 @@
 "use client";
 
-import type { DeliveryStatus, OfferStatus } from "@prisma/client";
+import type { DeliveryStatus, OfferInitiator, OfferStatus } from "@prisma/client";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatOfferWorkflowActions } from "@/components/chat/ChatOfferWorkflowActions";
@@ -20,6 +20,13 @@ import { trackFirstTimeOnce, trackProductEvent } from "@/lib/productTracking/pro
 
 const WORKFLOW_EVENT_ICON_PX = 12;
 const WORKFLOW_EVENT_ICON_STROKE = 1.65;
+const OPEN_INFLUENCER_OFFER_REVIEW_STATUSES: OfferStatus[] = [
+  "PENDING",
+  "ACCEPTED",
+  "IN_PROGRESS",
+  "DELIVERED",
+  "REVISION_REQUESTED",
+];
 
 type Msg = {
   id: string;
@@ -392,6 +399,7 @@ export default function ChatClient({
   offer: {
     id: string;
     status: OfferStatus;
+    initiatedBy: OfferInitiator;
     brandId: string;
     influencerId: string;
     title: string | null;
@@ -562,6 +570,17 @@ export default function ChatClient({
   }, [messages, meId]);
 
   const threadItems = useMemo(() => buildThreadItems(messages), [messages]);
+  const isBrandViewer = meId === offer.brandId;
+  const brandReviewingInfluencerOffer = isBrandViewer && offer.initiatedBy === "INFLUENCER";
+  const showWorkspaceShortcut =
+    offer.status === "IN_PROGRESS" ||
+    offer.status === "REVISION_REQUESTED" ||
+    offer.status === "DELIVERED";
+  const showInfluencerInitiatedBrandReviewCopy =
+    brandReviewingInfluencerOffer && OPEN_INFLUENCER_OFFER_REVIEW_STATUSES.includes(offer.status);
+  const deliverySectionHint = showInfluencerInitiatedBrandReviewCopy
+    ? "Bu teklif influencer tarafından başlatıldı. Marka olarak teklifi inceleyebilir, kabul edebilir veya reddedebilirsiniz. Teslim süreci influencer tarafından yürütülür."
+    : "Kanıt yükleyin veya teslim kayıtlarını buradan izleyin.";
 
   return (
     <div className="chat-conversation chat-conversation--workspace">
@@ -647,11 +666,9 @@ export default function ChatClient({
           availableNextTransitions={availableNextTransitions}
           profileHref={chatContext.profileHref}
           offersPanelHref={offersPanelHref}
-          showDeliveryShortcut={
-            offer.status === "IN_PROGRESS" ||
-            offer.status === "REVISION_REQUESTED" ||
-            offer.status === "DELIVERED"
-          }
+          showDeliveryShortcut={showWorkspaceShortcut}
+          deliveryShortcutLabel={brandReviewingInfluencerOffer ? "Teklifi incele" : "Teslim alanına git"}
+          deliveryShortcutTargetId={brandReviewingInfluencerOffer ? "chat-workspace-header" : "chat-delivery-anchor"}
         />
 
         <div className="chat-workflow-card__workspace-foot">
@@ -666,7 +683,7 @@ export default function ChatClient({
           <h3 id="chat-delivery-section-label" className="chat-workspace-block__label">
             Teslimat
           </h3>
-          <p className="chat-workspace-block__hint muted">Kanıt yükleyin veya teslim kayıtlarını buradan izleyin.</p>
+          <p className="chat-workspace-block__hint muted">{deliverySectionHint}</p>
         </div>
         <div id="chat-delivery-anchor" className="chat-delivery-anchor">
           <DeliveryPanel

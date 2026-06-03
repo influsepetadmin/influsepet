@@ -50,6 +50,8 @@ export function ChatOfferWorkflowActions({
   profileHref,
   offersPanelHref,
   showDeliveryShortcut,
+  deliveryShortcutLabel = "Teslim alanına git",
+  deliveryShortcutTargetId = "chat-delivery-anchor",
 }: {
   offerId: string;
   availableNextTransitions: OfferStatus[];
@@ -57,6 +59,8 @@ export function ChatOfferWorkflowActions({
   offersPanelHref: string;
   /** When collaboration is in a delivery-capable state — scroll to #chat-delivery-anchor */
   showDeliveryShortcut: boolean;
+  deliveryShortcutLabel?: string;
+  deliveryShortcutTargetId?: string;
 }) {
   const router = useRouter();
   const [pendingKey, setPendingKey] = useState<string | null>(null);
@@ -133,9 +137,9 @@ export function ChatOfferWorkflowActions({
     setCancelOpen(true);
   }, []);
 
-  const scrollToDelivery = useCallback(() => {
-    document.getElementById("chat-delivery-anchor")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
+  const scrollToShortcutTarget = useCallback(() => {
+    document.getElementById(deliveryShortcutTargetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [deliveryShortcutTargetId]);
 
   return (
     <div className="chat-workflow-actions">
@@ -176,8 +180,8 @@ export function ChatOfferWorkflowActions({
 
       <div className="chat-workflow-actions__row chat-workflow-actions__row--secondary">
         {showDeliveryShortcut ? (
-          <button type="button" className="btn secondary btn--sm" onClick={scrollToDelivery}>
-            Teslim alanına git
+          <button type="button" className="btn secondary btn--sm" onClick={scrollToShortcutTarget}>
+            {deliveryShortcutLabel}
           </button>
         ) : null}
         <Link className="btn secondary btn--sm" href={profileHref}>

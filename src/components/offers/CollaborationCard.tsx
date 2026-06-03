@@ -27,6 +27,8 @@ const ACTION_LABELS: Record<OfferStatus, string> = {
 };
 
 const DELIVERY_DRIVEN_STATUSES: OfferStatus[] = ["DELIVERED", "COMPLETED", "REVISION_REQUESTED"];
+type CollaborationViewerRole = "BRAND" | "INFLUENCER";
+const OPEN_REVIEW_STATUSES: OfferStatus[] = ["PENDING", "ACCEPTED", "IN_PROGRESS", "DELIVERED", "REVISION_REQUESTED"];
 
 const ACTION_ORDER: OfferStatus[] = [
   "ACCEPTED",
@@ -44,7 +46,21 @@ function isPrimaryAction(next: OfferStatus): boolean {
   return next === "ACCEPTED" || next === "IN_PROGRESS";
 }
 
-function workspaceCtaLabel(status: OfferStatus): string {
+function isBrandReviewingInfluencerOffer(
+  viewerRole: CollaborationViewerRole,
+  offer: CollaborationCardOffer,
+): boolean {
+  return viewerRole === "BRAND" && offer.initiatedBy === "INFLUENCER";
+}
+
+function workspaceCtaLabel(
+  status: OfferStatus,
+  viewerRole: CollaborationViewerRole,
+  offer: CollaborationCardOffer,
+): string {
+  if (isBrandReviewingInfluencerOffer(viewerRole, offer) && OPEN_REVIEW_STATUSES.includes(status)) {
+    return "Teklifi incele";
+  }
   if (status === "ACCEPTED" || status === "IN_PROGRESS" || status === "DELIVERED" || status === "REVISION_REQUESTED") {
     return "Teslim alanına git";
   }
@@ -115,6 +131,7 @@ export function CollaborationCard({
   chatHref,
   availableNextTransitions,
   counterpartyRating,
+  viewerRole,
 }: {
   offer: CollaborationCardOffer;
   otherSideLabel: string;
@@ -124,6 +141,7 @@ export function CollaborationCard({
   availableNextTransitions: OfferStatus[];
   /** Karşı tarafın (iş birliği puanları) özeti; yalnızca COMPLETED kartlarda anlamlı. */
   counterpartyRating?: RateeReputationStats | null;
+  viewerRole: CollaborationViewerRole;
 }) {
   const router = useRouter();
   const [pendingKey, setPendingKey] = useState<string | null>(null);
@@ -170,6 +188,14 @@ export function CollaborationCard({
 
   const showDeliveryNote =
     offer.status === "IN_PROGRESS" || offer.status === "DELIVERED" || offer.status === "REVISION_REQUESTED";
+  const brandReviewingInfluencerOffer = isBrandReviewingInfluencerOffer(viewerRole, offer);
+  const showInfluencerInitiatedBrandReviewCopy =
+    brandReviewingInfluencerOffer && OPEN_REVIEW_STATUSES.includes(offer.status);
+  const deliveryHint = showInfluencerInitiatedBrandReviewCopy
+    ? "Bu teklif influencer tarafından başlatıldı. Marka olarak teklifi inceleyebilir, kabul edebilir veya reddedebilirsiniz. Teslim süreci influencer tarafından yürütülür."
+    : showDeliveryNote
+      ? "İş teslimi, mesajlaşma ve inceleme aynı çalışma alanında ilerler."
+      : null;
 
   const metaChips = useMemo(() => {
     const dueStr = formatDue(offer.dueDate);
@@ -358,7 +384,7 @@ export function CollaborationCard({
               })
             }
           >
-            {workspaceCtaLabel(offer.status)}
+            {workspaceCtaLabel(offer.status, viewerRole, offer)}
           </a>
         ) : null}
         {profileHref ? (
@@ -380,9 +406,9 @@ export function CollaborationCard({
         ) : null}
       </div>
 
-      {showDeliveryNote ? (
+      {deliveryHint ? (
         <p className="muted collab-card__hint">
-          İş teslimi, mesajlaşma ve inceleme aynı çalışma alanında ilerler.
+          {deliveryHint}
         </p>
       ) : null}
 

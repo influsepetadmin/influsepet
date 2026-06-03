@@ -180,6 +180,7 @@ export default async function ChatConversationPage({
         offer={{
           id: o.id,
           status: o.status,
+          initiatedBy: o.initiatedBy,
           brandId: o.brandId,
           influencerId: o.influencerId,
           title: o.title,
