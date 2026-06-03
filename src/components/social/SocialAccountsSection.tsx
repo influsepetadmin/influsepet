@@ -86,13 +86,12 @@ export function SocialAccountsSection() {
               {accounts.map((a) => (
                 <div key={a.id} className="social-accounts-stack__item">
                   <SocialAccountCard account={a} />
-                  {!a.isVerified && (
-                    <VerifySocialAccountForm
-                      socialAccountId={a.id}
-                      verificationCode={a.verificationCode}
-                      onVerified={refresh}
-                    />
-                  )}
+                  <VerifySocialAccountForm
+                    socialAccountId={a.id}
+                    verificationCode={a.verificationCode}
+                    verificationStatus={a.verificationStatus}
+                    onVerified={refresh}
+                  />
                 </div>
               ))}
             </div>

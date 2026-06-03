@@ -54,6 +54,14 @@ enum VerificationMethod {
   MANUAL
 }
 
+enum SocialAccountVerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
 enum MessageKind {
   TEXT
   MEDIA
@@ -199,8 +207,13 @@ model SocialAccount {
   externalAccountId  String?
   isConnected        Boolean             @default(false)
   isVerified         Boolean             @default(false)
+  verificationStatus SocialAccountVerificationStatus @default(UNVERIFIED)
   verificationMethod VerificationMethod?
   verificationCode   String?
+  verificationRequestedAt DateTime?
+  verificationReviewedAt  DateTime?
+  verificationExpiresAt   DateTime?
+  verificationReviewerNote String?
   verifiedAt         DateTime?
   lastSyncedAt       DateTime?
   metadataJson       Json?

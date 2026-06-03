@@ -57,7 +57,7 @@ export async function GET(
       _count: { _all: true },
     }),
     prisma.socialAccount.findMany({
-      where: { userId, isVerified: true },
+      where: { userId, isVerified: true, verificationStatus: "VERIFIED" },
       select: {
         platform: true,
         username: true,

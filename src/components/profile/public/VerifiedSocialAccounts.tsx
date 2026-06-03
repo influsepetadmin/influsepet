@@ -1,5 +1,6 @@
 import type { SocialPlatform } from "@prisma/client";
 import { platformLabel } from "@/components/social/SocialAccountCard";
+import { SocialVerificationBadge } from "@/components/social/SocialVerificationBadge";
 
 export type PublicVerifiedSocialAccount = {
   platform: SocialPlatform;
@@ -41,9 +42,7 @@ export function VerifiedSocialAccounts({ accounts }: { accounts: PublicVerifiedS
               </span>
               <div className="public-profile-social-card__head-text">
                 <span className="public-profile-social-card__platform">{platformLabel(a.platform)}</span>
-                <span className="public-profile-social-card__verified-badge" title="Doğrulandı">
-                  <span aria-hidden>✓</span> Doğrulandı
-                </span>
+                <SocialVerificationBadge status="VERIFIED" mode="public" />
               </div>
             </div>
             <p className="public-profile-social-card__handle">@{a.username}</p>

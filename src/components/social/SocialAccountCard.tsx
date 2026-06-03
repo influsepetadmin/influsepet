@@ -1,4 +1,5 @@
-import type { SocialPlatform, VerificationMethod } from "@prisma/client";
+import type { SocialAccountVerificationStatus, SocialPlatform, VerificationMethod } from "@prisma/client";
+import { SocialVerificationBadge } from "./SocialVerificationBadge";
 
 export type SocialAccountCardData = {
   id: string;
@@ -10,8 +11,13 @@ export type SocialAccountCardData = {
   followerCount: number | null;
   isConnected: boolean;
   isVerified: boolean;
+  verificationStatus: SocialAccountVerificationStatus;
   verificationMethod: VerificationMethod | null;
   verifiedAt: string | null;
+  verificationRequestedAt: string | null;
+  verificationReviewedAt: string | null;
+  verificationExpiresAt: string | null;
+  verificationReviewerNote: string | null;
 };
 
 export function platformLabel(p: SocialPlatform): string {
@@ -78,6 +84,13 @@ export function SocialAccountCard({ account }: { account: SocialAccountCardData 
       : null;
 
   const method = methodLabel(account.verificationMethod);
+  const requestedDate =
+    account.verificationRequestedAt != null
+      ? new Date(account.verificationRequestedAt).toLocaleString("tr-TR", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      : null;
 
   return (
     <article className={`social-account-card ${platformClass(account.platform)}`}>
@@ -91,11 +104,7 @@ export function SocialAccountCard({ account }: { account: SocialAccountCardData 
           >
             {account.isConnected ? "Bağlı" : "Bağlı değil"}
           </span>
-          <span
-            className={`social-chip ${account.isVerified ? "social-chip--verified" : "social-chip--pending"}`}
-          >
-            {account.isVerified ? "Doğrulandı" : "Doğrulama bekliyor"}
-          </span>
+          <SocialVerificationBadge status={account.verificationStatus} />
         </div>
       </div>
 
@@ -119,6 +128,12 @@ export function SocialAccountCard({ account }: { account: SocialAccountCardData 
       {account.isVerified && verifiedDate ? (
         <p className="social-account-card__meta muted social-account-card__meta--small">
           Doğrulama zamanı: {verifiedDate}
+        </p>
+      ) : null}
+
+      {!account.isVerified && requestedDate ? (
+        <p className="social-account-card__meta muted social-account-card__meta--small">
+          İnceleme talebi: {requestedDate}
         </p>
       ) : null}
 

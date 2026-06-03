@@ -12,9 +12,14 @@ const mineSelect = {
   followerCount: true,
   isConnected: true,
   isVerified: true,
+  verificationStatus: true,
   verificationMethod: true,
   verifiedAt: true,
   verificationCode: true,
+  verificationRequestedAt: true,
+  verificationReviewedAt: true,
+  verificationExpiresAt: true,
+  verificationReviewerNote: true,
 } as const;
 
 export async function GET() {
@@ -22,6 +27,16 @@ export async function GET() {
   if (!session) {
     return NextResponse.json({ error: "Oturum bulunamadi." }, { status: 401 });
   }
+
+  await prisma.socialAccount.updateMany({
+    where: {
+      userId: session.uid,
+      isVerified: false,
+      verificationStatus: "UNVERIFIED",
+      verificationExpiresAt: { lt: new Date() },
+    },
+    data: { verificationStatus: "EXPIRED" },
+  });
 
   const accounts = await prisma.socialAccount.findMany({
     where: { userId: session.uid },
@@ -32,7 +47,10 @@ export async function GET() {
   const socialAccounts = accounts.map((a) => ({
     ...a,
     verifiedAt: a.verifiedAt?.toISOString() ?? null,
-    verificationCode: a.isVerified ? null : a.verificationCode,
+    verificationRequestedAt: a.verificationRequestedAt?.toISOString() ?? null,
+    verificationReviewedAt: a.verificationReviewedAt?.toISOString() ?? null,
+    verificationExpiresAt: a.verificationExpiresAt?.toISOString() ?? null,
+    verificationCode: a.isVerified || a.verificationStatus === "EXPIRED" ? null : a.verificationCode,
   }));
 
   return NextResponse.json({ ok: true, socialAccounts });

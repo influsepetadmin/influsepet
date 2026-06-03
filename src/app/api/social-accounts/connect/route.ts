@@ -8,6 +8,8 @@ import {
   parseUsernameOrUrl,
 } from "@/lib/socialAccounts";
 
+const VERIFICATION_CODE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
 function isSocialPlatform(value: unknown): value is SocialPlatform {
   return typeof value === "string" && Object.values(SocialPlatform).includes(value as SocialPlatform);
 }
@@ -19,6 +21,11 @@ const connectSelect = {
   profileUrl: true,
   isConnected: true,
   isVerified: true,
+  verificationStatus: true,
+  verificationRequestedAt: true,
+  verificationReviewedAt: true,
+  verificationExpiresAt: true,
+  verificationReviewerNote: true,
   verificationCode: true,
 } as const;
 
@@ -48,6 +55,7 @@ export async function POST(request: Request) {
   const username = parsed.username;
   const profileUrl = buildProfileUrl(platform, username);
   const code = generateVerificationCode();
+  const expiresAt = new Date(Date.now() + VERIFICATION_CODE_TTL_MS);
 
   const existing = await prisma.socialAccount.findUnique({
     where: {
@@ -70,8 +78,13 @@ export async function POST(request: Request) {
             profileUrl,
             isConnected: true,
             isVerified: false,
-            verificationMethod: null,
+            verificationStatus: "UNVERIFIED",
+            verificationMethod: "BIO_CODE",
             verificationCode: code,
+            verificationRequestedAt: null,
+            verificationReviewedAt: null,
+            verificationExpiresAt: expiresAt,
+            verificationReviewerNote: null,
             verifiedAt: null,
             lastSyncedAt: null,
           },
@@ -85,7 +98,10 @@ export async function POST(request: Request) {
             profileUrl,
             isConnected: true,
             isVerified: false,
+            verificationStatus: "UNVERIFIED",
+            verificationMethod: "BIO_CODE",
             verificationCode: code,
+            verificationExpiresAt: expiresAt,
           },
           select: connectSelect,
         });

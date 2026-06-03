@@ -1,91 +1,124 @@
 "use client";
 
 import { useState } from "react";
+import type { SocialAccountVerificationStatus } from "@prisma/client";
+import { SocialVerificationBadge } from "./SocialVerificationBadge";
+
+type VerifyIntent = "generate" | "submit";
+
+function statusMessage(status: SocialAccountVerificationStatus): string | null {
+  switch (status) {
+    case "PENDING":
+      return "Doğrulama talebiniz inceleme bekliyor.";
+    case "VERIFIED":
+      return "Sosyal hesap doğrulandı.";
+    case "REJECTED":
+      return "Doğrulama kodu biyografinizde görülemedi. Lütfen kodu ekleyip tekrar deneyin.";
+    case "EXPIRED":
+      return "Doğrulama kodunun süresi doldu. Yeni bir kod oluşturabilirsiniz.";
+    case "UNVERIFIED":
+    default:
+      return null;
+  }
+}
 
 export function VerifySocialAccountForm({
   socialAccountId,
   verificationCode,
+  verificationStatus,
   onVerified,
 }: {
   socialAccountId: string;
   verificationCode: string | null;
+  verificationStatus: SocialAccountVerificationStatus;
   onVerified: () => void;
 }) {
-  const [code, setCode] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loadingIntent, setLoadingIntent] = useState<VerifyIntent | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  if (!verificationCode) {
-    return (
-      <p className="social-verify-panel social-verify-panel--notice muted">
-        Yeni bir doğrulama kodu için hesabı yeniden bağlayın.
-      </p>
-    );
-  }
+  const message = statusMessage(verificationStatus);
+  const canGenerate = verificationStatus === "EXPIRED" || !verificationCode;
+  const canSubmit =
+    Boolean(verificationCode) &&
+    verificationStatus !== "PENDING" &&
+    verificationStatus !== "VERIFIED" &&
+    verificationStatus !== "EXPIRED";
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const trimmed = code.trim();
-    if (!trimmed) {
-      setError("Doğrulama kodunu girin.");
-      return;
-    }
-    setLoading(true);
+  async function runIntent(intent: VerifyIntent) {
+    setLoadingIntent(intent);
     setError(null);
     try {
       const res = await fetch("/api/social-accounts/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ socialAccountId, providedCode: trimmed }),
+        body: JSON.stringify({ socialAccountId, intent }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
-        setError(data.error ?? "Kod doğrulanamadı.");
+        setError(data.error ?? "İşlem tamamlanamadı.");
         return;
       }
-      setCode("");
       onVerified();
     } catch {
       setError("Bağlantı hatası.");
     } finally {
-      setLoading(false);
+      setLoadingIntent(null);
     }
   }
 
   return (
-    <div className="social-verify-panel">
-      <p className="social-verify-panel__intro muted">
-        <strong className="social-verify-panel__intro-strong">Manuel doğrulama:</strong> Aşağıdaki kodu kaydedin ve
-        doğrulama adımında girin. İleride OAuth veya biyografi doğrulaması eklenecektir.
-      </p>
-
-      <div className="social-verify-panel__code-block">
-        <span className="social-verify-panel__code-label">Doğrulama kodu</span>
-        <code className="social-verify-panel__code" translate="no">
-          {verificationCode}
-        </code>
+    <div className={`social-verify-panel social-verify-panel--${verificationStatus.toLowerCase()}`}>
+      <div className="social-verify-panel__head">
+        <div>
+          <p className="social-verify-panel__title">Sosyal hesap doğrulama</p>
+          <p className="social-verify-panel__intro muted">
+            Sosyal hesabınızı doğrulamak için size özel oluşturulan kodu Instagram veya TikTok biyografinize geçici
+            olarak ekleyin. Kod göründükten sonra inceleme talebi gönderebilirsiniz.
+          </p>
+        </div>
+        <SocialVerificationBadge status={verificationStatus} />
       </div>
 
-      <form className="social-verify-panel__form" onSubmit={handleSubmit}>
-        <label htmlFor={`verify-${socialAccountId}`} className="social-verify-panel__label">
-          Kodu buraya girin
-        </label>
-        <input
-          id={`verify-${socialAccountId}`}
-          type="text"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          disabled={loading}
-          autoComplete="off"
-          className="social-verify-panel__input"
-        />
-        {error ? <p className="social-verify-panel__error">{error}</p> : null}
-        <div className="social-verify-panel__actions">
-          <button className="btn secondary" type="submit" disabled={loading}>
-            {loading ? "…" : "Doğrula"}
-          </button>
+      {message ? <p className="social-verify-panel__status muted">{message}</p> : null}
+
+      {verificationCode ? (
+        <div className="social-verify-panel__code-block">
+          <span className="social-verify-panel__code-label">Doğrulama kodunuz:</span>
+          <code className="social-verify-panel__code" translate="no">
+            {verificationCode}
+          </code>
         </div>
-      </form>
+      ) : null}
+
+      <p className="social-verify-panel__note muted">
+        Kod yalnızca hesabın size ait olduğunu doğrulamak için kullanılır. Onaylandıktan sonra kodu biyografinizden
+        kaldırabilirsiniz.
+      </p>
+
+      {error ? <p className="social-verify-panel__error">{error}</p> : null}
+
+      <div className="social-verify-panel__actions">
+        {canGenerate ? (
+          <button
+            className="btn secondary"
+            type="button"
+            disabled={loadingIntent !== null}
+            onClick={() => void runIntent("generate")}
+          >
+            {loadingIntent === "generate" ? "…" : "Hesabı doğrula"}
+          </button>
+        ) : null}
+        {canSubmit ? (
+          <button
+            className="btn"
+            type="button"
+            disabled={loadingIntent !== null}
+            onClick={() => void runIntent("submit")}
+          >
+            {loadingIntent === "submit" ? "…" : "İncelemeye gönder"}
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }

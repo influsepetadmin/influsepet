@@ -50,7 +50,7 @@ export async function getPublicProfileByUserId(
       _count: { _all: true },
     }),
     prisma.socialAccount.findMany({
-      where: { userId: uid, isVerified: true },
+      where: { userId: uid, isVerified: true, verificationStatus: "VERIFIED" },
       select: {
         platform: true,
         username: true,
