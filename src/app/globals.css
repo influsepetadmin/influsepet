@@ -7787,6 +7787,16 @@ main:has(.dashboard-page) {
   gap: 18px;
 }
 
+.admin-login-page {
+  min-height: calc(100vh - 120px);
+  display: grid;
+  place-items: center;
+}
+
+.admin-login-card {
+  width: min(100%, 430px);
+}
+
 .admin-social-verifications__head {
   padding: 22px 0 4px;
 }
