@@ -3,10 +3,12 @@ import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import { BrandProfilePanel } from "@/components/dashboard/BrandProfilePanel";
 import { SocialAccountsSection } from "@/components/social/SocialAccountsSection";
+import { SocialVerificationBadge } from "@/components/social/SocialVerificationBadge";
 import { getAvatarUrl } from "@/lib/avatar";
 import { getCategoryLabel } from "@/lib/categories";
 import { isBrandDashboardProfileComplete } from "@/lib/dashboardProfileCompletion";
 import { getMarkaPanelAccess } from "@/lib/marka/panelAccess";
+import { prisma } from "@/lib/prisma";
 import { EmptyGlyphListBullet } from "@/components/icons/emptyStateGlyphs";
 
 function parseProfileTab(raw: string | undefined): "genel" | "sosyal" | "portfoy" | "degerlendirme" {
@@ -50,6 +52,9 @@ export default async function MarkaProfilePage({
   const profileComplete = isBrandDashboardProfileComplete(profile);
   const categoriesText =
     profile?.selectedCategories?.map((c) => getCategoryLabel(c.categoryKey)).filter(Boolean).join(", ") ?? "";
+  const verifiedSocialCount = await prisma.socialAccount.count({
+    where: { userId: user.id, isVerified: true, verificationStatus: "VERIFIED" },
+  });
 
   const tabHref = (t: typeof tab) => (t === "genel" ? "/marka/profile" : `/marka/profile?tab=${t}`);
 
@@ -127,6 +132,7 @@ export default async function MarkaProfilePage({
                 city: profile?.city ?? "",
                 websiteUrl: profile?.website?.trim() || null,
                 publicUsername: profile?.username?.trim() ? profile.username.trim() : null,
+                verifiedSocialCount,
               }}
             />
           </section>
@@ -151,7 +157,14 @@ export default async function MarkaProfilePage({
                 />
                 <div className="profile-preview-cta__text">
                   <span className="profile-preview-cta__eyebrow muted">Herkese açık profil</span>
-                  <span className="profile-preview-cta__name">@{profile.username.trim()}</span>
+                  <span className="profile-preview-cta__name-row">
+                    <span className="profile-preview-cta__name">@{profile.username.trim()}</span>
+                    {verifiedSocialCount > 0 ? (
+                      <span className="profile-preview-cta__verified">
+                        <SocialVerificationBadge status="VERIFIED" mode="public" />
+                      </span>
+                    ) : null}
+                  </span>
                   <span className="profile-preview-cta__hint muted">Ziyaretçilerin gördüğü sayfayı açın</span>
                 </div>
                 <span className="btn secondary btn--sm profile-preview-cta__action">

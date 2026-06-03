@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import InfluencerProfileForm from "@/components/InfluencerProfileForm";
+import { SocialVerificationBadge } from "@/components/social/SocialVerificationBadge";
 
 export function InfluencerProfilePanel({
   err,
@@ -35,6 +36,7 @@ export function InfluencerProfilePanel({
     categoriesText: string;
     nichePreview: string | null;
     bioPreview: string | null;
+    verifiedSocialCount: number;
   };
 }) {
   const hasErr = Boolean(err?.trim());
@@ -52,7 +54,12 @@ export function InfluencerProfilePanel({
           <div className="profile-public-hero">
             <img className="profile-public-avatar" src={summary.imageSrc} alt="" />
             <div className="influencer-profile-meta">
-              <p className="profile-public-handle influencer-profile-meta__handle">@{summary.username}</p>
+              <div className="dashboard-profile-summary__identity-row">
+                <p className="profile-public-handle influencer-profile-meta__handle">@{summary.username}</p>
+                {summary.verifiedSocialCount > 0 ? (
+                  <SocialVerificationBadge status="VERIFIED" mode="public" />
+                ) : null}
+              </div>
               <p className="muted influencer-profile-meta__name">{displayName}</p>
               <div className="influencer-profile-meta__grid">
                 <div className="influencer-profile-meta__item">

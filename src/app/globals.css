@@ -4353,6 +4353,14 @@ main:has(.public-profile-page--app) {
   border-color: rgba(148, 163, 184, 0.72);
 }
 
+.social-verification-badge--public {
+  padding: 4px 10px 4px 5px;
+  font-size: 0.68rem;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.75) inset,
+    0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
 .social-account-card {
   position: relative;
   border: 1px solid rgba(226, 232, 240, 0.95);
@@ -7906,10 +7914,16 @@ main:has(.dashboard-page) {
 
 .dashboard-profile-summary--influencer .dashboard-profile-summary__card {
   border-color: rgba(199, 210, 254, 0.5);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 10px 28px rgba(124, 58, 237, 0.07);
 }
 
 .dashboard-profile-summary--brand .dashboard-profile-summary__card {
-  border-color: rgba(219, 227, 239, 0.98);
+  border-color: rgba(94, 234, 212, 0.45);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 10px 28px rgba(13, 148, 136, 0.07);
 }
 
 .dashboard-profile-summary--brand {
@@ -7938,6 +7952,18 @@ main:has(.dashboard-page) {
 
 .dashboard-profile-summary--influencer .profile-public-hero {
   align-items: start;
+}
+
+.dashboard-profile-summary__identity-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  min-width: 0;
+}
+
+.dashboard-profile-summary__identity-row .profile-public-handle {
+  margin-bottom: 0;
 }
 
 .influencer-profile-meta {
@@ -8031,6 +8057,28 @@ main:has(.dashboard-page) {
   text-decoration: none;
 }
 
+.influencer-profile .profile-preview-cta__card {
+  border-color: rgba(168, 85, 247, 0.28);
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.05),
+    0 8px 24px rgba(124, 58, 237, 0.055);
+}
+
+.influencer-profile .profile-preview-cta__card:hover {
+  border-color: rgba(168, 85, 247, 0.44);
+}
+
+.marka-profile .profile-preview-cta__card {
+  border-color: rgba(13, 148, 136, 0.3);
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.05),
+    0 8px 24px rgba(13, 148, 136, 0.055);
+}
+
+.marka-profile .profile-preview-cta__card:hover {
+  border-color: rgba(13, 148, 136, 0.46);
+}
+
 .profile-preview-cta__avatar {
   width: 52px;
   height: 52px;
@@ -8059,6 +8107,19 @@ main:has(.dashboard-page) {
   font-weight: 700;
   font-size: 1.02rem;
   letter-spacing: -0.02em;
+}
+
+.profile-preview-cta__name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.profile-preview-cta__verified .social-verification-badge {
+  transform: scale(0.94);
+  transform-origin: left center;
 }
 
 .profile-preview-cta__hint {
@@ -9266,6 +9327,17 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
   color: var(--public-profile-accent-strong, #3730a3);
   background: var(--public-profile-badge-bg, #f8fafc);
   border-color: var(--public-profile-accent-border, rgba(129, 140, 248, 0.42));
+}
+
+.public-profile-hero__verified-badge {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.public-profile-hero__verified-badge .social-verification-badge {
+  border-color: rgba(96, 165, 250, 0.56);
+  background: #eff6ff;
 }
 
 /* Marka herkese açık profil — kapak + daha dolu düzen */
@@ -10587,13 +10659,13 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 14px 14px 12px;
+  padding: 15px 15px 13px;
   background: var(--public-profile-section-bg, #ffffff);
   border: 1px solid var(--public-profile-accent-border, rgba(199, 210, 254, 0.55));
-  border-radius: 14px;
+  border-radius: 16px;
   box-shadow:
-    0 2px 10px rgba(15, 23, 42, 0.04),
-    0 2px 8px rgba(15, 23, 42, 0.04),
+    0 1px 2px rgba(15, 23, 42, 0.035),
+    0 10px 24px var(--public-profile-accent-shadow, rgba(15, 23, 42, 0.045)),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -10622,8 +10694,11 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
   font-weight: 800;
   letter-spacing: 0.04em;
   color: #fff;
-  border-radius: 10px;
-  background: #64748b;
+  border-radius: 999px;
+  background: var(--public-profile-accent, #64748b);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.25) inset,
+    0 6px 14px var(--public-profile-accent-shadow, rgba(15, 23, 42, 0.12));
 }
 
 .public-profile-social-card__glyph--instagram {
@@ -10642,9 +10717,10 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
   flex: 1;
   min-width: 0;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: flex-start;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  align-items: center;
 }
 
 .public-profile-social-card__platform {
@@ -10652,6 +10728,11 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--text);
+}
+
+.public-profile-social-card .social-verification-badge {
+  transform: scale(0.92);
+  transform-origin: left center;
 }
 
 .public-profile-social-card__verified-badge {

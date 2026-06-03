@@ -4,6 +4,7 @@ import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import { InfluencerProfilePanel } from "@/components/dashboard/InfluencerProfilePanel";
 import InfluencerPortfolioManager from "@/components/InfluencerPortfolioManager";
 import { SocialAccountsSection } from "@/components/social/SocialAccountsSection";
+import { SocialVerificationBadge } from "@/components/social/SocialVerificationBadge";
 import { getAvatarUrl } from "@/lib/avatar";
 import { getCategoryLabel, normalizeCategoryKeysForForm } from "@/lib/categories";
 import { isInfluencerDashboardProfileComplete, truncateText } from "@/lib/dashboardProfileCompletion";
@@ -63,15 +64,19 @@ export default async function InfluencerProfilePage({
   const nichePreview = profile?.nicheText?.trim() ? truncateText(profile.nicheText, 140) : null;
   const bioPreview = profile?.bio?.trim() ? truncateText(profile.bio, 120) : null;
 
-  const portfolioItems =
+  const [portfolioItems, verifiedSocialCount] = await Promise.all([
     profile
-      ? await prisma.influencerPortfolioItem.findMany({
+      ? prisma.influencerPortfolioItem.findMany({
           where: { influencerProfileId: profile.id },
           orderBy: { createdAt: "desc" },
           select: { id: true, title: true, url: true, platform: true },
           take: 20,
         })
-      : [];
+      : Promise.resolve([]),
+    prisma.socialAccount.count({
+      where: { userId: user.id, isVerified: true, verificationStatus: "VERIFIED" },
+    }),
+  ]);
 
   const tabHref = (t: typeof tab) =>
     t === "genel" ? "/influencer/profile" : `/influencer/profile?tab=${t}`;
@@ -155,6 +160,7 @@ export default async function InfluencerProfilePage({
                 categoriesText,
                 nichePreview,
                 bioPreview,
+                verifiedSocialCount,
               }}
             />
           </section>
@@ -175,7 +181,14 @@ export default async function InfluencerProfilePage({
                 />
                 <div className="profile-preview-cta__text">
                   <span className="profile-preview-cta__eyebrow muted">Herkese açık profil</span>
-                  <span className="profile-preview-cta__name">@{profile.username}</span>
+                  <span className="profile-preview-cta__name-row">
+                    <span className="profile-preview-cta__name">@{profile.username}</span>
+                    {verifiedSocialCount > 0 ? (
+                      <span className="profile-preview-cta__verified">
+                        <SocialVerificationBadge status="VERIFIED" mode="public" />
+                      </span>
+                    ) : null}
+                  </span>
                   <span className="profile-preview-cta__hint muted">Ziyaretçilerin gördüğü sayfayı yeni sekmede açın</span>
                 </div>
                 <span className="btn secondary btn--sm profile-preview-cta__action">

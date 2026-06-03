@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { PublicProfileByUsernameResponse } from "@/lib/publicProfile/publicProfileByUsername";
 import { getAvatarUrl } from "@/lib/avatar";
 import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
+import { SocialVerificationBadge } from "@/components/social/SocialVerificationBadge";
 import { PublicCollaborationRequestCta } from "./PublicCollaborationRequestCta";
 import {
   PublicProfileIconMapPin,
@@ -54,6 +55,11 @@ export function PublicProfileHeader({
           <div className="public-profile-hero__title-row">
             <h1 className="public-profile-hero__name">{data.name}</h1>
             <span className="public-profile-role-badge">Influencer</span>
+            {socialVerifiedCount > 0 ? (
+              <span className="public-profile-hero__verified-badge">
+                <SocialVerificationBadge status="VERIFIED" mode="public" />
+              </span>
+            ) : null}
           </div>
           <p className="public-profile-hero__handle muted">@{data.username}</p>
           {categoryLine ? (

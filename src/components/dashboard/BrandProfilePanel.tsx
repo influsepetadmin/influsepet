@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import BrandProfileForm from "@/components/BrandProfileForm";
+import { SocialVerificationBadge } from "@/components/social/SocialVerificationBadge";
 
 export function BrandProfilePanel({
   err,
@@ -31,6 +32,7 @@ export function BrandProfilePanel({
     city: string;
     websiteUrl: string | null;
     publicUsername: string | null;
+    verifiedSocialCount: number;
   };
 }) {
   const hasErr = Boolean(err?.trim());
@@ -52,9 +54,14 @@ export function BrandProfilePanel({
               alt=""
             />
             <div className="profile-stat-grid">
-              <p className="profile-public-handle" style={{ marginBottom: 4 }}>
-                {summary.companyName}
-              </p>
+              <div className="dashboard-profile-summary__identity-row">
+                <p className="profile-public-handle" style={{ marginBottom: 4 }}>
+                  {summary.companyName}
+                </p>
+                {summary.verifiedSocialCount > 0 ? (
+                  <SocialVerificationBadge status="VERIFIED" mode="public" />
+                ) : null}
+              </div>
               <p className="muted" style={{ margin: 0 }}>
                 {displayName}
               </p>
