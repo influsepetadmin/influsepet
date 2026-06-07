@@ -1,5 +1,18 @@
 import { CATEGORY_KEYS, normalizeCategoryKeysForForm } from "@/lib/categories";
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
+
+const brandProfileRoleWhere = { user: { role: "BRAND" } } satisfies Prisma.BrandProfileWhereInput;
+const influencerProfileRoleWhere = {
+  user: { role: "INFLUENCER" },
+} satisfies Prisma.InfluencerProfileWhereInput;
+
+function brandWhere(where?: Prisma.BrandProfileWhereInput | null): Prisma.BrandProfileWhereInput {
+  return where ? { AND: [brandProfileRoleWhere, where] } : brandProfileRoleWhere;
+}
+
+function influencerWhere(where?: Prisma.InfluencerProfileWhereInput | null): Prisma.InfluencerProfileWhereInput {
+  return where ? { AND: [influencerProfileRoleWhere, where] } : influencerProfileRoleWhere;
+}
 
 const brandCardSelect = {
   id: true,
@@ -96,27 +109,28 @@ export async function loadBrandDiscoverSections(
   const [forYouRows, newestRows, nearbyRows, featuredRows] = await Promise.all([
     catWhere
       ? prisma.brandProfile.findMany({
-          where: catWhere,
+          where: brandWhere(catWhere),
           select: brandCardSelect,
           take: 8,
           orderBy: { updatedAt: "desc" },
         })
       : Promise.resolve([]),
     prisma.brandProfile.findMany({
+      where: brandWhere(),
       select: brandCardSelect,
       take: 8,
       orderBy: { createdAt: "desc" },
     }),
     viewer.city?.trim()
       ? prisma.brandProfile.findMany({
-          where: { city: viewer.city.trim() },
+          where: brandWhere({ city: viewer.city.trim() }),
           select: brandCardSelect,
           take: 8,
           orderBy: { updatedAt: "desc" },
         })
       : Promise.resolve([]),
     prisma.brandProfile.findMany({
-      where: { profileImageUrl: { not: null } },
+      where: brandWhere({ profileImageUrl: { not: null } }),
       select: brandCardSelect,
       take: 8,
       orderBy: { updatedAt: "desc" },
@@ -173,27 +187,28 @@ export async function loadInfluencerDiscoverSections(
   const [forYouRows, newestRows, nearbyRows, featuredRows] = await Promise.all([
     catWhere
       ? prisma.influencerProfile.findMany({
-          where: catWhere,
+          where: influencerWhere(catWhere),
           select: influencerCardSelect,
           take: 8,
           orderBy: { followerCount: "desc" },
         })
       : Promise.resolve([]),
     prisma.influencerProfile.findMany({
+      where: influencerWhere(),
       select: influencerCardSelect,
       take: 8,
       orderBy: { createdAt: "desc" },
     }),
     viewer.city?.trim()
       ? prisma.influencerProfile.findMany({
-          where: { city: viewer.city.trim() },
+          where: influencerWhere({ city: viewer.city.trim() }),
           select: influencerCardSelect,
           take: 8,
           orderBy: { followerCount: "desc" },
         })
       : Promise.resolve([]),
     prisma.influencerProfile.findMany({
-      where: { profileImageUrl: { not: null } },
+      where: influencerWhere({ profileImageUrl: { not: null } }),
       select: influencerCardSelect,
       take: 8,
       orderBy: { updatedAt: "desc" },
@@ -263,23 +278,26 @@ export async function loadInfluencerDiscoverExplore(prisma: PrismaClient): Promi
   const [catGroups, cityGroups, suggestedRows, newestRows] = await Promise.all([
     prisma.influencerSelectedCategory.groupBy({
       by: ["categoryKey"],
+      where: { influencerProfile: influencerProfileRoleWhere },
       _count: { _all: true },
       orderBy: { _count: { categoryKey: "desc" } },
       take: 24,
     }),
     prisma.influencerProfile.groupBy({
       by: ["city"],
-      where: { city: { not: null } },
+      where: influencerWhere({ city: { not: null } }),
       _count: { _all: true },
       orderBy: { _count: { city: "desc" } },
       take: 16,
     }),
     prisma.influencerProfile.findMany({
+      where: influencerWhere(),
       select: influencerCardSelect,
       take: 12,
       orderBy: [{ followerCount: "desc" }, { updatedAt: "desc" }],
     }),
     prisma.influencerProfile.findMany({
+      where: influencerWhere(),
       select: influencerCardSelect,
       take: 20,
       orderBy: { createdAt: "desc" },
@@ -312,24 +330,26 @@ export async function loadBrandDiscoverExplore(prisma: PrismaClient): Promise<{
   const [catGroups, cityGroups, featuredRows, newestRows] = await Promise.all([
     prisma.brandSelectedCategory.groupBy({
       by: ["categoryKey"],
+      where: { brandProfile: brandProfileRoleWhere },
       _count: { _all: true },
       orderBy: { _count: { categoryKey: "desc" } },
       take: 24,
     }),
     prisma.brandProfile.groupBy({
       by: ["city"],
-      where: { city: { not: null } },
+      where: brandWhere({ city: { not: null } }),
       _count: { _all: true },
       orderBy: { _count: { city: "desc" } },
       take: 16,
     }),
     prisma.brandProfile.findMany({
-      where: { profileImageUrl: { not: null } },
+      where: brandWhere({ profileImageUrl: { not: null } }),
       select: brandCardSelect,
       take: 12,
       orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
     }),
     prisma.brandProfile.findMany({
+      where: brandWhere(),
       select: brandCardSelect,
       take: 20,
       orderBy: { createdAt: "desc" },

@@ -91,7 +91,10 @@ export default async function MarkaDiscoverPage({
       : Promise.resolve([]);
 
   const savedInfluencersPromise = prisma.brandSavedInfluencer.findMany({
-    where: { brandUserId: user.id },
+    where: {
+      brandUserId: user.id,
+      influencerUser: { role: "INFLUENCER", influencer: { isNot: null } },
+    },
     select: { influencerUserId: true },
   });
 

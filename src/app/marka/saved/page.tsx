@@ -34,7 +34,10 @@ export default async function MarkaSavedPage() {
 
   const rows = profile
     ? await prisma.brandSavedInfluencer.findMany({
-        where: { brandUserId: user.id },
+        where: {
+          brandUserId: user.id,
+          influencerUser: { role: "INFLUENCER", influencer: { isNot: null } },
+        },
         orderBy: { createdAt: "desc" },
         include: {
           influencerUser: {

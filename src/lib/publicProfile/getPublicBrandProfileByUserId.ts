@@ -12,8 +12,8 @@ import {
 export async function getPublicBrandProfileByUserId(
   userId: string,
 ): Promise<PublicBrandProfileResponse | null> {
-  const profile = await prisma.brandProfile.findUnique({
-    where: { userId },
+  const profile = await prisma.brandProfile.findFirst({
+    where: { userId, user: { role: "BRAND" } },
     select: {
       userId: true,
       username: true,
@@ -27,7 +27,7 @@ export async function getPublicBrandProfileByUserId(
     },
   });
 
-  if (!profile?.username || profile.user.role !== "BRAND") {
+  if (!profile?.username) {
     return null;
   }
 

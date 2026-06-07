@@ -76,7 +76,10 @@ export default async function InfluencerDiscoverPage({
       : Promise.resolve([]);
 
   const savedBrandsPromise = prisma.influencerSavedBrand.findMany({
-    where: { influencerUserId: user.id },
+    where: {
+      influencerUserId: user.id,
+      brandUser: { role: "BRAND", brand: { isNot: null } },
+    },
     select: { brandUserId: true },
   });
 

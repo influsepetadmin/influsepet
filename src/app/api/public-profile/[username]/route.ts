@@ -20,6 +20,7 @@ export async function GET(
   const profile = await prisma.influencerProfile.findFirst({
     where: {
       username: { equals: trimmed, mode: "insensitive" },
+      user: { role: "INFLUENCER" },
     },
     select: {
       userId: true,
@@ -35,7 +36,7 @@ export async function GET(
     },
   });
 
-  if (!profile || profile.user.role !== "INFLUENCER") {
+  if (!profile) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

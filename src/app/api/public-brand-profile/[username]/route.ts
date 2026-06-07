@@ -20,6 +20,7 @@ export async function GET(
   const profile = await prisma.brandProfile.findFirst({
     where: {
       username: { equals: trimmed, mode: "insensitive" },
+      user: { role: "BRAND" },
     },
     select: {
       userId: true,
@@ -34,7 +35,7 @@ export async function GET(
     },
   });
 
-  if (!profile?.username || profile.user.role !== "BRAND") {
+  if (!profile?.username) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

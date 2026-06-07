@@ -34,7 +34,10 @@ export default async function InfluencerSavedPage() {
   const basePriceTRY = profile?.basePriceTRY ?? 0;
 
   const rows = await prisma.influencerSavedBrand.findMany({
-    where: { influencerUserId: user.id },
+    where: {
+      influencerUserId: user.id,
+      brandUser: { role: "BRAND", brand: { isNot: null } },
+    },
     orderBy: { createdAt: "desc" },
     include: {
       brandUser: {

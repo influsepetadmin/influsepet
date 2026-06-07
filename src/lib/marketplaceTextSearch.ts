@@ -182,7 +182,7 @@ export function buildBrandMarketplaceWhere(args: {
   selectedCategoryKeys?: string[];
   textWhere: Prisma.BrandProfileWhereInput | null;
 }): Prisma.BrandProfileWhereInput {
-  const parts: Prisma.BrandProfileWhereInput[] = [];
+  const parts: Prisma.BrandProfileWhereInput[] = [{ user: { role: "BRAND" } }];
   if (args.city) parts.push({ city: args.city });
   const cats = args.selectedCategoryKeys?.filter(Boolean) ?? [];
   if (cats.length > 0) {
@@ -204,7 +204,7 @@ export function buildInfluencerMarketplaceWhere(args: {
   selectedCategoryKeys: string[];
   textWhere: Prisma.InfluencerProfileWhereInput | null;
 }): Prisma.InfluencerProfileWhereInput {
-  const parts: Prisma.InfluencerProfileWhereInput[] = [];
+  const parts: Prisma.InfluencerProfileWhereInput[] = [{ user: { role: "INFLUENCER" } }];
   if (args.city) parts.push({ city: args.city });
   if (args.selectedCategoryKeys.length > 0) {
     parts.push({
