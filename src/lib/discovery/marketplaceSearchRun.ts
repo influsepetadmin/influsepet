@@ -51,7 +51,7 @@ export type BrandSearchHit = Prisma.BrandProfileGetPayload<{ select: typeof bran
 };
 
 const LITERAL_FETCH = 220;
-const BROAD_FETCH = 320;
+const BROAD_FETCH = 800;
 /** Broad-pool rows must clear this fuzzy floor (typo layer). */
 const BROAD_MIN_FUZZY = 42;
 

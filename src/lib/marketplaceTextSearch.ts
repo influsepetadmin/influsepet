@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { matchCategoryKeysForSearch } from "@/lib/categories";
-import { foldTrAscii } from "@/lib/discovery/searchNormalize";
+import { compactFoldedSearchText, compactSearchText, foldTrAscii, normalizeSearchText } from "@/lib/discovery/searchNormalize";
 
 /** Trimmed user input (preserve casing for display; use in Prisma with insensitive mode). */
 export function parseMarketplaceSearchQuery(raw: string | undefined | null): string {
@@ -13,15 +13,15 @@ export type SearchTextVariants = { primary: string; secondary: string | null };
  * Non-empty trimmed query plus a whitespace-stripped variant for “zeynep bastık” vs “zeynepbastık”.
  */
 export function getSearchTextVariants(raw: string): SearchTextVariants | null {
-  const primary = raw.trim();
+  const primary = normalizeSearchText(raw);
   if (!primary) return null;
-  const compact = primary.replace(/\s+/g, "");
+  const compact = compactSearchText(primary);
   return { primary, secondary: compact === primary ? null : compact };
 }
 
 /** Turkish-normalized whitespace terms for multi-word AND matching. */
 export function splitSearchTerms(raw: string): string[] {
-  const n = raw.trim().toLocaleLowerCase("tr-TR").replace(/\s+/g, " ");
+  const n = normalizeSearchText(raw);
   return n.split(" ").filter(Boolean);
 }
 
@@ -37,7 +37,8 @@ export function collectSearchContainsVariants(term: string): string[] {
     if (x) out.add(x);
   };
   add(t);
-  add(t.replace(/\s+/g, ""));
+  add(normalizeSearchText(t));
+  add(compactSearchText(t));
   const v = getSearchTextVariants(t);
   if (v) {
     add(v.primary);
@@ -45,7 +46,7 @@ export function collectSearchContainsVariants(term: string): string[] {
   }
   const folded = foldTrAscii(t);
   add(folded);
-  add(folded.replace(/\s+/g, ""));
+  add(compactFoldedSearchText(t));
   return [...out];
 }
 

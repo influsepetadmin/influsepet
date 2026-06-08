@@ -6,10 +6,11 @@ export function normalizeSearchText(s: string): string {
   return s
     .trim()
     .toLocaleLowerCase("tr-TR")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
     .replace(/\s+/g, " ");
 }
 
-/** Remove spaces for “zeynepbastık” vs “zeynep bastık” style matching. */
+/** Remove separators for “zeynepbastık” vs “zeynep bastık” / “zeynep_bastik” style matching. */
 export function compactSearchText(s: string): string {
   return normalizeSearchText(s).replace(/\s+/g, "");
 }
@@ -36,6 +37,6 @@ export function compactFoldedSearchText(s: string): string {
 export function tokenizeSearchQuery(raw: string, minLen = 2): string[] {
   const n = normalizeSearchText(raw);
   if (!n) return [];
-  const parts = n.split(/[\s,.;:/\\|]+/).filter((t) => t.length >= minLen);
+  const parts = n.split(/\s+/).filter((t) => t.length >= minLen);
   return [...new Set(parts)];
 }
