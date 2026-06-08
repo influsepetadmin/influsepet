@@ -66,16 +66,18 @@ export function DiscoverExploreInfluencers({
   data: {
     popularCategories: ExploreCategoryCount[];
     trendingCities: ExploreCityCount[];
+    verified: DiscoverInfluencerSectionRow[];
     suggested: DiscoverInfluencerSectionRow[];
     newest: DiscoverInfluencerSectionRow[];
   };
   hrefBase: string;
   savedInfluencerUserIds: Set<string>;
 }) {
-  const { popularCategories, trendingCities, suggested, newest } = data;
+  const { popularCategories, trendingCities, verified, suggested, newest } = data;
   const hasAny =
     popularCategories.length > 0 ||
     trendingCities.length > 0 ||
+    verified.length > 0 ||
     suggested.length > 0 ||
     newest.length > 0;
   if (!hasAny) return null;
@@ -135,6 +137,45 @@ export function DiscoverExploreInfluencers({
         </ExploreBlock>
       ) : null}
 
+      {verified.length > 0 ? (
+        <ExploreBlock
+          labelledBy="explore-inf-verified"
+          title="Doğrulanmış içerik üreticileri"
+          subtitle="Sosyal hesabı doğrulanmış profiller."
+        >
+          <ExploreRail>
+            {verified.map((p) => {
+              const categories = p.selectedCategories.map((c) => getCategoryLabel(c.categoryKey)).join(", ");
+              const defaultAmt =
+                p.basePriceTRY > 0 ? Math.max(100, Math.ceil(p.basePriceTRY / 100) * 100) : 100;
+              return (
+                <MarketplaceInfluencerOfferCard
+                  key={p.id}
+                  exploreRail
+                  formIdKey={`explore-ver-${p.id}`}
+                  influencerUserId={p.userId}
+                  username={p.username}
+                  city={p.city}
+                  profileImageUrl={p.profileImageUrl}
+                  categoriesLine={categories}
+                  whyLine="Doğrulanmış sosyal hesap."
+                  followerCount={p.followerCount}
+                  basePriceTRY={p.basePriceTRY}
+                  nicheText={p.nicheText}
+                  nicheTruncateLen={56}
+                  initialSaved={savedInfluencerUserIds.has(p.userId)}
+                  defaultOfferAmountTRY={defaultAmt}
+                  cardClassName="influencer-result-card influencer-result-card--hub influencer-result-card--explore-rail"
+                  profileLinkLabel="Profil"
+                  submitButtonLabel="İş birliği isteği gönder"
+                  briefRows={2}
+                />
+              );
+            })}
+          </ExploreRail>
+        </ExploreBlock>
+      ) : null}
+
       {suggested.length > 0 ? (
         <ExploreBlock
           labelledBy="explore-inf-suggested"
@@ -177,8 +218,8 @@ export function DiscoverExploreInfluencers({
       {newest.length > 0 ? (
         <ExploreBlock
           labelledBy="explore-inf-newest"
-          title="Yeni profiller"
-          subtitle="Yakın zamanda oluşturulan kayıtlar (önerilerle çakışanlar hariç)."
+          title="Yeni katılan içerik üreticileri"
+          subtitle="Yakın zamanda oluşturulan kayıtlar."
         >
           <ExploreRail>
             {newest.map((p) => {
@@ -225,6 +266,7 @@ export function DiscoverExploreBrands({
   data: {
     popularSectors: ExploreCategoryCount[];
     activeCities: ExploreCityCount[];
+    verified: DiscoverBrandSectionRow[];
     featured: DiscoverBrandSectionRow[];
     newest: DiscoverBrandSectionRow[];
   };
@@ -232,14 +274,18 @@ export function DiscoverExploreBrands({
   savedBrandUserIds: Set<string>;
   influencerBasePriceTRY: number;
 }) {
-  const { popularSectors, activeCities, featured, newest } = data;
+  const { popularSectors, activeCities, verified, featured, newest } = data;
   const defaultAmt =
     influencerBasePriceTRY > 0
       ? Math.max(100, Math.ceil(influencerBasePriceTRY / 100) * 100)
       : 100;
 
   const hasAny =
-    popularSectors.length > 0 || activeCities.length > 0 || featured.length > 0 || newest.length > 0;
+    popularSectors.length > 0 ||
+    activeCities.length > 0 ||
+    verified.length > 0 ||
+    featured.length > 0 ||
+    newest.length > 0;
   if (!hasAny) return null;
 
   return (
@@ -294,6 +340,39 @@ export function DiscoverExploreBrands({
               </ExploreFilterLink>
             ))}
           </ExplorePills>
+        </ExploreBlock>
+      ) : null}
+
+      {verified.length > 0 ? (
+        <ExploreBlock
+          labelledBy="explore-br-verified"
+          title="Doğrulanmış markalar"
+          subtitle="Sosyal hesabı doğrulanmış marka profilleri."
+        >
+          <ExploreRail>
+            {verified.map((b) => {
+              const cats = b.selectedCategories.map((c) => getCategoryLabel(c.categoryKey)).join(", ");
+              return (
+                <MarketplaceBrandOfferCard
+                  key={b.id}
+                  exploreRail
+                  formIdKey={`explore-ver-br-${b.id}`}
+                  brandUserId={b.userId}
+                  companyName={b.companyName}
+                  city={b.city}
+                  profileImageUrl={b.profileImageUrl}
+                  categoriesLine={cats}
+                  whyLine="Doğrulanmış sosyal hesap."
+                  initialSaved={savedBrandUserIds.has(b.userId)}
+                  defaultOfferAmountTRY={defaultAmt}
+                  cardClassName="brand-result-card brand-result-card--hub brand-result-card--explore-rail"
+                  profileLinkLabel="Profil"
+                  submitButtonLabel="Markaya iş birliği isteği gönder"
+                  briefRows={2}
+                />
+              );
+            })}
+          </ExploreRail>
         </ExploreBlock>
       ) : null}
 

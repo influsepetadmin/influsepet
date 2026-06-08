@@ -108,7 +108,7 @@ export default async function MarkaDiscoverPage({
   const savedInfluencerCount = savedInfluencerUserIds.size;
   const suggestedDefaultInfluencers =
     !hasActiveSearch && exploreData
-      ? [...exploreData.suggested, ...exploreData.newest]
+      ? [...exploreData.verified, ...exploreData.suggested, ...exploreData.newest]
           .filter((row, idx, arr) => arr.findIndex((x) => x.id === row.id) === idx)
           .slice(0, 10)
       : [];

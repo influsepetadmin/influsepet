@@ -14,6 +14,24 @@ function influencerWhere(where?: Prisma.InfluencerProfileWhereInput | null): Pri
   return where ? { AND: [influencerProfileRoleWhere, where] } : influencerProfileRoleWhere;
 }
 
+function verifiedBrandWhere(): Prisma.BrandProfileWhereInput {
+  return {
+    user: {
+      role: "BRAND",
+      socialAccounts: { some: { isVerified: true, verificationStatus: "VERIFIED" } },
+    },
+  };
+}
+
+function verifiedInfluencerWhere(): Prisma.InfluencerProfileWhereInput {
+  return {
+    user: {
+      role: "INFLUENCER",
+      socialAccounts: { some: { isVerified: true, verificationStatus: "VERIFIED" } },
+    },
+  };
+}
+
 const brandCardSelect = {
   id: true,
   userId: true,
@@ -272,10 +290,11 @@ export type ExploreCityCount = { city: string; count: number };
 export async function loadInfluencerDiscoverExplore(prisma: PrismaClient): Promise<{
   popularCategories: ExploreCategoryCount[];
   trendingCities: ExploreCityCount[];
+  verified: DiscoverInfluencerSectionRow[];
   suggested: DiscoverInfluencerSectionRow[];
   newest: DiscoverInfluencerSectionRow[];
 }> {
-  const [catGroups, cityGroups, suggestedRows, newestRows] = await Promise.all([
+  const [catGroups, cityGroups, verifiedRows, suggestedRows, newestRows] = await Promise.all([
     prisma.influencerSelectedCategory.groupBy({
       by: ["categoryKey"],
       where: { influencerProfile: influencerProfileRoleWhere },
@@ -289,6 +308,12 @@ export async function loadInfluencerDiscoverExplore(prisma: PrismaClient): Promi
       _count: { _all: true },
       orderBy: { _count: { city: "desc" } },
       take: 16,
+    }),
+    prisma.influencerProfile.findMany({
+      where: verifiedInfluencerWhere(),
+      select: influencerCardSelect,
+      take: 12,
+      orderBy: [{ updatedAt: "desc" }, { followerCount: "desc" }],
     }),
     prisma.influencerProfile.findMany({
       where: influencerWhere(),
@@ -314,20 +339,25 @@ export async function loadInfluencerDiscoverExplore(prisma: PrismaClient): Promi
     .slice(0, 12)
     .map((g) => ({ city: String(g.city).trim(), count: g._count._all }));
 
-  const suggested = suggestedRows as DiscoverInfluencerSectionRow[];
-  const sugIds = new Set(suggested.map((s) => s.id));
-  const newest = (newestRows as DiscoverInfluencerSectionRow[]).filter((r) => !sugIds.has(r.id)).slice(0, 12);
+  const verified = verifiedRows as DiscoverInfluencerSectionRow[];
+  const verifiedIds = new Set(verified.map((s) => s.id));
+  const suggested = (suggestedRows as DiscoverInfluencerSectionRow[])
+    .filter((r) => !verifiedIds.has(r.id))
+    .slice(0, 12);
+  const usedIds = new Set([...verifiedIds, ...suggested.map((s) => s.id)]);
+  const newest = (newestRows as DiscoverInfluencerSectionRow[]).filter((r) => !usedIds.has(r.id)).slice(0, 12);
 
-  return { popularCategories, trendingCities, suggested, newest };
+  return { popularCategories, trendingCities, verified, suggested, newest };
 }
 
 export async function loadBrandDiscoverExplore(prisma: PrismaClient): Promise<{
   popularSectors: ExploreCategoryCount[];
   activeCities: ExploreCityCount[];
+  verified: DiscoverBrandSectionRow[];
   featured: DiscoverBrandSectionRow[];
   newest: DiscoverBrandSectionRow[];
 }> {
-  const [catGroups, cityGroups, featuredRows, newestRows] = await Promise.all([
+  const [catGroups, cityGroups, verifiedRows, featuredRows, newestRows] = await Promise.all([
     prisma.brandSelectedCategory.groupBy({
       by: ["categoryKey"],
       where: { brandProfile: brandProfileRoleWhere },
@@ -341,6 +371,12 @@ export async function loadBrandDiscoverExplore(prisma: PrismaClient): Promise<{
       _count: { _all: true },
       orderBy: { _count: { city: "desc" } },
       take: 16,
+    }),
+    prisma.brandProfile.findMany({
+      where: verifiedBrandWhere(),
+      select: brandCardSelect,
+      take: 12,
+      orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
     }),
     prisma.brandProfile.findMany({
       where: brandWhere({ profileImageUrl: { not: null } }),
@@ -366,9 +402,13 @@ export async function loadBrandDiscoverExplore(prisma: PrismaClient): Promise<{
     .slice(0, 12)
     .map((g) => ({ city: String(g.city).trim(), count: g._count._all }));
 
-  const featured = featuredRows as DiscoverBrandSectionRow[];
-  const featIds = new Set(featured.map((b) => b.id));
-  const newest = (newestRows as DiscoverBrandSectionRow[]).filter((b) => !featIds.has(b.id)).slice(0, 12);
+  const verified = verifiedRows as DiscoverBrandSectionRow[];
+  const verifiedIds = new Set(verified.map((b) => b.id));
+  const featured = (featuredRows as DiscoverBrandSectionRow[])
+    .filter((b) => !verifiedIds.has(b.id))
+    .slice(0, 12);
+  const usedIds = new Set([...verifiedIds, ...featured.map((b) => b.id)]);
+  const newest = (newestRows as DiscoverBrandSectionRow[]).filter((b) => !usedIds.has(b.id)).slice(0, 12);
 
-  return { popularSectors, activeCities, featured, newest };
+  return { popularSectors, activeCities, verified, featured, newest };
 }
