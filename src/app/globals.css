@@ -5868,6 +5868,27 @@ main:has(.dashboard-page) {
   padding-right: 8px;
 }
 
+.dashboard-page .discovery-search-query--pending {
+  border-color: rgba(99, 102, 241, 0.78);
+  box-shadow:
+    0 0 0 4px rgba(129, 140, 248, 0.14),
+    0 10px 28px rgba(79, 70, 229, 0.12);
+}
+
+.dashboard-page .discovery-search-query--pending .discovery-search-query__icon {
+  animation: discovery-search-pulse 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes discovery-search-pulse {
+  from {
+    opacity: 0.55;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .dashboard-page .discovery-search-query__clear {
   flex-shrink: 0;
   display: inline-flex;
