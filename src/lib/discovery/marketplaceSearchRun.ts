@@ -22,7 +22,16 @@ const influencerSearchSelect = {
   nicheText: true,
   bio: true,
   selectedCategories: { select: { categoryKey: true } },
-  user: { select: { name: true } },
+  user: {
+    select: {
+      name: true,
+      socialAccounts: {
+        where: { isVerified: true, verificationStatus: "VERIFIED" },
+        select: { id: true },
+        take: 1,
+      },
+    },
+  },
 } as const;
 
 const brandSearchSelect = {
@@ -35,7 +44,16 @@ const brandSearchSelect = {
   bio: true,
   website: true,
   selectedCategories: { select: { categoryKey: true } },
-  user: { select: { name: true } },
+  user: {
+    select: {
+      name: true,
+      socialAccounts: {
+        where: { isVerified: true, verificationStatus: "VERIFIED" },
+        select: { id: true },
+        take: 1,
+      },
+    },
+  },
 } as const;
 
 export type InfluencerSearchHit = Prisma.InfluencerProfileGetPayload<{ select: typeof influencerSearchSelect }> & {

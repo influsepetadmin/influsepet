@@ -208,6 +208,7 @@ export function DiscoverExploreInfluencers({
                   profileLinkLabel="Profil"
                   submitButtonLabel="İş birliği isteği gönder"
                   briefRows={2}
+                  isVerifiedSocial
                 />
               );
             })}
@@ -369,6 +370,7 @@ export function DiscoverExploreBrands({
                   profileLinkLabel="Profil"
                   submitButtonLabel="Markaya iş birliği isteği gönder"
                   briefRows={2}
+                  isVerifiedSocial
                 />
               );
             })}

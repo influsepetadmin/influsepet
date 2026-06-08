@@ -258,6 +258,7 @@ export default async function InfluencerDiscoverPage({
                       profileLinkLabel="Profili incele"
                       submitButtonLabel="Markaya iş birliği isteği gönder"
                       briefRows={3}
+                      isVerifiedSocial={b.user.socialAccounts.length > 0}
                     />
                   );
                 })}

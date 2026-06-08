@@ -276,6 +276,7 @@ export default async function MarkaDiscoverPage({
                       profileLinkLabel="Profili incele"
                       submitButtonLabel="İş birliği isteği gönder"
                       briefRows={3}
+                      isVerifiedSocial={p.user.socialAccounts.length > 0}
                     />
                   );
                 })}

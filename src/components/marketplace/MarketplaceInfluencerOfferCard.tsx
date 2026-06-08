@@ -29,6 +29,7 @@ export type MarketplaceInfluencerOfferCardProps = {
   briefRows: 2 | 3;
   /** Compact rail: hide offer form (e.g. Discover Explore rows). */
   exploreRail?: boolean;
+  isVerifiedSocial?: boolean;
 };
 
 export function MarketplaceInfluencerOfferCard({
@@ -50,6 +51,7 @@ export function MarketplaceInfluencerOfferCard({
   submitButtonLabel,
   briefRows,
   exploreRail = false,
+  isVerifiedSocial = false,
 }: MarketplaceInfluencerOfferCardProps) {
   const nicheTrimmed = nicheText?.trim() ?? "";
   const [offerFormOpen, setOfferFormOpen] = useState(false);
@@ -85,7 +87,10 @@ export function MarketplaceInfluencerOfferCard({
           alt=""
         />
         <div className="influencer-result-card__identity">
-          <p className="influencer-result-card__name">{username}</p>
+          <div className="marketplace-profile-card__name-row">
+            <p className="influencer-result-card__name">{username}</p>
+            {isVerifiedSocial ? <span className="marketplace-profile-card__verified">Doğrulandı</span> : null}
+          </div>
           <p className="muted influencer-result-card__city">{city ?? "—"}</p>
           <p className="muted influencer-result-card__meta">{categoriesLine || "—"}</p>
           <p className="muted influencer-result-card__why">{whyLine}</p>

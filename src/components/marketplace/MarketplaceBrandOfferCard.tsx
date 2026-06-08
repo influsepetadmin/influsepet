@@ -24,6 +24,7 @@ export type MarketplaceBrandOfferCardProps = {
   submitButtonLabel: string;
   briefRows: 2 | 3;
   exploreRail?: boolean;
+  isVerifiedSocial?: boolean;
 };
 
 export function MarketplaceBrandOfferCard({
@@ -41,6 +42,7 @@ export function MarketplaceBrandOfferCard({
   submitButtonLabel,
   briefRows,
   exploreRail = false,
+  isVerifiedSocial = false,
 }: MarketplaceBrandOfferCardProps) {
   const [offerFormOpen, setOfferFormOpen] = useState(false);
   const router = useRouter();
@@ -75,7 +77,10 @@ export function MarketplaceBrandOfferCard({
           alt=""
         />
         <div className="brand-result-card__identity">
-          <p className="brand-result-card__name">{companyName}</p>
+          <div className="marketplace-profile-card__name-row">
+            <p className="brand-result-card__name">{companyName}</p>
+            {isVerifiedSocial ? <span className="marketplace-profile-card__verified">Doğrulandı</span> : null}
+          </div>
           <p className="muted brand-result-card__city">{city ?? "—"}</p>
           {categoriesLine ? (
             <p className="muted brand-result-card__cats brand-result-card__meta-line">{categoriesLine}</p>
