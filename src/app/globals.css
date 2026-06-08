@@ -9486,6 +9486,34 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
   }
 }
 
+.public-profile-hero__badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+@media (min-width: 900px) {
+  .public-profile-hero--influencer .public-profile-hero__identity {
+    position: relative;
+  }
+
+  .public-profile-hero--influencer .public-profile-hero__identity-text {
+    padding-right: 210px;
+  }
+
+  .public-profile-hero--influencer .public-profile-hero__badge-row {
+    position: absolute;
+    top: 10px;
+    right: 22px;
+    justify-content: flex-end;
+    max-width: 190px;
+    margin: 0;
+  }
+}
+
 .public-profile-hero__name {
   margin: 0;
   font-size: clamp(1.35rem, 4vw, 1.55rem);

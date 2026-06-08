@@ -54,6 +54,8 @@ export function PublicProfileHeader({
         <div className="public-profile-hero__identity-text">
           <div className="public-profile-hero__title-row">
             <h1 className="public-profile-hero__name">{data.name}</h1>
+          </div>
+          <div className="public-profile-hero__badge-row" aria-label="Profil rozetleri">
             <span className="public-profile-role-badge">Influencer</span>
             {socialVerifiedCount > 0 ? (
               <span className="public-profile-hero__verified-badge">
