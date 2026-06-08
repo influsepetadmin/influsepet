@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
-import { getAvatarUrl } from "@/lib/avatar";
+import { getProfileImageOrAvatarUrl } from "@/lib/avatar";
 import { prisma } from "@/lib/prisma";
 import { getAvailableOfferTransitions, type OfferForTransition } from "@/lib/offers/transitions";
 import { getSessionPayload } from "@/lib/session";
@@ -130,7 +130,11 @@ export default async function ChatConversationPage({
   const rawImg = isBrandViewer
     ? o.influencer?.influencer?.profileImageUrl?.trim()
     : o.brand?.brand?.profileImageUrl?.trim();
-  const otherSideAvatarSrc = rawImg || getAvatarUrl(otherUserId);
+  const otherSideAvatarSrc = getProfileImageOrAvatarUrl(
+    rawImg,
+    otherUserId,
+    isBrandViewer ? "person" : "brand",
+  );
 
   let otherSideHandleLine: string | null = null;
   if (isBrandViewer) {

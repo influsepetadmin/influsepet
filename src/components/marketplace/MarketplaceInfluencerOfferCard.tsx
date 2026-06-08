@@ -3,7 +3,7 @@
 import { useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { trackFirstTimeOnce, trackProductEvent } from "@/lib/productTracking/productEvents";
-import { getAvatarUrl } from "@/lib/avatar";
+import { getProfileImageOrAvatarUrl } from "@/lib/avatar";
 import { truncateText } from "@/lib/dashboardProfileCompletion";
 import { DiscoverProfileFromDiscoverLink } from "@/components/marketplace/DiscoverProfileFromDiscoverLink";
 import { DiscoverySaveButton } from "./DiscoverySaveButton";
@@ -81,7 +81,7 @@ export function MarketplaceInfluencerOfferCard({
       <div className="influencer-result-card__head influencer-result-card__head--hub">
         <img
           className="influencer-result-card__avatar"
-          src={profileImageUrl ?? getAvatarUrl(influencerUserId)}
+          src={getProfileImageOrAvatarUrl(profileImageUrl, influencerUserId)}
           alt=""
         />
         <div className="influencer-result-card__identity">

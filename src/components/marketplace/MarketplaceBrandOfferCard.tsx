@@ -3,7 +3,7 @@
 import { useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { trackFirstTimeOnce, trackProductEvent } from "@/lib/productTracking/productEvents";
-import { getAvatarUrl } from "@/lib/avatar";
+import { getProfileImageOrAvatarUrl } from "@/lib/avatar";
 import { DiscoverProfileFromDiscoverLink } from "@/components/marketplace/DiscoverProfileFromDiscoverLink";
 import { DiscoverySaveButton } from "./DiscoverySaveButton";
 import { TrackedOfferCreateForm } from "@/components/marketplace/TrackedOfferCreateForm";
@@ -71,7 +71,7 @@ export function MarketplaceBrandOfferCard({
       <div className="brand-result-card__head brand-result-card__head--hub">
         <img
           className="brand-result-card__avatar"
-          src={profileImageUrl ?? getAvatarUrl(brandUserId)}
+          src={getProfileImageOrAvatarUrl(profileImageUrl, brandUserId, "brand")}
           alt=""
         />
         <div className="brand-result-card__identity">

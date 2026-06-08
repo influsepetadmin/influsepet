@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import type { PublicProfileByUsernameResponse } from "@/lib/publicProfile/publicProfileByUsername";
-import { getAvatarUrl } from "@/lib/avatar";
+import { getProfileImageOrAvatarUrl } from "@/lib/avatar";
 import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
 import { SocialVerificationBadge } from "@/components/social/SocialVerificationBadge";
 import { PublicCollaborationRequestCta } from "./PublicCollaborationRequestCta";
@@ -39,7 +39,7 @@ export function PublicProfileHeader({
   canSendCollaborationRequest?: boolean;
   cameFromDiscover?: boolean;
 }) {
-  const avatarSrc = data.avatarUrl?.trim() || getAvatarUrl(data.id);
+  const avatarSrc = getProfileImageOrAvatarUrl(data.avatarUrl, data.id);
   const socialVerifiedCount = data.verifiedSocialAccounts.length;
   const categoryLine = categoryLeadLine(data);
 

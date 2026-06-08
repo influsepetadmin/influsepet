@@ -1,5 +1,5 @@
 import { DashboardShell } from "@/components/app-shell/DashboardShell";
-import { getAvatarUrl } from "@/lib/avatar";
+import { getProfileImageOrAvatarUrl } from "@/lib/avatar";
 import { getCurrentUser } from "@/lib/me";
 
 /**
@@ -15,8 +15,8 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   const panel = user.role === "BRAND" ? "marka" : "influencer";
   const userAvatarSrc =
     user.role === "BRAND"
-      ? user.brand?.profileImageUrl?.trim() || getAvatarUrl(user.id)
-      : user.influencer?.profileImageUrl?.trim() || getAvatarUrl(user.id);
+      ? getProfileImageOrAvatarUrl(user.brand?.profileImageUrl, user.id, "brand")
+      : getProfileImageOrAvatarUrl(user.influencer?.profileImageUrl, user.id);
 
   return (
     <DashboardShell

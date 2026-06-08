@@ -4,7 +4,7 @@ import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import { BrandProfilePanel } from "@/components/dashboard/BrandProfilePanel";
 import { SocialAccountsSection } from "@/components/social/SocialAccountsSection";
 import { SocialVerificationBadge } from "@/components/social/SocialVerificationBadge";
-import { getAvatarUrl } from "@/lib/avatar";
+import { getProfileImageOrAvatarUrl } from "@/lib/avatar";
 import { getCategoryLabel } from "@/lib/categories";
 import { isBrandDashboardProfileComplete } from "@/lib/dashboardProfileCompletion";
 import { getMarkaPanelAccess } from "@/lib/marka/panelAccess";
@@ -127,7 +127,7 @@ export default async function MarkaProfilePage({
               }}
               isExistingProfile={Boolean(profile)}
               summary={{
-                imageSrc: profile?.profileImageUrl ?? getAvatarUrl(user.id),
+                imageSrc: getProfileImageOrAvatarUrl(profile?.profileImageUrl, user.id, "brand"),
                 companyName: profile?.companyName ?? "",
                 city: profile?.city ?? "",
                 websiteUrl: profile?.website?.trim() || null,
@@ -152,7 +152,7 @@ export default async function MarkaProfilePage({
               >
                 <img
                   className="profile-preview-cta__avatar"
-                  src={profile.profileImageUrl ?? getAvatarUrl(user.id)}
+                  src={getProfileImageOrAvatarUrl(profile.profileImageUrl, user.id, "brand")}
                   alt=""
                 />
                 <div className="profile-preview-cta__text">

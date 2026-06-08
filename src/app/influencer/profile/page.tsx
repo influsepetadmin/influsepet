@@ -5,7 +5,7 @@ import { InfluencerProfilePanel } from "@/components/dashboard/InfluencerProfile
 import InfluencerPortfolioManager from "@/components/InfluencerPortfolioManager";
 import { SocialAccountsSection } from "@/components/social/SocialAccountsSection";
 import { SocialVerificationBadge } from "@/components/social/SocialVerificationBadge";
-import { getAvatarUrl } from "@/lib/avatar";
+import { getProfileImageOrAvatarUrl } from "@/lib/avatar";
 import { getCategoryLabel, normalizeCategoryKeysForForm } from "@/lib/categories";
 import { isInfluencerDashboardProfileComplete, truncateText } from "@/lib/dashboardProfileCompletion";
 import { getInfluencerPanelAccess } from "@/lib/influencer/panelAccess";
@@ -152,7 +152,7 @@ export default async function InfluencerProfilePage({
               }}
               isExistingProfile={Boolean(profile)}
               summary={{
-                imageSrc: profile?.profileImageUrl ?? getAvatarUrl(user.id),
+                imageSrc: getProfileImageOrAvatarUrl(profile?.profileImageUrl, user.id),
                 username: profile?.username ?? "",
                 city: profile?.city ?? "",
                 followerCount: profile?.followerCount ?? 0,
@@ -176,7 +176,7 @@ export default async function InfluencerProfilePage({
               <Link className="profile-preview-cta__card" href={`/u/${encodeURIComponent(profile.username)}`}>
                 <img
                   className="profile-preview-cta__avatar"
-                  src={profile.profileImageUrl ?? getAvatarUrl(user.id)}
+                  src={getProfileImageOrAvatarUrl(profile.profileImageUrl, user.id)}
                   alt=""
                 />
                 <div className="profile-preview-cta__text">

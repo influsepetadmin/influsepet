@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import type { PublicBrandProfileResponse } from "@/lib/publicProfile/publicBrandProfileByUsername";
-import { getAvatarUrl } from "@/lib/avatar";
+import { getProfileImageOrAvatarUrl } from "@/lib/avatar";
 import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
 import { SocialVerificationBadge } from "@/components/social/SocialVerificationBadge";
 import {
@@ -46,7 +46,7 @@ export function PublicBrandProfileHeader({
   viewerRole?: "INFLUENCER" | "BRAND" | null;
   cameFromDiscover?: boolean;
 }) {
-  const avatarSrc = data.avatarUrl?.trim() || getAvatarUrl(data.id);
+  const avatarSrc = getProfileImageOrAvatarUrl(data.avatarUrl, data.id, "brand");
   const socialVerifiedCount = data.verifiedSocialAccounts.length;
   const webHref = data.website ? safeWebsiteHref(data.website) : null;
   const sectorLine = sectorLeadLine(data);

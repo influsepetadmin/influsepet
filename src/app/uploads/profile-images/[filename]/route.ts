@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import { basename, join } from "path";
 import { NextResponse } from "next/server";
-import { STOCK_AVATAR_FILES } from "@/lib/avatar";
+import { getAvatarPlaceholderSvg } from "@/lib/avatar";
 import { PROFILE_UPLOAD_DIR_SEGMENTS } from "@/lib/uploads/profileImageUpload";
 
 function mimeFromFilename(filename: string): string {
@@ -10,12 +10,6 @@ function mimeFromFilename(filename: string): string {
   if (lower.endsWith(".png")) return "image/png";
   if (lower.endsWith(".webp")) return "image/webp";
   return "application/octet-stream";
-}
-
-function fallbackStockAvatarFilename(filename: string): string {
-  let sum = 0;
-  for (let i = 0; i < filename.length; i++) sum += filename.charCodeAt(i);
-  return STOCK_AVATAR_FILES[sum % STOCK_AVATAR_FILES.length] ?? STOCK_AVATAR_FILES[0];
 }
 
 async function readProfileImageFile(filename: string): Promise<Buffer> {
@@ -47,13 +41,11 @@ export async function GET(
       },
     });
   } catch {
-    // Local uploads are not durable on Railway redeploys. Serve a stable stock
-    // avatar so old DB URLs fail cleanly until uploads move to R2/S3 storage.
-    const fallbackFilename = fallbackStockAvatarFilename(filename);
-    const fallbackFile = await readProfileImageFile(fallbackFilename);
-    return new NextResponse(imageResponseBody(fallbackFile), {
+    // Local uploads are not durable on Railway redeploys. Missing files must
+    // fall back to a neutral generated placeholder, never another user's upload.
+    return new NextResponse(getAvatarPlaceholderSvg(), {
       headers: {
-        "Content-Type": mimeFromFilename(fallbackFilename),
+        "Content-Type": "image/svg+xml; charset=utf-8",
         "Cache-Control": "public, max-age=300",
         "X-InfluSepet-Upload-Fallback": "profile-image-missing",
       },
