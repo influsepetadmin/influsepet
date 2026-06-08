@@ -215,28 +215,11 @@ export default async function InfluencerDiscoverPage({
         </section>
       ) : null}
 
-      {profile ? (
+      {profile && hasBrandSearch ? (
         <section className="dash-card dash-card--section discover-results-card">
           <div className="discovery-search-results">
             <h3 className="discovery-search-results__title">Sonuçlar</h3>
-            {!hasBrandSearch ? (
-              <EmptyStateCard
-                icon={<EmptyGlyphBuildingOffice />}
-                hint="Sonraki adım"
-                title="Aramayı başlatın veya filtre seçin"
-                description="Önerilen markalara bakın veya birkaç kelimeyle arayın."
-              >
-                {showExploreRail && exploreData ? (
-                  <a className="btn" href="#influencer-discover-oneriler">
-                    Önerilenlere göz at
-                  </a>
-                ) : (
-                  <a className="btn" href="#influencer-marka-ara">
-                    Arama formuna git
-                  </a>
-                )}
-              </EmptyStateCard>
-            ) : brandResults.length === 0 ? (
+            {brandResults.length === 0 ? (
               <EmptyStateCard
                 icon={<EmptyGlyphMapPin />}
                 hint="Kriterleri gevşetin"
@@ -282,7 +265,9 @@ export default async function InfluencerDiscoverPage({
             )}
           </div>
         </section>
-      ) : (
+      ) : null}
+
+      {!profile ? (
         <section className="dash-card dash-card--section">
           <EmptyStateCard
             icon={<EmptyGlyphBuildingOffice />}
@@ -295,7 +280,7 @@ export default async function InfluencerDiscoverPage({
             </Link>
           </EmptyStateCard>
         </section>
-      )}
+      ) : null}
 
       <section className="dash-card dash-card--section">
         <h2 className="dash-section__title">Kayıtlı markalar</h2>

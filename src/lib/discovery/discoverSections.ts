@@ -286,6 +286,8 @@ const allowedCategoryKeySet = new Set<string>(CATEGORY_KEYS);
 export type ExploreCategoryCount = { key: string; count: number };
 export type ExploreCityCount = { city: string; count: number };
 
+const EXPLORE_PROFILE_SECTION_LIMIT = 6;
+
 /** Lightweight aggregates + profile rows for Discover “Explore” (no text query). */
 export async function loadInfluencerDiscoverExplore(prisma: PrismaClient): Promise<{
   popularCategories: ExploreCategoryCount[];
@@ -339,13 +341,15 @@ export async function loadInfluencerDiscoverExplore(prisma: PrismaClient): Promi
     .slice(0, 12)
     .map((g) => ({ city: String(g.city).trim(), count: g._count._all }));
 
-  const verified = verifiedRows as DiscoverInfluencerSectionRow[];
+  const verified = (verifiedRows as DiscoverInfluencerSectionRow[]).slice(0, EXPLORE_PROFILE_SECTION_LIMIT);
   const verifiedIds = new Set(verified.map((s) => s.id));
   const suggested = (suggestedRows as DiscoverInfluencerSectionRow[])
     .filter((r) => !verifiedIds.has(r.id))
-    .slice(0, 12);
+    .slice(0, EXPLORE_PROFILE_SECTION_LIMIT);
   const usedIds = new Set([...verifiedIds, ...suggested.map((s) => s.id)]);
-  const newest = (newestRows as DiscoverInfluencerSectionRow[]).filter((r) => !usedIds.has(r.id)).slice(0, 12);
+  const newest = (newestRows as DiscoverInfluencerSectionRow[])
+    .filter((r) => !usedIds.has(r.id))
+    .slice(0, EXPLORE_PROFILE_SECTION_LIMIT);
 
   return { popularCategories, trendingCities, verified, suggested, newest };
 }
@@ -402,13 +406,15 @@ export async function loadBrandDiscoverExplore(prisma: PrismaClient): Promise<{
     .slice(0, 12)
     .map((g) => ({ city: String(g.city).trim(), count: g._count._all }));
 
-  const verified = verifiedRows as DiscoverBrandSectionRow[];
+  const verified = (verifiedRows as DiscoverBrandSectionRow[]).slice(0, EXPLORE_PROFILE_SECTION_LIMIT);
   const verifiedIds = new Set(verified.map((b) => b.id));
   const featured = (featuredRows as DiscoverBrandSectionRow[])
     .filter((b) => !verifiedIds.has(b.id))
-    .slice(0, 12);
+    .slice(0, EXPLORE_PROFILE_SECTION_LIMIT);
   const usedIds = new Set([...verifiedIds, ...featured.map((b) => b.id)]);
-  const newest = (newestRows as DiscoverBrandSectionRow[]).filter((b) => !usedIds.has(b.id)).slice(0, 12);
+  const newest = (newestRows as DiscoverBrandSectionRow[])
+    .filter((b) => !usedIds.has(b.id))
+    .slice(0, EXPLORE_PROFILE_SECTION_LIMIT);
 
   return { popularSectors, activeCities, verified, featured, newest };
 }
