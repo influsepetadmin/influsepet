@@ -5,6 +5,7 @@ import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { EmptyGlyphPhoto } from "@/components/icons/emptyStateGlyphs";
 
 type Item = { id: string; title: string | null; url: string; platform: string };
+type PortfolioPreviewKind = "instagram" | "tiktok" | "youtube" | "link";
 
 function platformLabel(p: string): string {
   switch (p) {
@@ -16,6 +17,27 @@ function platformLabel(p: string): string {
       return "Diğer";
     default:
       return p;
+  }
+}
+
+function portfolioPreviewKind(item: Item): PortfolioPreviewKind {
+  const url = item.url.toLocaleLowerCase("tr-TR");
+  if (item.platform === "INSTAGRAM") return "instagram";
+  if (item.platform === "TIKTOK") return "tiktok";
+  if (url.includes("youtube.com") || url.includes("youtu.be")) return "youtube";
+  return "link";
+}
+
+function portfolioPreviewLabel(kind: PortfolioPreviewKind): string {
+  switch (kind) {
+    case "instagram":
+      return "IG";
+    case "tiktok":
+      return "TT";
+    case "youtube":
+      return "YT";
+    case "link":
+      return "Link";
   }
 }
 
@@ -112,31 +134,41 @@ export default function InfluencerPortfolioManager({ initialItems }: { initialIt
         />
       ) : (
         <ul className="portfolio-item-list">
-          {items.map((it) => (
-            <li key={it.id} className="portfolio-item-card">
-              <div
-                className={`portfolio-item-card__thumb portfolio-item-card__thumb--${it.platform.toLowerCase()}`}
-                aria-hidden
-              />
-              <div className="portfolio-item-card__body">
-                <p className="portfolio-item-card__title">{it.title?.trim() || "Başlıksız öğe"}</p>
-                <p className="portfolio-item-card__platform">{platformLabel(it.platform)}</p>
-                <p className="portfolio-item-card__url muted">
-                  <a href={it.url} target="_blank" rel="noreferrer">
-                    Bağlantıyı aç
-                  </a>
-                </p>
-                <div className="portfolio-item-card__actions">
-                  <a className="btn secondary btn--sm" href={it.url} target="_blank" rel="noreferrer">
-                    Görüntüle
-                  </a>
-                  <button className="btn secondary btn--subtle btn--sm" type="button" onClick={() => void remove(it.id)}>
-                    Kaldır
-                  </button>
+          {items.map((it) => {
+            const previewKind = portfolioPreviewKind(it);
+            return (
+              <li key={it.id} className="portfolio-item-card">
+                <div
+                  className={`portfolio-item-card__thumb portfolio-item-card__thumb--${previewKind}`}
+                  aria-hidden
+                >
+                  <span className="portfolio-item-card__thumb-badge">{portfolioPreviewLabel(previewKind)}</span>
+                  <span className="portfolio-item-card__thumb-lines">
+                    <span />
+                    <span />
+                    <span />
+                  </span>
                 </div>
-              </div>
-            </li>
-          ))}
+                <div className="portfolio-item-card__body">
+                  <p className="portfolio-item-card__title">{it.title?.trim() || "Başlıksız öğe"}</p>
+                  <p className="portfolio-item-card__platform">{platformLabel(it.platform)}</p>
+                  <p className="portfolio-item-card__url muted">
+                    <a href={it.url} target="_blank" rel="noreferrer">
+                      Bağlantıyı aç
+                    </a>
+                  </p>
+                  <div className="portfolio-item-card__actions">
+                    <a className="btn secondary btn--sm" href={it.url} target="_blank" rel="noreferrer">
+                      Görüntüle
+                    </a>
+                    <button className="btn secondary btn--subtle btn--sm" type="button" onClick={() => void remove(it.id)}>
+                      Kaldır
+                    </button>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
