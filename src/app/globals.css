@@ -8475,17 +8475,21 @@ main:has(.dashboard-page) {
 }
 
 .portfolio-add-panel {
-  margin-bottom: 18px;
-  padding: 14px 16px;
-  border-radius: 14px;
-  background: #f8fafc;
-  border: 1px solid rgba(226, 232, 240, 0.95);
+  margin-bottom: 22px;
+  padding: clamp(16px, 2.4vw, 22px);
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid rgba(199, 210, 254, 0.58);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 10px 24px rgba(15, 23, 42, 0.055);
 }
 
 .portfolio-add-panel__title {
   margin: 0 0 6px;
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
   color: var(--text);
 }
 
@@ -8498,13 +8502,13 @@ main:has(.dashboard-page) {
 .portfolio-add-panel__fields {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 14px;
 }
 
 @media (min-width: 720px) {
   .portfolio-add-panel__fields {
-    grid-template-columns: minmax(140px, 180px) 1fr auto;
-    align-items: end;
+    grid-template-columns: minmax(150px, 190px) minmax(0, 1fr);
+    align-items: start;
   }
 
   .portfolio-add-panel__field--full {
@@ -8512,13 +8516,72 @@ main:has(.dashboard-page) {
   }
 
   .portfolio-add-panel__submit {
-    grid-column: 3;
+    grid-column: 1 / -1;
+    justify-self: end;
     align-self: end;
   }
 }
 
+.portfolio-add-panel__field {
+  min-width: 0;
+}
+
 .portfolio-add-panel__field--grow {
   min-width: 0;
+}
+
+.portfolio-add-panel__field label {
+  display: block;
+  margin: 0 0 7px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.portfolio-add-panel__field input,
+.portfolio-add-panel__field select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 13px;
+  border-radius: 13px;
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.86) inset;
+}
+
+.portfolio-add-panel__field input:focus,
+.portfolio-add-panel__field select:focus {
+  outline: none;
+  border-color: rgba(124, 58, 237, 0.58);
+  box-shadow:
+    0 0 0 3px rgba(124, 58, 237, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.86) inset;
+}
+
+.portfolio-add-panel__field--full input {
+  min-height: 48px;
+  font-weight: 650;
+}
+
+.portfolio-add-panel__submit {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 2px;
+}
+
+.portfolio-add-panel__submit .btn {
+  min-width: 112px;
+  min-height: 42px;
+  font-weight: 800;
+}
+
+.portfolio-add-panel + .empty-state-card,
+.portfolio-add-panel + .portfolio-item-list {
+  margin-top: 4px;
 }
 
 .portfolio-item-list {
