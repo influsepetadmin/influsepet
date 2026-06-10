@@ -70,7 +70,7 @@ export default async function MarkaSavedPage() {
       />
 
       {!profile ? (
-        <section className="dash-card dash-card--section">
+        <section className="dash-card dash-card--section dashboard-empty-section">
           <EmptyStateCard
             icon={<Bookmark strokeWidth={1.25} />}
             hint="Liste için profil"
@@ -83,7 +83,7 @@ export default async function MarkaSavedPage() {
           </EmptyStateCard>
         </section>
       ) : count === 0 ? (
-        <section className="dash-card dash-card--section">
+        <section className="dash-card dash-card--section dashboard-empty-section">
           <EmptyStateCard
             icon={<Bookmark strokeWidth={1.25} />}
             hint="Teklif öncesi kısayol"

@@ -117,7 +117,7 @@ export default async function MarkaOffersPage({
       />
 
       {!profile ? (
-        <section className="dash-card dash-card--section">
+        <section className="dash-card dash-card--section dashboard-empty-section">
           <EmptyStateCard
             icon={<EmptyGlyphPaperAirplane />}
             hint="Teklifler için profil"
@@ -160,7 +160,7 @@ export default async function MarkaOffersPage({
           </ShellPanelHint>
 
           {filtered.length === 0 ? (
-            <section className="dash-card dash-card--section">
+            <section className="dash-card dash-card--section dashboard-empty-section">
               <EmptyStateCard
                 icon={tab === "gelen" ? <EmptyGlyphInbox /> : <EmptyGlyphPaperAirplane />}
                 hint={

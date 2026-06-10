@@ -69,7 +69,7 @@ export default async function InfluencerSavedPage() {
       />
 
       {count === 0 ? (
-        <section className="dash-card dash-card--section">
+        <section className="dash-card dash-card--section dashboard-empty-section">
           <EmptyStateCard
             icon={<Bookmark strokeWidth={1.25} />}
             hint="Teklif öncesi kısayol"

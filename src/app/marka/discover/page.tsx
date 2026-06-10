@@ -106,7 +106,7 @@ export default async function MarkaDiscoverPage({
       </header>
 
       {!canUseMarketplace ? (
-        <section className="dash-card dash-card--section">
+        <section className="dash-card dash-card--section dashboard-empty-section">
           <EmptyStateCard
             icon={<EmptyGlyphMagnifyingGlass />}
             hint="Keşfet için profil"
@@ -286,7 +286,7 @@ export default async function MarkaDiscoverPage({
         </section>
       ) : null}
 
-      <section className="dash-card dash-card--section">
+        <section className="dash-card dash-card--section dashboard-empty-section">
         <h2 className="dash-section__title">Kayıtlı içerik üreticileri</h2>
         {savedInfluencerCount === 0 ? (
           <EmptyStateCard

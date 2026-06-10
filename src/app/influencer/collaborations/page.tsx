@@ -128,7 +128,7 @@ export default async function InfluencerCollaborationsPage({
       </ShellPanelHint>
 
       {filtered.length === 0 ? (
-        <section className="dash-card dash-card--section">
+        <section className="dash-card dash-card--section dashboard-empty-section">
           <EmptyStateCard
             icon={<EmptyGlyphInbox />}
             hint={

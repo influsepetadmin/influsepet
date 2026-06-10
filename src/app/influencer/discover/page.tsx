@@ -269,7 +269,7 @@ export default async function InfluencerDiscoverPage({
       ) : null}
 
       {!profile ? (
-        <section className="dash-card dash-card--section">
+        <section className="dash-card dash-card--section dashboard-empty-section">
           <EmptyStateCard
             icon={<EmptyGlyphBuildingOffice />}
             hint="Keşfet için profil"

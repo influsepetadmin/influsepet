@@ -128,7 +128,7 @@ export default async function MarkaCampaignsPage({
       />
 
       {!profile ? (
-        <section className="dash-card dash-card--section">
+        <section className="dash-card dash-card--section dashboard-empty-section">
           <EmptyStateCard
             icon={<EmptyGlyphBuildingOffice />}
             hint="Kampanyalar için profil"
@@ -158,7 +158,7 @@ export default async function MarkaCampaignsPage({
           </ShellControlBar>
 
           {tabDef.statuses === "placeholder" ? (
-            <section className="dash-card dash-card--section">
+            <section className="dash-card dash-card--section dashboard-empty-section">
               <EmptyStateCard
                 icon={<EmptyGlyphBuildingOffice />}
                 hint="Yakında"
@@ -177,7 +177,7 @@ export default async function MarkaCampaignsPage({
                 {tabKey === "tamamlanan" && "Tamamlanan iş birlikleri; raporlama ve arşiv için referans."}
                 {tabKey === "arsiv" && "Reddedilen veya iptal edilen kayıtlar."}
               </ShellPanelHint>
-              <section className="dash-card dash-card--section">
+              <section className="dash-card dash-card--section dashboard-empty-section">
                 <EmptyStateCard
                   icon={<EmptyGlyphInbox />}
                   hint={tabKey === "aktif" ? "İlk iş birliğini başlat" : undefined}

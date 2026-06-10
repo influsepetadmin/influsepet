@@ -723,6 +723,10 @@ main:has(.public-profile-page--app) {
   padding-bottom: 8px;
 }
 
+.dashboard-page.chat-layout {
+  padding-bottom: 4px;
+}
+
 .chat-layout--conversation {
   display: flex;
   flex-direction: column;
@@ -5764,11 +5768,12 @@ main:has(.dashboard-page) {
   position: relative;
   overflow: hidden;
   padding: clamp(18px, 3vw, 30px);
-  border-color: rgba(219, 227, 239, 0.95);
+  border-color: rgba(213, 221, 236, 0.94);
   background: #ffffff;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.92) inset,
-    0 12px 30px rgba(15, 23, 42, 0.06);
+    0 1px 0 rgba(255, 255, 255, 0.94) inset,
+    0 2px 8px rgba(15, 23, 42, 0.04),
+    0 10px 24px rgba(15, 23, 42, 0.055);
 }
 
 .dashboard-page .discovery-search-card__intro {
@@ -5800,7 +5805,7 @@ main:has(.dashboard-page) {
   position: relative;
   z-index: 1;
   padding: clamp(14px, 2.4vw, 22px);
-  border-radius: 24px;
+  border-radius: var(--radius-app-card-lg);
   border: 1px solid rgba(219, 227, 239, 0.95);
   background: #ffffff;
   box-shadow:
@@ -6242,7 +6247,7 @@ main:has(.dashboard-page) {
 .dashboard-page .discover-explore {
   margin: 0;
   padding: clamp(16px, 2.4vw, 24px);
-  border-radius: 24px;
+  border-radius: var(--radius-app-card-lg);
   border: 1px solid rgba(219, 227, 239, 0.95);
   background: #ffffff;
   box-shadow:
@@ -6667,6 +6672,10 @@ main:has(.dashboard-page) {
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.9) inset,
     0 10px 24px rgba(15, 23, 42, 0.055);
+}
+
+.dashboard-page:is(.marka-discover, .influencer-discover) .saved-teaser {
+  min-height: 0;
 }
 
 .dashboard-page .discovery-search-actions {
@@ -8886,6 +8895,17 @@ main:has(.dashboard-page) {
   gap: var(--dashboard-action-gap);
 }
 
+.dashboard-page .dashboard-empty-section {
+  display: flex;
+  justify-content: center;
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.dashboard-page .dashboard-empty-section .empty-state-card {
+  width: min(100%, 640px);
+  margin: 0 auto;
+}
+
 .dashboard-page .dash-card .empty-state-card__hint {
   color: #4338ca;
 }
@@ -9147,6 +9167,11 @@ main:has(.dashboard-page) {
     gap: 28px;
   }
 
+  .public-profile-page--brand .public-profile-split {
+    grid-template-columns: minmax(0, 1.18fr) minmax(280px, 0.82fr);
+    gap: 24px;
+  }
+
   .public-profile-page--influencer .public-profile-split {
     grid-template-columns: minmax(0, 840px);
     gap: 12px;
@@ -9174,6 +9199,11 @@ main:has(.dashboard-page) {
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+}
+
+.public-profile-page--brand .public-profile-split__main,
+.public-profile-page--brand .public-profile-split__aside {
+  gap: 16px;
 }
 
 .public-profile-trust-stack {
@@ -9773,8 +9803,11 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
 }
 
 .public-profile-hero__avatar-ring--brand {
+  padding: 5px;
   background: var(--public-profile-avatar-ring, #e2e8f0);
-  box-shadow: 0 4px 18px var(--public-profile-accent-shadow, rgba(15, 23, 42, 0.08));
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.92) inset,
+    0 6px 20px var(--public-profile-accent-shadow, rgba(15, 23, 42, 0.08));
 }
 
 .public-profile-hero__avatar {
@@ -9813,6 +9846,12 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
 .public-profile-hero--premium.public-profile-hero--influencer .public-profile-hero__avatar {
   width: 132px;
   height: 132px;
+}
+
+.public-profile-hero--premium.public-profile-hero--brand .public-profile-hero__avatar {
+  object-fit: contain;
+  padding: 10px;
+  border-radius: 50%;
 }
 
 @media (min-width: 640px) {
@@ -9937,7 +9976,7 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
 }
 
 .public-profile-brand-cover {
-  height: 60px;
+  height: 76px;
   width: 100%;
   flex-shrink: 0;
   background: var(--public-profile-cover-bg, #f8fafc);
@@ -9948,28 +9987,28 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  padding: 0 16px 18px;
+  padding: 0 18px 20px;
   text-align: center;
 }
 
 @media (min-width: 640px) {
   .public-profile-brand-hero-inner {
     flex-direction: row;
-    align-items: center;
-    gap: 22px;
-    padding: 4px 22px 22px;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 0 24px 24px;
     text-align: left;
   }
 }
 
 .public-profile-hero--brand-rich .public-profile-hero__avatar-wrap {
-  margin-top: -38px;
+  margin-top: -46px;
   flex-shrink: 0;
 }
 
 @media (min-width: 640px) {
   .public-profile-hero--brand-rich .public-profile-hero__avatar-wrap {
-    margin-top: -40px;
+    margin-top: -50px;
   }
 }
 
@@ -9979,6 +10018,7 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
 
 .public-profile-hero--brand-rich .public-profile-hero__title-row {
   justify-content: center;
+  gap: 8px;
   margin-bottom: 4px;
 }
 
@@ -10063,10 +10103,28 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
 
 .public-profile-hero__meta--brand-row .public-profile-hero__meta-line {
   margin: 0;
-  padding: 6px 9px;
+  padding: 7px 10px;
   border-radius: 999px;
   border: 1px solid rgba(226, 232, 240, 0.9);
   background: rgba(255, 255, 255, 0.74);
+}
+
+.public-profile-page--brand .public-profile-hero__identity--brand {
+  width: 100%;
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  .public-profile-page--brand .public-profile-hero__identity--brand {
+    align-items: flex-start;
+  }
+}
+
+.public-profile-page--brand .public-profile-aside-card,
+.public-profile-page--brand .public-profile-section,
+.public-profile-page--brand .public-profile-rating-card,
+.public-profile-page--brand .public-profile-recent-reviews {
+  border-color: var(--public-profile-accent-border, rgba(13, 148, 136, 0.24));
 }
 
 .public-profile-hero__contact {

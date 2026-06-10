@@ -54,6 +54,7 @@ export function PublicBrandProfileView({
                 cameFromDiscover={cameFromDiscover}
               />
               <PublicBrandProfileStats data={data} />
+              <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
               <div className="public-profile-trust-stack">
                 <PublicProfileCollaborationTrust completedCount={data.completedCollaborationsCount} />
                 <PublicProfileRatingSummary
@@ -69,7 +70,6 @@ export function PublicBrandProfileView({
             </div>
             <aside className="public-profile-split__aside">
               <PublicProfileAsideBrand data={data} />
-              <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
             </aside>
           </div>
         </div>

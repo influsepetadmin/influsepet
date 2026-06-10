@@ -65,8 +65,8 @@ export default async function ChatIndexPage() {
 
   if (!session) {
     return (
-      <div className="chat-layout">
-        <section className="dash-card dash-card--section">
+      <div className="dashboard-page shell-panel-page chat-layout">
+        <section className="dash-card dash-card--section dashboard-empty-section">
           <h1 className="dash-section__title">Sohbetler</h1>
           <EmptyStateCard
             icon={<EmptyGlyphLockClosed />}
@@ -89,8 +89,8 @@ export default async function ChatIndexPage() {
 
   if (!me) {
     return (
-      <div className="chat-layout">
-        <section className="dash-card dash-card--section">
+      <div className="dashboard-page shell-panel-page chat-layout">
+        <section className="dash-card dash-card--section dashboard-empty-section">
           <h1 className="dash-section__title">Sohbetler</h1>
           <EmptyStateCard
             icon={<EmptyGlyphExclamationTriangle />}
@@ -166,7 +166,7 @@ export default async function ChatIndexPage() {
   ) as Record<string, number>;
 
   return (
-    <div className="chat-layout">
+    <div className="dashboard-page shell-panel-page chat-layout">
       <PageHeader
         eyebrow="Sohbetler"
         title="Görüşmeler"
@@ -179,7 +179,7 @@ export default async function ChatIndexPage() {
       />
 
       {conversations.length === 0 ? (
-        <section className="dash-card dash-card--section chat-inbox-empty-card">
+        <section className="dash-card dash-card--section dashboard-empty-section chat-inbox-empty-card">
           <EmptyStateCard
             icon={<EmptyGlyphChatBubble />}
             hint="İlk mesajın sohbet ekranında — önce bir teklif gönderin veya kabul edin."
