@@ -86,7 +86,7 @@ export default async function InfluencerCollaborationsPage({
     k === "aktif" ? "/influencer/collaborations" : `/influencer/collaborations?tab=${encodeURIComponent(k)}`;
 
   const headerAction = (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "flex-end" }}>
+    <div className="dashboard-page__actions">
       <Link className="btn btn--sm" href="/influencer/offers">
         Teklifler
       </Link>

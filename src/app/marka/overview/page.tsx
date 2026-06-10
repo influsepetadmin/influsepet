@@ -151,7 +151,7 @@ export default async function MarkaOverviewPage() {
         title="Genel Bakış"
         description="Tekliflerini, kampanyalarını ve influencer görüşmelerini takip et."
         action={
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "flex-end" }}>
+          <div className="dashboard-page__actions">
             <Link className="btn btn--sm" href="/marka/discover">
               Influencer keşfet
             </Link>

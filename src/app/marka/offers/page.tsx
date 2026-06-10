@@ -97,7 +97,7 @@ export default async function MarkaOffersPage({
   const tabLink = (t: "gelen" | "gonderilen", d: string) => buildOfferTabHref("/marka/offers", t, d);
 
   const headerAction = (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "flex-end" }}>
+    <div className="dashboard-page__actions">
       <Link className="btn btn--sm" href="/marka/discover">
         Influencer keşfet
       </Link>

@@ -29,6 +29,9 @@
   /* Phase 1 — spacing scale (logged-in app) */
   --app-section-gap: 20px;
   --app-section-gap-lg: 24px;
+  --dashboard-stack-gap: 20px;
+  --dashboard-header-gap: 14px 18px;
+  --dashboard-action-gap: 8px;
   --app-shell-padding-y-top: 22px;
   --app-shell-padding-y-bottom: 48px;
   --app-shell-padding-x: 18px;
@@ -5449,7 +5452,7 @@ main:has(.dashboard-page) {
 .dashboard-page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--dashboard-stack-gap);
   width: 100%;
   padding-bottom: 4px;
 }
@@ -5458,6 +5461,74 @@ main:has(.dashboard-page) {
   width: min(100%, var(--dashboard-content-max-width));
   margin-left: auto;
   margin-right: auto;
+}
+
+.dashboard-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--dashboard-action-gap);
+}
+
+.dashboard-page .app-shell-page-header,
+.dashboard-page .influencer-panel-page__hero {
+  margin: 0;
+  padding: 2px 2px 0;
+}
+
+.dashboard-page .app-shell-page-header__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--dashboard-header-gap);
+}
+
+.dashboard-page .app-shell-page-header__row > div:first-child {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.dashboard-page .app-shell-page-header__actions {
+  flex: 0 0 auto;
+  align-self: flex-start;
+}
+
+@media (max-width: 640px) {
+  .dashboard-page .app-shell-page-header__actions,
+  .dashboard-page__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+.dashboard-page .app-shell-page-header__eyebrow {
+  margin: 0 0 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.dashboard-page .app-shell-page-header__title,
+.dashboard-page .influencer-panel-page__title {
+  margin: 0 0 8px;
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.dashboard-page .app-shell-page-header__desc,
+.dashboard-page .influencer-panel-page__lede {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  color: var(--muted);
 }
 
 .dashboard-page__header {
@@ -8789,6 +8860,7 @@ main:has(.dashboard-page) {
 .dashboard-page .dash-card .empty-state-card {
   padding: 20px 20px 20px;
   margin-top: 2px;
+  max-width: min(100%, 680px);
   border-radius: var(--radius-app-card);
   background: linear-gradient(165deg, #ffffff 0%, #f8fafc 48%, #f1f5f9 100%);
   border: 1px solid rgba(199, 210, 254, 0.42);
@@ -8808,6 +8880,10 @@ main:has(.dashboard-page) {
 .dashboard-page .dash-card .empty-state-card__desc {
   margin-bottom: 14px;
   max-width: 52ch;
+}
+
+.dashboard-page .dash-card .empty-state-card__actions {
+  gap: var(--dashboard-action-gap);
 }
 
 .dashboard-page .dash-card .empty-state-card__hint {

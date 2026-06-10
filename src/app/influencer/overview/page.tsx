@@ -157,7 +157,7 @@ export default async function InfluencerOverviewPage() {
         title="Genel Bakış"
         description="Tekliflerini, sohbetlerini ve iş birliklerini tek yerden takip et."
         action={
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "flex-end" }}>
+          <div className="dashboard-page__actions">
             <Link className="btn btn--sm" href="/influencer/discover">
               Keşfet
             </Link>

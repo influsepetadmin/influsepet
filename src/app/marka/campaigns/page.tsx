@@ -108,7 +108,7 @@ export default async function MarkaCampaignsPage({
   const tabHref = (k: string) => (k === "aktif" ? "/marka/campaigns" : `/marka/campaigns?tab=${encodeURIComponent(k)}`);
 
   const headerAction = (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "flex-end" }}>
+    <div className="dashboard-page__actions">
       <Link className="btn btn--sm" href="/marka/discover">
         Influencer keşfet
       </Link>

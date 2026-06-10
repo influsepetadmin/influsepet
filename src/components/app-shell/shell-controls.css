@@ -2,7 +2,7 @@
  * Shell-native panel controls (tabs + filters) — premium minimal, app-shell uyumlu
  */
 .shell-panel-page {
-  padding-bottom: 8px;
+  padding-bottom: 4px;
 }
 
 .shell-control-bar {
@@ -14,7 +14,7 @@
     0 2px 8px rgba(15, 23, 42, 0.035),
     0 8px 20px rgba(15, 23, 42, 0.045);
   padding: 10px 11px 11px;
-  margin-bottom: 12px;
+  margin: 0;
 }
 
 .shell-control-bar__tabs {
@@ -160,7 +160,7 @@
 }
 
 .shell-panel-hint {
-  margin: 0 0 12px;
+  margin: -8px 2px 0;
   font-size: 0.84rem;
   line-height: 1.45;
   max-width: 62ch;
