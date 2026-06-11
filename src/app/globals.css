@@ -5767,7 +5767,7 @@ main:has(.dashboard-page) {
 .dashboard-page .discovery-search-card {
   position: relative;
   overflow: hidden;
-  padding: clamp(18px, 3vw, 30px);
+  padding: clamp(16px, 2.4vw, 24px);
   border-color: rgba(213, 221, 236, 0.94);
   background: #ffffff;
   box-shadow:
@@ -5778,33 +5778,53 @@ main:has(.dashboard-page) {
 
 .dashboard-page .discovery-search-card__intro {
   position: relative;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
   z-index: 1;
 }
 
 .dashboard-page .discovery-search-card__title {
-  margin-bottom: 7px;
-  font-size: clamp(1.35rem, 2.6vw, 2rem);
-  letter-spacing: -0.045em;
+  margin-bottom: 5px;
+  font-size: clamp(1.28rem, 2.2vw, 1.72rem);
+  letter-spacing: -0.04em;
 }
 
 .dashboard-page .discovery-search-card__lede {
   margin-bottom: 0;
   max-width: 54ch;
-  font-size: 0.98rem;
+  font-size: 0.94rem;
 }
 
 .dashboard-page .discovery-context-hint {
-  margin: 6px 0 0;
+  margin: 5px 0 0;
   max-width: 48ch;
   font-size: 0.82rem;
   line-height: 1.45;
 }
 
+.dashboard-page .discovery-next-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.dashboard-page .discovery-next-steps span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(203, 213, 225, 0.84);
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
 .dashboard-page .discovery-search-panel {
   position: relative;
   z-index: 1;
-  padding: clamp(14px, 2.4vw, 22px);
+  padding: clamp(12px, 2vw, 18px);
   border-radius: var(--radius-app-card-lg);
   border: 1px solid rgba(219, 227, 239, 0.95);
   background: #ffffff;
@@ -5815,21 +5835,21 @@ main:has(.dashboard-page) {
 
 @media (min-width: 860px) {
   .dashboard-page .discovery-search-panel {
-    padding: 22px;
+    padding: 18px;
   }
 
   .dashboard-page .discovery-search-form {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 12px;
-    align-items: start;
+    gap: 10px 12px;
+    align-items: end;
   }
 
   .dashboard-page .discovery-search-field--query {
     grid-column: 1 / -1;
   }
 
-  .dashboard-page .discovery-search-field:not(.discovery-search-field--query):not(.discovery-search-field--categories):not(.discovery-search-field--sort) {
+  .dashboard-page .discovery-search-field:not(.discovery-search-field--query):not(.discovery-search-field--categories) {
     grid-column: span 3;
   }
 
@@ -5837,13 +5857,9 @@ main:has(.dashboard-page) {
     grid-column: span 6;
   }
 
-  .dashboard-page .discovery-search-field--sort {
-    grid-column: span 3;
-    align-self: stretch;
-  }
-
   .dashboard-page .discovery-search-actions {
-    grid-column: 1 / -1;
+    grid-column: span 3;
+    align-self: end;
   }
 }
 
@@ -5856,10 +5872,10 @@ main:has(.dashboard-page) {
 }
 
 .dashboard-page .discovery-search-field:not(.discovery-search-field--query) {
-  margin-top: 12px;
-  padding: 10px;
+  margin-top: 10px;
+  padding: 9px;
   border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(248, 250, 252, 0.72);
 }
 
@@ -5895,9 +5911,9 @@ main:has(.dashboard-page) {
   align-items: center;
   gap: 10px;
   width: 100%;
-  min-height: 68px;
-  padding: 17px 18px;
-  border-radius: 22px;
+  min-height: 60px;
+  padding: 14px 16px;
+  border-radius: 18px;
   border: 1px solid rgba(99, 102, 241, 0.66);
   background: #ffffff;
   box-shadow:
@@ -6448,7 +6464,7 @@ main:has(.dashboard-page) {
 /* Discover Explore — compact rails + pills (shared marka / influencer) */
 .dashboard-page .discover-explore {
   margin: 0;
-  padding: clamp(16px, 2.4vw, 24px);
+  padding: clamp(14px, 2vw, 20px);
   border-radius: var(--radius-app-card-lg);
   border: 1px solid rgba(219, 227, 239, 0.95);
   background: #ffffff;
@@ -6469,7 +6485,7 @@ main:has(.dashboard-page) {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 8px 14px;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
 }
 
 .dashboard-page .discover-explore__eyebrow-k {
@@ -6488,7 +6504,7 @@ main:has(.dashboard-page) {
 }
 
 .dashboard-page .discover-explore__block {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .dashboard-page .discover-explore__block:last-child {
@@ -6496,7 +6512,7 @@ main:has(.dashboard-page) {
 }
 
 .dashboard-page .discover-explore__block-head {
-  margin-bottom: 8px;
+  margin-bottom: 7px;
 }
 
 .dashboard-page .discover-explore__block-title {
@@ -6552,7 +6568,7 @@ main:has(.dashboard-page) {
 .dashboard-page .discover-explore__rail-track {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px;
   padding: 2px 0 4px;
   width: 100%;
   min-width: 0;
@@ -6562,7 +6578,7 @@ main:has(.dashboard-page) {
 .dashboard-page .brand-result-card--explore-rail {
   width: 100%;
   min-width: 0;
-  padding: 20px;
+  padding: 18px;
   border-radius: 22px;
   background: #ffffff;
   border: 1px solid rgba(219, 227, 239, 0.95);
@@ -6654,7 +6670,7 @@ main:has(.dashboard-page) {
 
 .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card--hub,
 .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card--hub {
-  padding: 22px 20px 20px;
+  padding: 20px 20px 18px;
   border-color: var(--discover-card-border, rgba(219, 227, 239, 0.95));
   background: #ffffff;
   box-shadow:
@@ -6665,7 +6681,7 @@ main:has(.dashboard-page) {
 
 .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__head--hub,
 .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__head--hub {
-  gap: 16px 18px;
+  gap: 16px 20px;
 }
 
 @media (max-width: 560px) {
@@ -6710,7 +6726,7 @@ main:has(.dashboard-page) {
 .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions,
 .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions {
   gap: 8px;
-  min-width: 124px;
+  min-width: 172px;
 }
 
 .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions .btn.secondary,
@@ -6720,6 +6736,7 @@ main:has(.dashboard-page) {
 .dashboard-page:is(.marka-discover, .influencer-discover) .brand-result-card__actions .marketplace-offer-toggle,
 .dashboard-page:is(.marka-discover, .influencer-discover) .influencer-result-card__actions .marketplace-offer-toggle {
   width: 100%;
+  min-height: 40px;
   justify-content: center;
 }
 
@@ -6784,19 +6801,6 @@ main:has(.dashboard-page) {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.78);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.86) inset;
-}
-
-.dashboard-page .discovery-search-sort {
-  display: block;
-  width: 100%;
-  padding: 11px 14px;
-  border-radius: 12px;
-  border: 1px dashed rgba(148, 163, 184, 0.75);
-  background: rgba(248, 250, 252, 0.95);
-  color: #94a3b8;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: not-allowed;
 }
 
 /* Keşfet — arama öncesi örnek profiller (marka / influencer panelleri) */
@@ -6869,6 +6873,7 @@ main:has(.dashboard-page) {
 }
 
 .dashboard-page .discover-results-card {
+  padding: clamp(16px, 2.2vw, 22px);
   border-color: rgba(219, 227, 239, 0.95);
   background: #ffffff;
   box-shadow:
@@ -6878,6 +6883,49 @@ main:has(.dashboard-page) {
 
 .dashboard-page:is(.marka-discover, .influencer-discover) .saved-teaser {
   min-height: 0;
+}
+
+.dashboard-page .discover-saved-shortcut {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius-app-card);
+  border: 1px solid rgba(219, 227, 239, 0.95);
+  background: #ffffff;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 6px 18px rgba(15, 23, 42, 0.045);
+}
+
+.dashboard-page .discover-saved-shortcut .dash-section__title {
+  flex: 0 0 100%;
+  margin: 0 0 2px;
+  font-size: 0.92rem;
+}
+
+.dashboard-page .discover-saved-shortcut .empty-state-card {
+  width: 100%;
+  padding: 12px 0 2px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.dashboard-page .discover-saved-shortcut .empty-state-card__icon {
+  width: 42px;
+  height: 42px;
+}
+
+.dashboard-page .discover-saved-shortcut .empty-state-card__desc {
+  max-width: 58ch;
+}
+
+.dashboard-page .discover-saved-shortcut .saved-teaser {
+  flex: 1 1 auto;
+  padding: 0;
 }
 
 .dashboard-page .discovery-search-actions {

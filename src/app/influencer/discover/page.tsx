@@ -97,7 +97,7 @@ export default async function InfluencerDiscoverPage({
       <header className="influencer-panel-page__hero discover-page-hero">
         <h1 className="influencer-panel-page__title">Keşfet</h1>
         <p className="influencer-panel-page__lede muted">
-          Size uygun markaları arayın, filtreleyin ve iş birliği başlatın.
+          Marka bulun, profili inceleyin ve iş birliği teklifi gönderin.
         </p>
       </header>
 
@@ -112,9 +112,14 @@ export default async function InfluencerDiscoverPage({
               Marka adı, şehir veya kategoriye göre hızlıca arayın.
             </p>
             <p className="discovery-context-hint muted">
-              Sonuçları daraltmak için şehir ve kategori ekleyebilirsiniz.
+              Arayın, gerekirse filtreleyin; uygun markada teklif alanını açın.
             </p>
           </header>
+          <div className="discovery-next-steps" aria-label="Keşfet adımları">
+            <span>1. Ara</span>
+            <span>2. Daralt</span>
+            <span>3. Profil veya teklif</span>
+          </div>
           <FirstVisitGuidanceGate scope="discover" />
 
           <div className="discovery-search-panel">
@@ -160,24 +165,6 @@ export default async function InfluencerDiscoverPage({
                     inputName="categories"
                   />
                 </div>
-              </div>
-
-              <div className="discovery-search-field discovery-search-field--sort">
-                <label className="discovery-search-field__label" htmlFor="discovery-sort-influencer-discover">
-                  Sıralama
-                </label>
-                <select
-                  id="discovery-sort-influencer-discover"
-                  className="discovery-search-sort"
-                  disabled
-                  aria-disabled="true"
-                  title="Yakında"
-                >
-                  <option>Sıralama seçenekleri yakında</option>
-                </select>
-                <p className="discovery-search-field__hint muted">
-                  Sıralama seçenekleri yakında.
-                </p>
               </div>
 
               <div className="influencer-search-form__actions discovery-search-actions">
@@ -283,7 +270,7 @@ export default async function InfluencerDiscoverPage({
         </section>
       ) : null}
 
-      <section className="dash-card dash-card--section">
+      <section className="discover-saved-shortcut">
         <h2 className="dash-section__title">Kayıtlı markalar</h2>
         {savedBrandCount === 0 ? (
           <EmptyStateCard

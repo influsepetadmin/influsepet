@@ -101,7 +101,7 @@ export default async function MarkaDiscoverPage({
       <header className="influencer-panel-page__hero discover-page-hero">
         <h1 className="influencer-panel-page__title">Keşfet</h1>
         <p className="influencer-panel-page__lede muted">
-          Markanıza uygun içerik üreticilerini arayın, filtreleyin ve teklif gönderin.
+          İçerik üreticisi bulun, profili inceleyin ve iş birliği teklifi gönderin.
         </p>
       </header>
 
@@ -129,9 +129,14 @@ export default async function MarkaDiscoverPage({
               İsim, kullanıcı adı, şehir, kategori veya niş alanına göre hızlıca arayın.
             </p>
             <p className="discovery-context-hint muted">
-              Daha net sonuçlar için şehir ve kategori filtrelerini ekleyebilirsiniz.
+              Arayın, gerekirse filtreleyin; uygun profilde teklif alanını açın.
             </p>
           </header>
+          <div className="discovery-next-steps" aria-label="Keşfet adımları">
+            <span>1. Ara</span>
+            <span>2. Daralt</span>
+            <span>3. Profil veya teklif</span>
+          </div>
           <FirstVisitGuidanceGate scope="discover" />
 
           <div className="discovery-search-panel">
@@ -177,24 +182,6 @@ export default async function MarkaDiscoverPage({
                     inputName="categories"
                   />
                 </div>
-              </div>
-
-              <div className="discovery-search-field discovery-search-field--sort">
-                <label className="discovery-search-field__label" htmlFor="discovery-sort-marka-discover">
-                  Sıralama
-                </label>
-                <select
-                  id="discovery-sort-marka-discover"
-                  className="discovery-search-sort"
-                  disabled
-                  aria-disabled="true"
-                  title="Yakında"
-                >
-                  <option>Sıralama seçenekleri yakında</option>
-                </select>
-                <p className="discovery-search-field__hint muted">
-                  Sıralama seçenekleri yakında.
-                </p>
               </div>
 
               <div className="influencer-search-form__actions discovery-search-actions">
@@ -286,7 +273,7 @@ export default async function MarkaDiscoverPage({
         </section>
       ) : null}
 
-        <section className="dash-card dash-card--section dashboard-empty-section">
+      <section className="discover-saved-shortcut">
         <h2 className="dash-section__title">Kayıtlı içerik üreticileri</h2>
         {savedInfluencerCount === 0 ? (
           <EmptyStateCard
