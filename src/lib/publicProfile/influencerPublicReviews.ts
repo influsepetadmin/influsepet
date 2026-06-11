@@ -5,14 +5,22 @@ import { prisma } from "@/lib/prisma";
 export const PUBLIC_INFLUENCER_PROFILE_REVIEWS_LIMIT = 6;
 
 /**
- * Public-safe reviews for an influencer: left by counterparties after completed collaborations,
- * opted in via isPublic, and tied to a COMPLETED offer (same bar as collaboration review creation).
+ * Public-safe collaboration ratings received by a profile owner.
+ * This matches the chat/workspace rating flow that writes CollaborationRating.reviewText.
  */
-export function publicInfluencerReviewsWhere(influencerUserId: string): Prisma.ReviewWhereInput {
+export function publicInfluencerReviewsWhere(revieweeUserId: string): Prisma.CollaborationRatingWhereInput {
   return {
-    revieweeUserId: influencerUserId,
-    isPublic: true,
+    rateeUserId: revieweeUserId,
     offer: { status: "COMPLETED" },
+  };
+}
+
+function publicWrittenCollaborationReviewsWhere(
+  revieweeUserId: string,
+): Prisma.CollaborationRatingWhereInput {
+  return {
+    ...publicInfluencerReviewsWhere(revieweeUserId),
+    reviewText: { not: null },
   };
 }
 
@@ -69,30 +77,30 @@ export type PublicProfileRecentReviewJson = {
 };
 
 /**
- * Recent text reviews (Review model, isPublic) for public profile JSON — not used for average star score
- * (that comes from CollaborationRating elsewhere).
+ * Recent written collaboration review notes for public profile JSON.
+ * Average star score and rating count are calculated from the same CollaborationRating model elsewhere.
  */
 export async function getRecentPublicReviewsForPublicProfile(
   revieweeUserId: string,
   limit = PUBLIC_INFLUENCER_PROFILE_REVIEWS_LIMIT,
 ): Promise<PublicProfileRecentReviewJson[]> {
-  const where = publicInfluencerReviewsWhere(revieweeUserId);
-  const rows = await prisma.review.findMany({
+  const where = publicWrittenCollaborationReviewsWhere(revieweeUserId);
+  const rows = await prisma.collaborationRating.findMany({
     where,
     orderBy: { createdAt: "desc" },
     take: limit,
     select: {
       rating: true,
-      comment: true,
+      reviewText: true,
       createdAt: true,
-      reviewer: { select: { role: true } },
+      rater: { select: { role: true } },
     },
   });
   return rows.map((row) => ({
     rating: row.rating,
-    comment: row.comment,
+    comment: row.reviewText,
     createdAt: row.createdAt.toISOString(),
-    reviewerTypeLabel: reviewerRolePublicLabel(row.reviewer.role),
+    reviewerTypeLabel: reviewerRolePublicLabel(row.rater.role),
   }));
 }
 
@@ -100,22 +108,23 @@ export async function getPublicInfluencerReviewsSectionData(
   influencerUserId: string,
 ): Promise<PublicInfluencerReviewsSectionData> {
   const where = publicInfluencerReviewsWhere(influencerUserId);
+  const writtenWhere = publicWrittenCollaborationReviewsWhere(influencerUserId);
 
   const [aggregate, rows] = await Promise.all([
-    prisma.review.aggregate({
+    prisma.collaborationRating.aggregate({
       where,
       _avg: { rating: true },
       _count: { _all: true },
     }),
-    prisma.review.findMany({
-      where,
+    prisma.collaborationRating.findMany({
+      where: writtenWhere,
       orderBy: { createdAt: "desc" },
       take: PUBLIC_INFLUENCER_PROFILE_REVIEWS_LIMIT,
       select: {
         rating: true,
-        comment: true,
+        reviewText: true,
         createdAt: true,
-        reviewer: { select: { role: true } },
+        rater: { select: { role: true } },
       },
     }),
   ]);
@@ -126,9 +135,9 @@ export async function getPublicInfluencerReviewsSectionData(
 
   const recentReviews: PublicInfluencerReviewCard[] = rows.map((row) => ({
     rating: row.rating,
-    comment: row.comment,
+    comment: row.reviewText,
     createdAt: row.createdAt,
-    reviewerTypeLabel: reviewerRolePublicLabel(row.reviewer.role),
+    reviewerTypeLabel: reviewerRolePublicLabel(row.rater.role),
   }));
 
   return { totalCount, averageRating, recentReviews };

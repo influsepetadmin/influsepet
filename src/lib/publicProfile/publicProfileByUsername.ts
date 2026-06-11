@@ -26,7 +26,7 @@ export type PublicProfileByUsernameResponse = {
   /** Ortalama yıldız: CollaborationRating (tamamlanan teklifler), Review ile karıştırılmaz. */
   averageRating: number | null;
   ratingCount: number;
-  /** Opsiyonel metin değerlendirmeler (Review, isPublic); hero ortalaması buradan değil. */
+  /** Opsiyonel metin değerlendirmeler (CollaborationRating.reviewText); hero ortalaması aynı rating kaynağından gelir. */
   recentPublicReviews: PublicProfileRecentReviewJson[];
 };
 
