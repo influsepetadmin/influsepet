@@ -55,6 +55,7 @@ export function PublicBrandProfileView({
               />
               <PublicBrandProfileStats data={data} />
               <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
+              <PublicProfileAsideBrand data={data} />
               <div className="public-profile-trust-stack">
                 <PublicProfileCollaborationTrust completedCount={data.completedCollaborationsCount} />
                 <PublicProfileRatingSummary
@@ -68,9 +69,6 @@ export function PublicBrandProfileView({
                 />
               </div>
             </div>
-            <aside className="public-profile-split__aside">
-              <PublicProfileAsideBrand data={data} />
-            </aside>
           </div>
         </div>
       </div>

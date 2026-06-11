@@ -9370,8 +9370,17 @@ main:has(.dashboard-page) {
   }
 
   .public-profile-page--brand .public-profile-split {
-    grid-template-columns: minmax(0, 1.18fr) minmax(280px, 0.82fr);
-    gap: 24px;
+    grid-template-columns: minmax(0, 840px);
+    gap: 12px;
+    justify-content: center;
+    align-items: start;
+    padding: 16px;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: calc(var(--radius-app-card-lg) + 6px);
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.92) inset,
+      0 14px 34px rgba(15, 23, 42, 0.055);
   }
 
   .public-profile-page--influencer .public-profile-split {
@@ -9406,6 +9415,10 @@ main:has(.dashboard-page) {
 .public-profile-page--brand .public-profile-split__main,
 .public-profile-page--brand .public-profile-split__aside {
   gap: 16px;
+}
+
+.public-profile-page--brand .public-profile-split__main {
+  width: 100%;
 }
 
 .public-profile-trust-stack {
@@ -10327,6 +10340,116 @@ main:has(.public-profile-page--app) .public-profile-hero__cta-btn--prominent:not
 .public-profile-page--brand .public-profile-rating-card,
 .public-profile-page--brand .public-profile-recent-reviews {
   border-color: var(--public-profile-accent-border, rgba(13, 148, 136, 0.24));
+}
+
+.public-profile-page--brand .public-profile-brand-cover {
+  height: 58px;
+}
+
+.public-profile-page--brand .public-profile-brand-hero-inner {
+  gap: 16px;
+  padding-bottom: 16px;
+}
+
+.public-profile-page--brand .public-profile-hero--brand-rich .public-profile-hero__avatar-wrap {
+  margin-top: -38px;
+}
+
+.public-profile-page--brand .public-profile-hero--premium.public-profile-hero--brand .public-profile-hero__avatar {
+  width: 116px;
+  height: 116px;
+}
+
+.public-profile-page--brand .public-profile-hero__title-row {
+  margin-bottom: 2px;
+}
+
+.public-profile-page--brand .public-profile-hero__handle {
+  margin-bottom: 4px;
+}
+
+.public-profile-page--brand .public-profile-hero__contact {
+  margin-bottom: 4px;
+}
+
+.public-profile-page--brand .public-profile-hero__category-lead {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.public-profile-page--brand .public-profile-hero__meta--brand-row {
+  margin-top: 8px;
+}
+
+.public-profile-page--brand .public-profile-hero__cta-region--brand-full {
+  margin-top: 0;
+  padding: 0 18px 16px;
+  border-top: none;
+}
+
+.public-profile-page--brand .public-profile-hero__cta-region--premium {
+  gap: 10px;
+}
+
+.public-profile-page--brand .public-profile-cta-conversion-belt {
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--public-profile-accent-border, rgba(13, 148, 136, 0.24));
+  background: #ffffff;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.92) inset,
+    0 6px 18px rgba(15, 23, 42, 0.045);
+}
+
+.public-profile-page--brand .public-profile-hero__cta--brand-panel {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #ffffff;
+}
+
+.public-profile-page--brand .public-profile-aside-stack {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.public-profile-page--brand .public-profile-aside-card {
+  padding: 16px 18px;
+}
+
+.public-profile-page--brand .public-profile-trust-stack {
+  gap: 12px;
+}
+
+.public-profile-page--brand .public-profile-rating-card,
+.public-profile-page--brand .public-profile-recent-reviews {
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .public-profile-page--brand .public-profile-brand-cover {
+    height: 64px;
+  }
+
+  .public-profile-page--brand .public-profile-brand-hero-inner {
+    align-items: center;
+    padding: 0 22px 18px;
+  }
+
+  .public-profile-page--brand .public-profile-hero--brand-rich .public-profile-hero__avatar-wrap {
+    margin-top: -40px;
+  }
+
+  .public-profile-page--brand .public-profile-hero--premium.public-profile-hero--brand .public-profile-hero__avatar {
+    width: 128px;
+    height: 128px;
+  }
+
+  .public-profile-page--brand .public-profile-hero__cta-region--brand-full {
+    padding: 0 22px 18px;
+  }
 }
 
 .public-profile-hero__contact {

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PublicBrandProfileView } from "@/components/profile/public/PublicBrandProfileView";
 import { isOwnBrandPublicProfile } from "@/lib/publicProfile/isOwnBrandPublicProfile";
@@ -41,8 +40,6 @@ export default async function InfluencerPanelBrandProfilePage({
     notFound();
   }
 
-  const publicProfileHref = `/brand/${encodeURIComponent(data.username)}`;
-
   const viewer =
     user && user.role === "BRAND" && user.brand
       ? { id: user.id, role: user.role, brand: { username: user.brand.username } }
@@ -70,18 +67,6 @@ export default async function InfluencerPanelBrandProfilePage({
       chatHref={chatHref}
       viewerRole={viewerRole}
       cameFromDiscover={cameFromDiscover}
-      headerCta={
-        <>
-          <div className="public-profile-hero__cta-actions">
-            <Link className="btn secondary public-profile-hero__cta-btn" href={publicProfileHref}>
-              Herkese açık profili görüntüle
-            </Link>
-          </div>
-          <p className="public-profile-hero__cta-hint">
-            Teklif ve mesajlaşma için influencer panelinizdeki ilgili teklif veya sohbet akışını kullanın.
-          </p>
-        </>
-      }
     />
   );
 }

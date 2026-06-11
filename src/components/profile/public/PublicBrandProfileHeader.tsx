@@ -26,9 +26,7 @@ function sectorLeadLine(data: PublicBrandProfileResponse): string | null {
     .join(" · ");
 }
 
-/**
- * Üst kimlik + CTA; detay metinleri iki sütun düzeninde aside’da.
- */
+/** Üst kimlik + CTA; detay bölümleri sayfa akışında gösterilir. */
 export function PublicBrandProfileHeader({
   data,
   cta,
