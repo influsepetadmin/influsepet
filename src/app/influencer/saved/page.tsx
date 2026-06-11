@@ -69,7 +69,7 @@ export default async function InfluencerSavedPage() {
       />
 
       {count === 0 ? (
-        <section className="dash-card dash-card--section dashboard-empty-section">
+        <section className="dashboard-empty-section saved-page__empty">
           <EmptyStateCard
             icon={<Bookmark strokeWidth={1.25} />}
             hint="Teklif öncesi kısayol"
@@ -82,11 +82,11 @@ export default async function InfluencerSavedPage() {
           </EmptyStateCard>
         </section>
       ) : (
-        <section className="dash-card dash-card--section dash-card--emphasis">
+        <section className="saved-page__section">
           <p className="saved-page__count muted" aria-live="polite">
             Toplam <strong>{count}</strong> kayıt
           </p>
-          <div className="marketplace-discover__grid marketplace-discover__grid--brands saved-page__grid">
+          <div className="saved-page__grid">
             {rows.map((row) => {
               const b = row.brandUser.brand;
               if (!b) return null;
@@ -105,7 +105,7 @@ export default async function InfluencerSavedPage() {
                   whyLine="Kayıtlı listenizde"
                   initialSaved={true}
                   defaultOfferAmountTRY={defaultAmt}
-                  cardClassName="brand-result-card brand-result-card--discover brand-result-card--hub"
+                  cardClassName="brand-result-card brand-result-card--discover brand-result-card--hub saved-page-card"
                   profileLinkLabel="Profil"
                   submitButtonLabel="İş birliği isteği gönder"
                   briefRows={2}

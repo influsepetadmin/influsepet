@@ -70,7 +70,7 @@ export default async function MarkaSavedPage() {
       />
 
       {!profile ? (
-        <section className="dash-card dash-card--section dashboard-empty-section">
+        <section className="dashboard-empty-section saved-page__empty">
           <EmptyStateCard
             icon={<Bookmark strokeWidth={1.25} />}
             hint="Liste için profil"
@@ -83,7 +83,7 @@ export default async function MarkaSavedPage() {
           </EmptyStateCard>
         </section>
       ) : count === 0 ? (
-        <section className="dash-card dash-card--section dashboard-empty-section">
+        <section className="dashboard-empty-section saved-page__empty">
           <EmptyStateCard
             icon={<Bookmark strokeWidth={1.25} />}
             hint="Teklif öncesi kısayol"
@@ -96,11 +96,11 @@ export default async function MarkaSavedPage() {
           </EmptyStateCard>
         </section>
       ) : (
-        <section className="dash-card dash-card--section dash-card--emphasis">
+        <section className="saved-page__section">
           <p className="saved-page__count muted" aria-live="polite">
             Toplam <strong>{count}</strong> kayıt
           </p>
-          <div className="marketplace-discover__grid discover-hub__grid saved-page__grid">
+          <div className="saved-page__grid">
             {rows.map((row) => {
               const p = row.influencerUser.influencer;
               if (!p) return null;
@@ -123,7 +123,7 @@ export default async function MarkaSavedPage() {
                   nicheTruncateLen={72}
                   initialSaved={true}
                   defaultOfferAmountTRY={defaultAmt}
-                  cardClassName="influencer-result-card influencer-result-card--discover influencer-result-card--hub"
+                  cardClassName="influencer-result-card influencer-result-card--discover influencer-result-card--hub saved-page-card"
                   profileLinkLabel="Profil"
                   submitButtonLabel="İş birliği isteği gönder"
                   briefRows={2}
