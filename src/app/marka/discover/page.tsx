@@ -205,19 +205,6 @@ export default async function MarkaDiscoverPage({
         </section>
       )}
 
-      {canUseMarketplace && showExploreRail && exploreData ? (
-        <section
-          className="dash-card dash-card--section discover-showcase-card"
-          id="marka-discover-oneriler"
-        >
-          <DiscoverExploreInfluencers
-            data={exploreData}
-            hrefBase="/marka/discover"
-            savedInfluencerUserIds={savedInfluencerUserIds}
-          />
-        </section>
-      ) : null}
-
       {canUseMarketplace && hasActiveSearch ? (
         <section className="dash-card dash-card--section discover-results-card">
           <div className="discovery-search-results">
@@ -270,6 +257,19 @@ export default async function MarkaDiscoverPage({
               </div>
             )}
           </div>
+        </section>
+      ) : null}
+
+      {canUseMarketplace && showExploreRail && exploreData ? (
+        <section
+          className="dash-card dash-card--section discover-showcase-card"
+          id="marka-discover-oneriler"
+        >
+          <DiscoverExploreInfluencers
+            data={exploreData}
+            hrefBase="/marka/discover"
+            savedInfluencerUserIds={savedInfluencerUserIds}
+          />
         </section>
       ) : null}
 

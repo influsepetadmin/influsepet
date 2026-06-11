@@ -188,20 +188,6 @@ export default async function InfluencerDiscoverPage({
         </section>
       ) : null}
 
-      {profile && showExploreRail && exploreData ? (
-        <section
-          className="dash-card dash-card--section discover-showcase-card"
-          id="influencer-discover-oneriler"
-        >
-          <DiscoverExploreBrands
-            data={exploreData}
-            hrefBase="/influencer/discover"
-            savedBrandUserIds={savedBrandUserIds}
-            influencerBasePriceTRY={profile.basePriceTRY}
-          />
-        </section>
-      ) : null}
-
       {profile && hasBrandSearch ? (
         <section className="dash-card dash-card--section discover-results-card">
           <div className="discovery-search-results">
@@ -252,6 +238,20 @@ export default async function InfluencerDiscoverPage({
               </div>
             )}
           </div>
+        </section>
+      ) : null}
+
+      {profile && showExploreRail && exploreData ? (
+        <section
+          className="dash-card dash-card--section discover-showcase-card"
+          id="influencer-discover-oneriler"
+        >
+          <DiscoverExploreBrands
+            data={exploreData}
+            hrefBase="/influencer/discover"
+            savedBrandUserIds={savedBrandUserIds}
+            influencerBasePriceTRY={profile.basePriceTRY}
+          />
         </section>
       ) : null}
 
