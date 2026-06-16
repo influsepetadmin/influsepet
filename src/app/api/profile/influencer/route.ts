@@ -5,6 +5,18 @@ import { getSessionPayload } from "@/lib/session";
 import { CATEGORY_KEYS } from "@/lib/categories";
 import { parseOptionalHttpHttpsUrl, parseOptionalProfileImageUrl } from "@/lib/safeUrl";
 
+function parseNonNegativeNumber(value: FormDataEntryValue | null, error: string) {
+  const n = Number(value ?? 0);
+  if (!Number.isFinite(n)) return { ok: false as const, error };
+  return { ok: true as const, value: Math.max(0, n) };
+}
+
+function parseNonNegativeInteger(value: FormDataEntryValue | null, error: string) {
+  const n = Number(value ?? 0);
+  if (!Number.isFinite(n)) return { ok: false as const, error };
+  return { ok: true as const, value: Math.max(0, Math.floor(n)) };
+}
+
 export async function POST(request: Request) {
   const session = await getSessionPayload();
   if (!session) {
@@ -21,8 +33,16 @@ export async function POST(request: Request) {
 
   const form = await request.formData();
   const username = String(form.get("username") ?? "").trim().toLowerCase();
-  const followerCount = Math.max(0, Number(form.get("followerCount") ?? 0));
-  const basePriceTRY = Math.max(0, Math.floor(Number(form.get("basePriceTRY") ?? 0)));
+  const followerCountParsed = parseNonNegativeNumber(form.get("followerCount"), "Takipci sayisi gecersiz");
+  if (followerCountParsed.ok === false) {
+    return sameOriginRedirect("/influencer/profile?err=" + encodeURIComponent(followerCountParsed.error));
+  }
+  const basePriceTRYParsed = parseNonNegativeInteger(form.get("basePriceTRY"), "Baz fiyat gecersiz");
+  if (basePriceTRYParsed.ok === false) {
+    return sameOriginRedirect("/influencer/profile?err=" + encodeURIComponent(basePriceTRYParsed.error));
+  }
+  const followerCount = followerCountParsed.value;
+  const basePriceTRY = basePriceTRYParsed.value;
   const city = String(form.get("city") ?? "").trim() || null;
   const profileImageUrlRaw = String(form.get("profileImageUrl") ?? "").trim() || null;
   const instagramUrlRaw = String(form.get("instagramUrl") ?? "").trim() || null;

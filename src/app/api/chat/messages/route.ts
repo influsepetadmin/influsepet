@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 
   const messages = await prisma.message.findMany({
     where: { conversationId },
-    orderBy: { createdAt: "asc" },
+    orderBy: { createdAt: "desc" },
     take: 200,
     select: {
       id: true,
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    messages: messages.map((m) => ({
+    messages: messages.reverse().map((m) => ({
       id: m.id,
       body: m.body,
       senderId: m.senderId,

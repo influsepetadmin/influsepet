@@ -154,12 +154,29 @@ export async function POST(request: Request) {
 
   const user = await prisma.user.findUnique({
     where: { id: session.uid },
-    select: { id: true, role: true },
+    select: {
+      id: true,
+      role: true,
+      brand: { select: { id: true } },
+      influencer: { select: { id: true } },
+    },
   });
 
   if (!user || (user.role !== "BRAND" && user.role !== "INFLUENCER")) {
     if (wantsRedirect) return redirectWithErr("/", "Yetkisiz.");
     return NextResponse.json({ error: "Yetkisiz." }, { status: 403 });
+  }
+
+  if (user.role === "BRAND" && !user.brand) {
+    const error = "Marka profilinizi tamamlamadan teklif olusturamazsiniz.";
+    if (wantsRedirect) return redirectWithErr("/marka/profile", error);
+    return NextResponse.json({ error }, { status: 403 });
+  }
+
+  if (user.role === "INFLUENCER" && !user.influencer) {
+    const error = "Influencer profilinizi tamamlamadan teklif olusturamazsiniz.";
+    if (wantsRedirect) return redirectWithErr("/influencer/profile", error);
+    return NextResponse.json({ error }, { status: 403 });
   }
 
   let record: Record<string, unknown>;
