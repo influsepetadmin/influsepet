@@ -63,10 +63,10 @@ export default async function MarkaProfilePage({
       <header className="influencer-panel-page__hero">
         <h1 className="influencer-panel-page__title">Profil</h1>
         <p className="influencer-panel-page__lede muted">
-          Marka bilgileri, sosyal hesaplar ve herkese açık sayfa ayarları.
+          İçerik üreticilerinin gördüğü marka bilgilerini ve herkese açık sayfayı güncelleyin.
         </p>
         <p className="profile-page__context-hint muted">
-          Eksiksiz şirket profili keşfet ve teklif adımlarında daha net görünmenizi sağlar.
+          Şirket adı, şehir, kategori ve doğrulama teklif öncesi güven verir.
         </p>
       </header>
 
@@ -179,7 +179,9 @@ export default async function MarkaProfilePage({
       {tab === "sosyal" && (
         <section className="dash-card dash-card--section">
           <h2 className="dash-section__title">Sosyal hesaplar</h2>
-          <p className="dash-section__lede muted">Bağlı platformlar ve doğrulama durumu.</p>
+          <p className="dash-section__lede muted">
+            Doğrulanmış sosyal hesaplar içerik üreticilerine güven sinyali verir.
+          </p>
           <SocialAccountsSection />
         </section>
       )}
@@ -194,7 +196,7 @@ export default async function MarkaProfilePage({
             description="Marka vitrini ve medya kütüphanesi eklendiğinde burada yönetilecek. Şimdilik teklif ve sohbet üzerinden içerik akışını sürdürün."
           >
             <Link className="btn" href="/marka/offers">
-              Tekliflere git
+              Teklifleri incele
             </Link>
           </EmptyStateCard>
         </section>
@@ -210,7 +212,7 @@ export default async function MarkaProfilePage({
             description="Tamamlanan iş birliklerinden gelen herkese açık değerlendirmeler burada listelenecek. Önce teklif süreçlerini ilerletin."
           >
             <Link className="btn" href="/marka/offers">
-              Tekliflere git
+              Teklifleri incele
             </Link>
           </EmptyStateCard>
         </section>

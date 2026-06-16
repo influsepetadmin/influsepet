@@ -35,7 +35,7 @@ function BrandDiscoverCard({
       initialSaved={initialSaved}
       defaultOfferAmountTRY={defaultAmt}
       cardClassName="brand-result-card brand-result-card--discover brand-result-card--hub"
-      profileLinkLabel="Profil"
+      profileLinkLabel="Profili incele"
       submitButtonLabel="İş birliği isteği gönder"
       briefRows={2}
     />

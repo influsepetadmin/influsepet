@@ -250,7 +250,7 @@ export default async function InfluencerDiscoverPage({
             description="Marka araması ve teklif göndermek için profil bilgileriniz kayıtlı olmalı."
           >
             <Link className="btn" href="/influencer/profile?tab=genel">
-              Profile git
+              Profili tamamla
             </Link>
           </EmptyStateCard>
         </section>
@@ -266,7 +266,7 @@ export default async function InfluencerDiscoverPage({
             description="İlginizi çeken markaları kart üzerinden kaydedin; teklif yazmadan önce buradan hızlıca açın."
           >
             <Link className="btn" href="/influencer/discover#influencer-marka-ara">
-              Marka keşfet
+              Marka ara
             </Link>
           </EmptyStateCard>
         ) : (

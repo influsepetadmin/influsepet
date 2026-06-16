@@ -99,7 +99,7 @@ export default async function MarkaOffersPage({
   const headerAction = (
     <div className="dashboard-page__actions">
       <Link className="btn btn--sm" href="/marka/discover">
-        Influencer keşfet
+        Influencer ara
       </Link>
       <Link className="btn secondary btn--sm" href="/chat">
         Sohbetler
@@ -112,7 +112,7 @@ export default async function MarkaOffersPage({
       <PageHeader
         eyebrow="Offers"
         title="Teklifler"
-        description="Influencer’ların gönderdiği istekler ile marka olarak başlattığınız teklifler."
+        description="Influencer’lardan gelen istekleri yanıtlayın, gönderdiğiniz teklifleri takip edin."
         action={headerAction}
       />
 
@@ -155,8 +155,8 @@ export default async function MarkaOffersPage({
 
           <ShellPanelHint>
             {tab === "gelen"
-              ? "Influencer’ların size ilettiği iş birliği özetleri; kabul veya red için kart üzerinden ilerleyin."
-              : "Keşfet üzerinden seçtiğiniz içerik üreticilerine gönderdiğiniz tekliflerin durumu."}
+              ? "Influencer’lar işi üstlenmek için teklif gönderir; kabul, ret veya sohbet aksiyonları kartın içinde."
+              : "Seçtiğiniz içerik üreticilerine gönderdiğiniz tekliflerin yanıt ve sohbet durumu burada."}
           </ShellPanelHint>
 
           {filtered.length === 0 ? (
@@ -166,7 +166,7 @@ export default async function MarkaOffersPage({
                 hint={
                   tabSourceList.length === 0 && durumKey === "tumu"
                     ? tab === "gelen"
-                      ? "İlk iş birliğini başlat"
+                      ? "Gelen teklif bekleniyor"
                       : "İlk teklifini gönder"
                     : durumKey !== "tumu"
                       ? "Filtreyi genişletin"
@@ -177,10 +177,10 @@ export default async function MarkaOffersPage({
                   tab === "gelen"
                     ? durumKey !== "tumu"
                       ? "Seçili duruma uyan kayıt yok. Tüm durumları göstererek listeyi açın."
-                      : "Influencer istekleri burada birikir. Henüz yoksa keşfet ile süreç başlatın."
+                      : "Influencer’lar size iş birliği isteği gönderdiğinde burada listelenir. Bu sırada influencer arayıp teklif gönderebilirsiniz."
                     : durumKey !== "tumu"
                       ? "Bu durumda gönderilmiş teklif yok. Filtreyi sıfırlayın."
-                      : "Profil kartından form doldurarak teklif gönderin; durum burada güncellenir."
+                      : "Profil kartından teklif formunu doldurun; yanıt ve sohbet durumu burada güncellenir."
                 }
               >
                 {durumKey !== "tumu" ? (
@@ -189,7 +189,7 @@ export default async function MarkaOffersPage({
                   </Link>
                 ) : (
                   <Link className="btn" href="/marka/discover">
-                    Influencer keşfet
+                    Influencer ara
                   </Link>
                 )}
               </EmptyStateCard>

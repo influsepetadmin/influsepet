@@ -332,7 +332,7 @@ function ChatWorkspaceNav({
           {discoverLabel}
         </Link>
         <Link className="btn secondary btn--sm" href={offersPanelHref}>
-          Teklifler
+          Teklifleri incele
         </Link>
       </div>
     </nav>
@@ -581,7 +581,16 @@ export default function ChatClient({
     offer.status === "DELIVERED";
   const deliverySectionHint = brandReviewingInfluencerOffer
     ? influencerInitiatedBrandHint(offer.status)
-    : "Kanıt yükleyin veya teslim kayıtlarını buradan izleyin.";
+    : isBrandViewer
+      ? "Teslimi influencer gönderir; siz burada inceleyip onay veya revize isteyebilirsiniz."
+      : "Teslim bağlantısı, not veya dosyayı burada gönderin; marka buradan inceler.";
+  const deliveryShortcutLabel = brandReviewingInfluencerOffer
+    ? "Teklifi incele"
+    : isBrandViewer
+      ? offer.status === "DELIVERED"
+        ? "Teslimi incele"
+        : "Teslim durumunu gör"
+      : "Teslim alanına git";
 
   return (
     <div className="chat-conversation chat-conversation--workspace">
@@ -668,13 +677,13 @@ export default function ChatClient({
           profileHref={chatContext.profileHref}
           offersPanelHref={offersPanelHref}
           showDeliveryShortcut={showWorkspaceShortcut}
-          deliveryShortcutLabel={brandReviewingInfluencerOffer ? "Teklifi incele" : "Teslim alanına git"}
+          deliveryShortcutLabel={deliveryShortcutLabel}
           deliveryShortcutTargetId={brandReviewingInfluencerOffer ? "chat-workspace-header" : "chat-delivery-anchor"}
         />
 
         <div className="chat-workflow-card__workspace-foot">
           <p className="chat-workflow-card__workspace-hint muted">
-            Teslim ve puanlama aşağıda; mesajlar bu özetin altında devam eder.
+            Mesajlar aşağıda devam eder; teslim ve değerlendirme bölümleri iş akışını kapatır.
           </p>
         </div>
       </header>
@@ -718,7 +727,7 @@ export default function ChatClient({
             <EmptyStateCard
               icon={<EmptyGlyphChatBubble />}
               title="Henüz mesaj yok"
-              description="İlk mesajı veya dosyayı göndererek görüşmeyi başlatın. Teslim ve iş akışı güncellemeleri üstteki özetten takip edilir."
+              description="İlk mesajı gönderin; teslim bağlantısı, dosya ve değerlendirme adımları bu çalışma alanında takip edilir."
             />
           </div>
         ) : (

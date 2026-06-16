@@ -28,7 +28,7 @@ export default async function MarkaSettingsPage() {
       <header className="influencer-panel-page__hero">
         <h1 className="influencer-panel-page__title">Ayarlar</h1>
         <p className="influencer-panel-page__lede muted">
-          Hesap ve güvenlik ayarları kademeli olarak eklenecek. Şimdilik temel işlemleri buradan yönetebilirsiniz.
+          Hesap güvenliği ve bildirim tercihleri burada toplanır. Kullanılabilir işlemler aşağıda.
         </p>
       </header>
 
@@ -36,20 +36,20 @@ export default async function MarkaSettingsPage() {
         <section className="dash-card dash-card--section influencer-settings__card influencer-settings__card--info">
           <div className="influencer-settings__card-head">
             <h2 className="dash-section__title">Hesap bilgileri</h2>
-            <span className="influencer-settings__status">Planlandı</span>
+            <span className="influencer-settings__status">Hazırlanıyor</span>
           </div>
           <p className="muted dash-section__lede">
-            E-posta ve profil güvenliği yönetimi bu alana eklenecek.
+            E-posta ve güvenlik seçenekleri bu bölümde toplanacak.
           </p>
         </section>
 
         <section className="dash-card dash-card--section influencer-settings__card influencer-settings__card--info">
           <div className="influencer-settings__card-head">
             <h2 className="dash-section__title">Bildirim tercihleri</h2>
-            <span className="influencer-settings__status">Yakında</span>
+            <span className="influencer-settings__status">Hazırlanıyor</span>
           </div>
           <p className="muted dash-section__lede">
-            Teklif, mesaj ve teslim bildirimleri için tercih yönetimi hazırlanıyor.
+            Teklif, mesaj ve teslim bildirimleri için tercih ekranı hazırlanıyor.
           </p>
         </section>
 

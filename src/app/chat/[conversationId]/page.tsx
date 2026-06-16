@@ -201,7 +201,7 @@ export default async function ChatConversationPage({
           discoverHref,
           offersPanelHref,
           collaborationTitle,
-          discoverLabel: me.role === "BRAND" ? "Influencer keşfet" : "Keşfet",
+          discoverLabel: me.role === "BRAND" ? "Influencer ara" : "Marka ara",
         }}
         workspaceSummary={{
           latestDelivery: latestDelivery ? { status: latestDelivery.status } : null,

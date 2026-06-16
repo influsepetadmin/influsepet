@@ -62,6 +62,9 @@ function workspaceCtaLabel(
     return "Teklifi incele";
   }
   if (status === "ACCEPTED" || status === "IN_PROGRESS" || status === "DELIVERED" || status === "REVISION_REQUESTED") {
+    if (viewerRole === "BRAND") {
+      return status === "DELIVERED" ? "Teslimi incele" : "Teslim durumunu gör";
+    }
     return "Teslim alanına git";
   }
   if (status === "COMPLETED" || status === "REJECTED" || status === "CANCELLED") {
@@ -202,7 +205,9 @@ export function CollaborationCard({
   const deliveryHint = brandReviewingInfluencerOffer
     ? influencerInitiatedBrandHint(offer.status)
     : showDeliveryNote
-      ? "İş teslimi, mesajlaşma ve inceleme aynı çalışma alanında ilerler."
+      ? viewerRole === "BRAND"
+        ? "Teslimi influencer gönderir; siz sohbetten takip edip teslim geldiğinde inceleyebilirsiniz."
+        : "Teslim bağlantısı, not veya dosyayı teslim alanından gönderin; marka buradan inceler."
       : null;
 
   const metaChips = useMemo(() => {

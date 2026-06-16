@@ -155,11 +155,11 @@ export default async function InfluencerOverviewPage() {
       <PageHeader
         eyebrow="Panel"
         title="Genel Bakış"
-        description="Tekliflerini, sohbetlerini ve iş birliklerini tek yerden takip et."
+        description="Marka arayın, teklifleri yanıtlayın ve aktif işleri tek yerden takip edin."
         action={
           <div className="dashboard-page__actions">
             <Link className="btn btn--sm" href="/influencer/discover">
-              Keşfet
+              Marka ara
             </Link>
             <Link className="btn secondary btn--sm" href="/influencer/profile">
               Profili düzenle
@@ -173,21 +173,21 @@ export default async function InfluencerOverviewPage() {
           href="/influencer/offers?tab=gelen&durum=bekleyen"
           label="Bekleyen teklifler"
           value={pendingOfferCount}
-          hint="Yanıt bekleyen iş birlikleri"
+          hint="Yanıt veya sohbet bekleyen teklifler"
           icon={<Inbox size={18} strokeWidth={1.85} />}
         />
         <OverviewStatCard
           href="/influencer/collaborations?tab=aktif"
           label="Aktif iş birlikleri"
           value={pipelineOfferCount}
-          hint="Tamamlanmamış süreçler"
+          hint="Teslim, revize veya kapanış bekleyen işler"
           icon={<Briefcase size={18} strokeWidth={1.85} />}
         />
         <OverviewStatCard
           href="/chat"
           label="Okunmamış sohbet"
           value={unreadChatThreads}
-          hint="Karşı taraftan gelen okunmamış mesaj"
+          hint="Markalardan gelen yeni mesajlar"
           icon={<MessageCircle size={18} strokeWidth={1.85} />}
         />
         <OverviewStatCard
@@ -205,10 +205,10 @@ export default async function InfluencerOverviewPage() {
             <EmptyStateCard
               icon={<EmptyGlyphInbox />}
               title="Henüz teklif yok"
-              description="Markalardan veya sizden oluşan ilk teklif burada listelenir. Keşfet ile marka arayarak başlayabilirsiniz."
+              description="Markalardan gelen ve sizin gönderdiğiniz teklifler burada görünür. İlk adım için marka arayın."
             >
               <Link className="btn secondary btn--sm" href="/influencer/discover">
-                Marka keşfet
+                Marka ara
               </Link>
             </EmptyStateCard>
           ) : (
@@ -239,10 +239,10 @@ export default async function InfluencerOverviewPage() {
             <EmptyStateCard
               icon={<EmptyGlyphChatBubble />}
               title="Sohbet geçmişi boş"
-              description="İş birliği oluşturduğunuzda ilgili sohbet burada görünür. Teklif veya keşfet ile başlayın."
+              description="Teklif gönderdiğinizde veya gelen teklifi yanıtladığınızda sohbet burada açılır."
             >
               <Link className="btn secondary btn--sm" href="/influencer/discover">
-                Keşfet
+                Marka ara
               </Link>
             </EmptyStateCard>
           ) : (
@@ -284,26 +284,26 @@ export default async function InfluencerOverviewPage() {
       <div className="overview-page__grid-actions">
         <QuickActionCard
           href="/influencer/discover"
-          title="Yeni marka keşfet"
-          description="Şehir ve kategoriye göre marka ara, iş birliği başlat."
+          title="Marka ara"
+          description="Uygun markayı bulun, profili inceleyin ve teklif gönderin."
           icon={<Compass size={20} strokeWidth={1.75} />}
         />
         <QuickActionCard
           href="/influencer/profile?tab=genel"
           title="Profili güncelle"
-          description="Fiyat, niş ve kategorilerinle görünürlüğünü artır."
+          description="Fiyat, şehir ve kategorileri güncelleyerek keşfette net görünün."
           icon={<User size={20} strokeWidth={1.75} />}
         />
         <QuickActionCard
           href="/chat"
           title="Sohbetlere git"
-          description="Aktif iş birliklerindeki mesajları aç."
+          description="Teklif ve teslim konuşmalarını kaldığınız yerden açın."
           icon={<MessageCircle size={20} strokeWidth={1.75} />}
         />
         <QuickActionCard
           href="/influencer/collaborations"
-          title="İş birliklerini görüntüle"
-          description="Aktif, teslim ve tamamlanan süreçleri incele."
+          title="İş birliklerini takip et"
+          description="Aktif, teslim, revize ve tamamlanan işleri görün."
           icon={<Briefcase size={20} strokeWidth={1.75} />}
         />
       </div>
@@ -312,7 +312,7 @@ export default async function InfluencerOverviewPage() {
         <section className="ov-profile-nudge--compact">
           <h2 className="dash-section__title">Profil tamamlama</h2>
           <p className="dash-section__lede muted" style={{ marginBottom: 12 }}>
-            Kategoriler, şehir ve fiyat bilgileri görünürlüğünüzü artırır.
+            Kategori, şehir ve fiyat bilgileri markaların doğru teklifi göndermesini sağlar.
             {selectedCategoryKeys.length > 0
               ? ` Seçili kategoriler: ${selectedCategoryKeys.map((k) => getCategoryLabel(k)).join(", ")}.`
               : ""}

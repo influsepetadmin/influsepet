@@ -185,10 +185,10 @@ export function ChatOfferWorkflowActions({
           </button>
         ) : null}
         <Link className="btn secondary btn--sm" href={profileHref}>
-          Profil
+          Profili incele
         </Link>
         <Link className="btn secondary btn--sm" href={offersPanelHref}>
-          Teklifler
+          Teklifleri incele
         </Link>
       </div>
 

@@ -149,11 +149,11 @@ export default async function MarkaOverviewPage() {
       <PageHeader
         eyebrow="Panel"
         title="Genel Bakış"
-        description="Tekliflerini, kampanyalarını ve influencer görüşmelerini takip et."
+        description="Influencer arayın, teklif gönderin ve kampanya akışını tek yerden takip edin."
         action={
           <div className="dashboard-page__actions">
             <Link className="btn btn--sm" href="/marka/discover">
-              Influencer keşfet
+              Influencer ara
             </Link>
             <Link className="btn secondary btn--sm" href="/marka/profile">
               Profili düzenle
@@ -167,28 +167,28 @@ export default async function MarkaOverviewPage() {
           href="/marka/offers?tab=gonderilen"
           label="Gönderilen teklifler"
           value={sentOfferCount}
-          hint="Marka tarafından iletilen istekler"
+          hint="Influencer’lara gönderdiğiniz teklifler"
           icon={<Send size={18} strokeWidth={1.85} />}
         />
         <OverviewStatCard
           href="/marka/campaigns?tab=aktif"
           label="Aktif kampanyalar"
           value={publishedCampaignCount}
-          hint="Tekliflerde benzersiz campaign adı"
+          hint="Kabul edilen tekliflerden oluşan kampanya akışı"
           icon={<Megaphone size={18} strokeWidth={1.85} />}
         />
         <OverviewStatCard
           href="/marka/offers?durum=kabul"
           label="Devam eden iş birlikleri"
           value={pipelineOfferCount}
-          hint="Tamamlanmamış süreçler"
+          hint="Teslim, revize veya kapanış bekleyen işler"
           icon={<Briefcase size={18} strokeWidth={1.85} />}
         />
         <OverviewStatCard
           href="/chat"
           label="Yeni sohbetler"
           value={unreadChatThreads}
-          hint="Okunmamış mesaj içeren konuşmalar"
+          hint="Influencer’lardan gelen yeni mesajlar"
           icon={<Inbox size={18} strokeWidth={1.85} />}
         />
       </div>
@@ -199,20 +199,20 @@ export default async function MarkaOverviewPage() {
             <EmptyStateCard
               icon={<EmptyGlyphInbox />}
               title="Önce marka profilini tamamla"
-              description="Teklif özeti için şirket profilin kayıtlı olmalı. Birkaç alan yeterli."
+              description="Teklif göndermek ve gelen istekleri görmek için şirket profilinizi kaydedin."
             >
               <Link className="btn btn--sm" href="/marka/profile?tab=genel">
-                Profile git
+                Profili tamamla
               </Link>
             </EmptyStateCard>
           ) : recentOffers.length === 0 ? (
             <EmptyStateCard
               icon={<EmptyGlyphInbox />}
               title="Henüz teklif yok"
-              description="Influencer keşfet üzerinden teklif göndererek veya gelen istekleri yanıtlayarak başlayın."
+              description="Influencer arayıp teklif gönderin veya gelen istekleri Teklifler’de yanıtlayın."
             >
               <Link className="btn secondary btn--sm" href="/marka/discover">
-                Influencer keşfet
+                Influencer ara
               </Link>
             </EmptyStateCard>
           ) : (
@@ -242,17 +242,17 @@ export default async function MarkaOverviewPage() {
           {!canUseMarketplace ? (
             <EmptyStateCard
               icon={<EmptyGlyphChatBubble />}
-              title="Profil sonrası görünür"
-              description="Sohbet özeti için önce marka profilini oluştur."
+              title="Sohbetler profil sonrası açılır"
+              description="Marka profilinizi kaydedince teklif sohbetleri burada görünür."
             />
           ) : recentChats.length === 0 ? (
             <EmptyStateCard
               icon={<EmptyGlyphChatBubble />}
               title="Henüz sohbet yok"
-              description="Teklif oluşturduğunuzda ilgili sohbet burada listelenir. Influencer keşfet ile başlayabilirsiniz."
+              description="Teklif gönderdiğinizde veya gelen isteği yanıtladığınızda sohbet burada açılır."
             >
               <Link className="btn secondary btn--sm" href="/marka/discover">
-                Keşfet
+                Influencer ara
               </Link>
             </EmptyStateCard>
           ) : (
@@ -296,26 +296,26 @@ export default async function MarkaOverviewPage() {
       <div className="overview-page__grid-actions">
         <QuickActionCard
           href="/marka/discover"
-          title="Influencer keşfet"
-          description="Şehir ve kategoriye göre içerik üreticisi bul."
+          title="Influencer ara"
+          description="Uygun içerik üreticisini bulun, profili inceleyin ve teklif gönderin."
           icon={<Compass size={20} strokeWidth={1.75} />}
         />
         <QuickActionCard
           href="/marka/discover"
           title="Yeni teklif oluştur"
-          description="Keşfet üzerinden profil seçip teklif formunu doldur."
+          description="Bir profil seçin, kısa brief ve bütçe ile teklif gönderin."
           icon={<Send size={20} strokeWidth={1.75} />}
         />
         <QuickActionCard
           href="/chat"
           title="Sohbetlere git"
-          description="Aktif iş birliklerindeki mesajları aç."
+          description="Teklif ve teslim konuşmalarını kaldığınız yerden açın."
           icon={<MessageCircle size={20} strokeWidth={1.75} />}
         />
         <QuickActionCard
           href="/marka/campaigns"
-          title="Kampanyaları görüntüle"
-          description="Aktif, tamamlanan ve arşiv süreçlerine göz at."
+          title="Kampanyaları takip et"
+          description="Aktif, tamamlanan ve arşivdeki işleri görün."
           icon={<Megaphone size={20} strokeWidth={1.75} />}
         />
       </div>
@@ -324,7 +324,7 @@ export default async function MarkaOverviewPage() {
         <section className="ov-profile-nudge--compact">
           <h2 className="dash-section__title">Profil tamamlama</h2>
           <p className="dash-section__lede muted" style={{ marginBottom: 12 }}>
-            Şirket adı ve şehir bilgisi güven verir; kategoriler keşfette görünürlüğü artırır.
+            Şirket adı, şehir ve kategori bilgisi içerik üreticilerinin sizi güvenle değerlendirmesini sağlar.
           </p>
           <Link className="btn btn--sm" href="/marka/profile?tab=genel">
             Profili tamamla

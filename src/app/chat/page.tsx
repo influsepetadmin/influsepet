@@ -107,6 +107,7 @@ export default async function ChatIndexPage() {
   }
 
   const discoverHref = me.role === "BRAND" ? "/marka/discover" : "/influencer/discover";
+  const discoverLabel = me.role === "BRAND" ? "Influencer ara" : "Marka ara";
 
   const conversations = await prisma.conversation.findMany({
     where: {
@@ -170,10 +171,10 @@ export default async function ChatIndexPage() {
       <PageHeader
         eyebrow="Sohbetler"
         title="Görüşmeler"
-        description="İş birliği akışınızdaki tüm konuşmalar."
+        description="Teklif, teslim ve değerlendirme konuşmalarını buradan açın."
         action={
           <Link className="btn btn--sm" href={discoverHref}>
-            {me.role === "BRAND" ? "Influencer keşfet" : "Marka keşfet"}
+            {discoverLabel}
           </Link>
         }
       />
@@ -182,12 +183,12 @@ export default async function ChatIndexPage() {
         <section className="dash-card dash-card--section dashboard-empty-section chat-inbox-empty-card">
           <EmptyStateCard
             icon={<EmptyGlyphChatBubble />}
-            hint="İlk mesajın sohbet ekranında — önce bir teklif gönderin veya kabul edin."
+            hint="Sohbet için önce teklif akışı gerekir"
             title="Henüz sohbet yok"
-            description="Konuşmalar, teklif kabul edildikten sonra burada listelenir. Açık bir teklifiniz varsa Teklifler sayfasından ilgili karta girip sohbete geçebilirsiniz."
+            description="Sohbetler teklif oluşturulduğunda veya gelen teklif yanıtlandığında açılır. Açık bir teklifiniz varsa Teklifler’den ilgili karta girin."
           >
             <Link className="btn" href={discoverHref}>
-              İlk iş birliğini başlat
+              {discoverLabel}
             </Link>
           </EmptyStateCard>
         </section>

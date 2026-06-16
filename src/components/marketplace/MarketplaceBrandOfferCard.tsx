@@ -88,19 +88,6 @@ export function MarketplaceBrandOfferCard({
           <p className="muted brand-result-card__why">{whyLine}</p>
         </div>
         <div className="brand-result-card__actions">
-          <DiscoverySaveButton
-            targetUserId={brandUserId}
-            variant="influencer-saves-brand"
-            initialSaved={initialSaved}
-          />
-          <DiscoverProfileFromDiscoverLink
-            className="btn secondary btn--sm"
-            href={profileHref}
-            profileRole="brand"
-            targetUserId={brandUserId}
-          >
-            {profileLinkLabel}
-          </DiscoverProfileFromDiscoverLink>
           {!exploreRail && !offerFormOpen ? (
             <button
               className="btn btn--sm marketplace-offer-toggle"
@@ -112,6 +99,19 @@ export function MarketplaceBrandOfferCard({
               {submitButtonLabel}
             </button>
           ) : null}
+          <DiscoverProfileFromDiscoverLink
+            className="btn secondary btn--sm"
+            href={profileHref}
+            profileRole="brand"
+            targetUserId={brandUserId}
+          >
+            {profileLinkLabel}
+          </DiscoverProfileFromDiscoverLink>
+          <DiscoverySaveButton
+            targetUserId={brandUserId}
+            variant="influencer-saves-brand"
+            initialSaved={initialSaved}
+          />
         </div>
       </div>
 

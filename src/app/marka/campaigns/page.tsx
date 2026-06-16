@@ -110,10 +110,10 @@ export default async function MarkaCampaignsPage({
   const headerAction = (
     <div className="dashboard-page__actions">
       <Link className="btn btn--sm" href="/marka/discover">
-        Influencer keşfet
+        Influencer ara
       </Link>
       <Link className="btn secondary btn--sm" href="/marka/offers">
-        Teklifler
+        Teklifleri incele
       </Link>
     </div>
   );
@@ -123,7 +123,7 @@ export default async function MarkaCampaignsPage({
       <PageHeader
         eyebrow="Campaigns"
         title="Kampanyalar"
-        description="Tekliflerinizden türetilen süreç görünümü; ileride bağımsız kampanya kayıtları buraya bağlanacak."
+        description="Kabul edilen ve kapanan teklifleri kampanya akışı olarak takip edin."
         action={headerAction}
       />
 
@@ -161,19 +161,19 @@ export default async function MarkaCampaignsPage({
             <section className="dash-card dash-card--section dashboard-empty-section">
               <EmptyStateCard
                 icon={<EmptyGlyphBuildingOffice />}
-                hint="Yakında"
-                title="Taslak kampanyalar yakında"
-                description="Şimdilik teklif oluşturup aktif sekmeden süreci yönetin; bu sekme ileride dolar."
+                hint="Planlanan özellik"
+                title="Taslak kampanya alanı hazırlanıyor"
+                description="Şimdilik yeni süreç için Influencer ara sayfasından teklif gönderin; kabul edilen işler Aktif sekmesine düşer."
               >
                 <Link className="btn" href="/marka/discover">
-                  Influencer keşfet
+                  Influencer ara
                 </Link>
               </EmptyStateCard>
             </section>
           ) : offers.length === 0 ? (
             <>
               <ShellPanelHint>
-                {tabKey === "aktif" && "Devam eden üretim ve teslim aşamaları; sohbet ve kart aksiyonlarıyla ilerleyin."}
+                {tabKey === "aktif" && "Devam eden üretim ve influencer teslimleri; sohbetten takip edin."}
                 {tabKey === "tamamlanan" && "Tamamlanan iş birlikleri; raporlama ve arşiv için referans."}
                 {tabKey === "arsiv" && "Reddedilen veya iptal edilen kayıtlar."}
               </ShellPanelHint>
@@ -190,14 +190,14 @@ export default async function MarkaCampaignsPage({
                   }
                   description={
                     tabKey === "aktif"
-                      ? "Kabul sonrası süreçler burada listelenir. Keşfet’ten teklif gönderin veya Teklifler’den gelen isteği yanıtlayın."
+                      ? "Kabul sonrası işler burada listelenir. Influencer arayıp teklif gönderin veya Teklifler’den gelen isteği yanıtlayın."
                       : tabKey === "tamamlanan"
                         ? "Tamamlanan iş birlikleri zamanla burada birikir."
                         : "İptal veya red sonrası kayıtlar bu sekmede tutulur."
                   }
                 >
                   <Link className="btn" href="/marka/discover">
-                    Influencer keşfet
+                    Influencer ara
                   </Link>
                 </EmptyStateCard>
               </section>
@@ -205,9 +205,9 @@ export default async function MarkaCampaignsPage({
           ) : (
             <>
               <ShellPanelHint>
-                {tabKey === "aktif" && "Aktif süreçleriniz; teslim ve mesajlaşma için sohbete geçebilirsiniz."}
+                {tabKey === "aktif" && "Aktif süreçleriniz; influencer teslimini ve mesajlaşmayı sohbette takip edin."}
                 {tabKey === "tamamlanan" && "Tamamlanan kayıtlar; gerekirse teklifler sayfasından detay açın."}
-                {tabKey === "arsiv" && "Kapalı veya iptal süreçler; yeni iş birliği için Keşfet’i kullanın."}
+                {tabKey === "arsiv" && "Kapalı veya iptal süreçler; yeni iş birliği için Influencer ara’yı kullanın."}
               </ShellPanelHint>
               <div className="dash-collab-list shell-list-stack">
                 {offers.map((o) => (

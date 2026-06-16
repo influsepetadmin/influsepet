@@ -392,6 +392,12 @@ export function DeliveryPanel({
     isBrand && offerStatus === "DELIVERED" && Boolean(pendingReview);
 
   const latestDelivery = deliveries.length > 0 ? deliveries[0] : null;
+  const deliveryIntroCopy = isBrand
+    ? "Teslimi influencer gönderir; marka olarak burada onay veya revize kararı verirsiniz. Geçmiş kayıtlar aşağıda listelenir."
+    : "Teslim bağlantısı, not ve isteğe bağlı dosya yükleyerek kalıcı kanıt paylaşın. Marka buradan onaylar veya revize ister.";
+  const emptyDeliveryCopy = isBrand
+    ? "Influencer teslim gönderdiğinde bağlantı, not ve dosyalar burada görünür."
+    : "İş teslim aşamasına geldiğinde bağlantı, not veya kanıt dosyalarını buradan gönderebilirsiniz.";
 
   function snapshotPillClass(status: DeliveryStatus): string {
     if (status === "APPROVED") return "chat-delivery-snapshot__pill chat-delivery-snapshot__pill--approved";
@@ -414,8 +420,7 @@ export function DeliveryPanel({
           </div>
         </div>
         <p className="chat-delivery-intro__lede muted">
-          Bağlantı, not ve isteğe bağlı dosya yükleyerek kalıcı kanıt paylaşın; marka inceleyip onaylar veya revize
-          talep eder. Geçmiş kayıtlar aşağıda listelenir.
+          {deliveryIntroCopy}
         </p>
       </div>
 
@@ -683,7 +688,9 @@ export function DeliveryPanel({
       )}
 
       {!loading && !showSubmit && offerStatus === "DELIVERED" && isBrand && !pendingReview && (
-        <p className="chat-delivery-wait-hint muted">İncelenecek teslim kaydı yok.</p>
+        <p className="chat-delivery-wait-hint muted">
+          İncelenecek teslim kaydı yok; influencer yeni teslim gönderdiğinde burada görünür.
+        </p>
       )}
 
       {!loading &&
@@ -694,7 +701,7 @@ export function DeliveryPanel({
             <EmptyStateCard
               icon={<EmptyGlyphInbox />}
               title="Henüz teslim kaydı yok"
-              description="Teslim gönderildiğinde veya geçmiş oluştuğunda burada görünür."
+              description={emptyDeliveryCopy}
             />
           </div>
         )}
@@ -703,7 +710,7 @@ export function DeliveryPanel({
         <div className="chat-delivery-block chat-delivery-block--timeline">
           <div className="chat-delivery-timeline__head">
             <h4 className="chat-delivery-timeline__title">Teslim geçmişi</h4>
-            <p className="chat-delivery-timeline__lede muted">Onaylanan ve önceki sürümler.</p>
+            <p className="chat-delivery-timeline__lede muted">Onaylanan, revize istenen ve önceki sürümler.</p>
           </div>
           <ul className="chat-delivery-timeline__list" role="list">
             {deliveries.map((d) => (

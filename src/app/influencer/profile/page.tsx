@@ -86,10 +86,10 @@ export default async function InfluencerProfilePage({
       <header className="influencer-panel-page__hero">
         <h1 className="influencer-panel-page__title">Profil</h1>
         <p className="influencer-panel-page__lede muted">
-          Görünür bilgilerinizi ve bağlı hesaplarınızı yönetin.
+          Markaların gördüğü profil bilgilerini, sosyal hesapları ve portföyü güncelleyin.
         </p>
         <p className="profile-page__context-hint muted">
-          Tamamlanan genel bilgiler ve doğrulanmış hesaplar keşfette daha güçlü görünmenizi sağlar.
+          Kullanıcı adı, şehir, fiyat ve doğrulama keşfette daha net görünmenizi sağlar.
         </p>
       </header>
 
@@ -203,7 +203,9 @@ export default async function InfluencerProfilePage({
       {tab === "sosyal" && (
         <section className="dash-card dash-card--section">
           <h2 className="dash-section__title">Sosyal hesaplar</h2>
-          <p className="dash-section__lede muted">Bağlı platformlar ve doğrulama durumu.</p>
+          <p className="dash-section__lede muted">
+            Doğrulanmış sosyal hesaplar markalara güven sinyali verir.
+          </p>
           <SocialAccountsSection />
         </section>
       )}
@@ -243,7 +245,7 @@ export default async function InfluencerProfilePage({
             description="Tamamlanan iş birliklerinden gelen herkese açık değerlendirmeler burada listelenecek. Önce teklif süreçlerini ilerletin."
           >
             <Link className="btn" href="/influencer/offers">
-              Tekliflere git
+              Teklifleri incele
             </Link>
           </EmptyStateCard>
         </section>

@@ -13,7 +13,7 @@ function ExploreEyebrow() {
   return (
     <div className="discover-explore__eyebrow">
       <span className="discover-explore__eyebrow-k">Öne çıkanlar</span>
-      <span className="discover-explore__eyebrow-t muted">Arama yapmadan hızlı başlangıç — tıklayınca filtre uygulanır.</span>
+      <span className="discover-explore__eyebrow-t muted">Arama yapmadan hızlı başlangıç — tıklayınca sonuçlar daralır.</span>
     </div>
   );
 }
@@ -166,7 +166,7 @@ export function DiscoverExploreInfluencers({
                   initialSaved={savedInfluencerUserIds.has(p.userId)}
                   defaultOfferAmountTRY={defaultAmt}
                   cardClassName="influencer-result-card influencer-result-card--hub influencer-result-card--explore-rail"
-                  profileLinkLabel="Profil"
+                  profileLinkLabel="Profili incele"
                   submitButtonLabel="İş birliği isteği gönder"
                   briefRows={2}
                 />
@@ -205,7 +205,7 @@ export function DiscoverExploreInfluencers({
                   initialSaved={savedInfluencerUserIds.has(p.userId)}
                   defaultOfferAmountTRY={defaultAmt}
                   cardClassName="influencer-result-card influencer-result-card--hub influencer-result-card--explore-rail"
-                  profileLinkLabel="Profil"
+                  profileLinkLabel="Profili incele"
                   submitButtonLabel="İş birliği isteği gönder"
                   briefRows={2}
                   isVerifiedSocial
@@ -245,7 +245,7 @@ export function DiscoverExploreInfluencers({
                   initialSaved={savedInfluencerUserIds.has(p.userId)}
                   defaultOfferAmountTRY={defaultAmt}
                   cardClassName="influencer-result-card influencer-result-card--hub influencer-result-card--explore-rail"
-                  profileLinkLabel="Profil"
+                  profileLinkLabel="Profili incele"
                   submitButtonLabel="İş birliği isteği gönder"
                   briefRows={2}
                 />
@@ -367,7 +367,7 @@ export function DiscoverExploreBrands({
                   initialSaved={savedBrandUserIds.has(b.userId)}
                   defaultOfferAmountTRY={defaultAmt}
                   cardClassName="brand-result-card brand-result-card--hub brand-result-card--explore-rail"
-                  profileLinkLabel="Profil"
+                  profileLinkLabel="Profili incele"
                   submitButtonLabel="Markaya iş birliği isteği gönder"
                   briefRows={2}
                   isVerifiedSocial
@@ -401,7 +401,7 @@ export function DiscoverExploreBrands({
                   initialSaved={savedBrandUserIds.has(b.userId)}
                   defaultOfferAmountTRY={defaultAmt}
                   cardClassName="brand-result-card brand-result-card--hub brand-result-card--explore-rail"
-                  profileLinkLabel="Profil"
+                  profileLinkLabel="Profili incele"
                   submitButtonLabel="Markaya iş birliği isteği gönder"
                   briefRows={2}
                 />
@@ -434,7 +434,7 @@ export function DiscoverExploreBrands({
                   initialSaved={savedBrandUserIds.has(b.userId)}
                   defaultOfferAmountTRY={defaultAmt}
                   cardClassName="brand-result-card brand-result-card--hub brand-result-card--explore-rail"
-                  profileLinkLabel="Profil"
+                  profileLinkLabel="Profili incele"
                   submitButtonLabel="Markaya iş birliği isteği gönder"
                   briefRows={2}
                 />

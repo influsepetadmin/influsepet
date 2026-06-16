@@ -63,7 +63,7 @@ export default async function InfluencerSavedPage() {
         }
         action={
           <Link className="btn secondary" href="/influencer/discover">
-            Keşfet
+            Marka ara
           </Link>
         }
       />
@@ -77,7 +77,7 @@ export default async function InfluencerSavedPage() {
             description="Keşfet’te kartlardan “Kaydet” ile listeyi oluşturun; teklif yazmadan önce buradan açın."
           >
             <Link className="btn" href="/influencer/discover#influencer-marka-ara">
-              Keşfede marka bul
+              Marka ara
             </Link>
           </EmptyStateCard>
         </section>
@@ -102,11 +102,11 @@ export default async function InfluencerSavedPage() {
                   city={b.city}
                   profileImageUrl={b.profileImageUrl}
                   categoriesLine={cats}
-                  whyLine="Kayıtlı listenizde"
+                  whyLine="Teklif öncesi kaydettiniz"
                   initialSaved={true}
                   defaultOfferAmountTRY={defaultAmt}
                   cardClassName="brand-result-card brand-result-card--discover brand-result-card--hub saved-page-card"
-                  profileLinkLabel="Profil"
+                  profileLinkLabel="Profili incele"
                   submitButtonLabel="İş birliği isteği gönder"
                   briefRows={2}
                 />

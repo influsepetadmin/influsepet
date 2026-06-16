@@ -64,7 +64,7 @@ export default async function MarkaSavedPage() {
         }
         action={
           <Link className="btn secondary" href="/marka/discover">
-            Keşfet
+            Influencer ara
           </Link>
         }
       />
@@ -91,7 +91,7 @@ export default async function MarkaSavedPage() {
             description="Keşfet’te kartlardan “Kaydet” ile listeyi oluşturun; ardından buradan teklife geçin."
           >
             <Link className="btn" href="/marka/discover#marka-influencer-ara">
-              Keşfede profil bul
+              Influencer ara
             </Link>
           </EmptyStateCard>
         </section>
@@ -116,7 +116,7 @@ export default async function MarkaSavedPage() {
                   city={p.city}
                   profileImageUrl={p.profileImageUrl}
                   categoriesLine={categories}
-                  whyLine="Kayıtlı listenizde"
+                  whyLine="Teklif öncesi kaydettiniz"
                   followerCount={p.followerCount}
                   basePriceTRY={p.basePriceTRY}
                   nicheText={p.nicheText}
@@ -124,7 +124,7 @@ export default async function MarkaSavedPage() {
                   initialSaved={true}
                   defaultOfferAmountTRY={defaultAmt}
                   cardClassName="influencer-result-card influencer-result-card--discover influencer-result-card--hub saved-page-card"
-                  profileLinkLabel="Profil"
+                  profileLinkLabel="Profili incele"
                   submitButtonLabel="İş birliği isteği gönder"
                   briefRows={2}
                 />

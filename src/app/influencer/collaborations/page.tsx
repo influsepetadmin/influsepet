@@ -88,10 +88,10 @@ export default async function InfluencerCollaborationsPage({
   const headerAction = (
     <div className="dashboard-page__actions">
       <Link className="btn btn--sm" href="/influencer/offers">
-        Teklifler
+        Teklifleri incele
       </Link>
       <Link className="btn secondary btn--sm" href="/influencer/discover">
-        Keşfet
+        Marka ara
       </Link>
     </div>
   );
@@ -121,9 +121,9 @@ export default async function InfluencerCollaborationsPage({
       </ShellControlBar>
 
       <ShellPanelHint>
-        {tabKey === "aktif" && "Üzerinde çalışılan anlaşmalar; teslim ve mesajlaşma için sohbete geçin."}
-        {tabKey === "teslim" && "İnceleme veya onay bekleyen teslimler."}
-        {tabKey === "tamamlanan" && "Kapanmış iş birlikleri ve ödeme süreçleri."}
+        {tabKey === "aktif" && "Üzerinde çalışılan anlaşmalar; mesajlaşma ve teslim için sohbete geçin."}
+        {tabKey === "teslim" && "Markanın incelemesine gönderilen teslimler burada görünür."}
+        {tabKey === "tamamlanan" && "Kapanan iş birlikleri ve değerlendirme adımları burada görünür."}
         {tabKey === "revize" && "Revize talebi açık kayıtlar; marka geri bildirimini kart üzerinden takip edin."}
       </ShellPanelHint>
 
@@ -151,16 +151,16 @@ export default async function InfluencerCollaborationsPage({
               noOffersEver && tabKey === "aktif"
                 ? "Kabul edilmiş bir teklif olunca süreçler burada görünür. Önce marka bulup teklif gönderin veya gelen teklifi yanıtlayın."
                 : tabKey === "aktif"
-                  ? "Kabul sonrası üretim veya teslim aşamasındaki kayıtlar burada listelenir. Açık teklifleriniz için Teklifler’e bakın."
+                  ? "Kabul sonrası üretim ve teslim aşamasındaki kayıtlar burada listelenir. Açık teklifler için Teklifler’e bakın."
                   : tabKey === "teslim"
-                    ? "Teslim bekleyen aşamaya geçen iş birliği olunca burada görünür."
+                    ? "Teslim gönderip marka incelemesi beklediğiniz işler burada görünür."
                     : tabKey === "tamamlanan"
                       ? "Tamamlanan iş birlikleri zamanla burada birikir."
                       : "Revize istenen teklifler bu sekmede toplanır."
             }
           >
             <Link className="btn" href={noOffersEver && tabKey === "aktif" ? "/influencer/discover" : "/influencer/offers"}>
-              {noOffersEver && tabKey === "aktif" ? "Marka keşfet" : "Tekliflere git"}
+              {noOffersEver && tabKey === "aktif" ? "Marka ara" : "Teklifleri incele"}
             </Link>
           </EmptyStateCard>
         </section>

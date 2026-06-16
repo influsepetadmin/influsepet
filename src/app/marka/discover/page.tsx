@@ -110,7 +110,7 @@ export default async function MarkaDiscoverPage({
             icon={<EmptyGlyphMagnifyingGlass />}
             hint="Keşfet için profil"
             title="Önce marka profilinizi tamamlayın"
-            description="Şirket bilgileriniz olmadan arama ve teklif açılmaz; birkaç alanla hemen başlayabilirsiniz."
+            description="Şirket bilgileriniz olmadan arama ve teklif açılmaz; birkaç temel alanı kaydedin."
           >
             <Link className="btn" href="/marka/profile?tab=genel">
               Profili tamamla
@@ -269,7 +269,7 @@ export default async function MarkaDiscoverPage({
             description="Beğendiğiniz içerik üreticilerini kart üzerinden kaydedin; teklif yazmadan önce buradan hızlıca açın."
           >
             <Link className="btn" href="/marka/discover#marka-influencer-ara">
-              Keşfede profil bul
+              Influencer ara
             </Link>
           </EmptyStateCard>
         ) : (

@@ -34,7 +34,7 @@ function InfluencerDiscoverCard({
       initialSaved={initialSaved}
       defaultOfferAmountTRY={defaultAmt}
       cardClassName="influencer-result-card influencer-result-card--discover influencer-result-card--hub"
-      profileLinkLabel="Profil"
+      profileLinkLabel="Profili incele"
       submitButtonLabel="İş birliği isteği gönder"
       briefRows={2}
     />
