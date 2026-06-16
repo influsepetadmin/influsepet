@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { Bookmark } from "lucide-react";
-import CategoryMultiSelect from "@/components/CategoryMultiSelect";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
-import CitySelect from "@/components/CitySelect";
 import { DiscoverActiveFilters } from "@/components/marketplace/DiscoverActiveFilters";
+import { DiscoverFilterPanel } from "@/components/marketplace/DiscoverFilterPanel";
 import { TrackedDiscoverSubmitButton } from "@/components/marketplace/TrackedDiscoverSubmitButton";
 import { DiscoverExploreInfluencers } from "@/components/marketplace/DiscoverExplore";
 import { DiscoverySearchQueryField } from "@/components/marketplace/DiscoverySearchQueryField";
@@ -65,7 +64,7 @@ export default async function MarkaDiscoverPage({
   const selectedCategoryKeys = categoriesArray.filter(Boolean).slice(0, 3);
   const hasActiveSearch =
     Boolean(city.trim()) || selectedCategoryKeys.length > 0 || Boolean(q);
-  const showExploreRail = canUseMarketplace && !q.trim();
+  const showExploreRail = canUseMarketplace && !hasActiveSearch;
 
   const explorePromise = showExploreRail ? loadInfluencerDiscoverExplore(prisma) : Promise.resolve(null);
 
@@ -120,27 +119,30 @@ export default async function MarkaDiscoverPage({
         </section>
       ) : (
         <section
-          className="dash-card dash-card--section dash-card--emphasis discovery-search-card"
+          className="dash-card dash-card--section dash-card--emphasis discovery-search-card discovery-search-card--compact"
           id="marka-influencer-ara"
         >
           <header className="discovery-search-card__intro">
             <h2 className="dash-section__title discovery-search-card__title">İçerik üreticisi bul</h2>
             <p className="dash-section__lede muted discovery-search-card__lede">
-              İsim, kullanıcı adı, şehir, kategori veya niş alanına göre hızlıca arayın.
+              Arayın, sonuçları hemen görün.
             </p>
             <p className="discovery-context-hint muted">
-              Arayın, gerekirse filtreleyin; uygun profilde teklif alanını açın.
+              Profili inceleyin veya teklif gönderin.
             </p>
           </header>
-          <div className="discovery-next-steps" aria-label="Keşfet adımları">
-            <span>1. Ara</span>
-            <span>2. Daralt</span>
-            <span>3. Profil veya teklif</span>
-          </div>
           <FirstVisitGuidanceGate scope="discover" />
 
           <div className="discovery-search-panel">
-            <form className="influencer-search-form discovery-search-form" method="get" action="/marka/discover">
+            <form
+              className="influencer-search-form discovery-search-form discovery-search-form--query"
+              method="get"
+              action="/marka/discover"
+            >
+              {city.trim() ? <input type="hidden" name="city" value={city.trim()} /> : null}
+              {selectedCategoryKeys.map((key) => (
+                <input key={key} type="hidden" name="categories" value={key} />
+              ))}
               <div className="discovery-search-field discovery-search-field--query">
                 <label className="discovery-search-field__label" htmlFor="discovery-query-marka-discover">
                   İsim, kullanıcı adı, kategori veya şehir ara
@@ -156,33 +158,14 @@ export default async function MarkaDiscoverPage({
                 </p>
               </div>
 
-              <div className="discovery-search-field">
-                <label className="discovery-search-field__label" htmlFor="city-marka-discover">
-                  Şehir
-                </label>
-                <div className="influencer-search-form__city discovery-search-field__control--city">
-                  <CitySelect
-                    id="city-marka-discover"
-                    name="city"
-                    defaultValue={city}
-                    required={false}
-                    searchable
-                  />
-                </div>
-              </div>
-
-              <div className="discovery-search-field discovery-search-field--categories">
-                <span className="discovery-search-field__label" id="marka-disc-cat-label">
-                  Kategori
-                </span>
-                <div className="discovery-search-field__control" aria-labelledby="marka-disc-cat-label">
-                  <CategoryMultiSelect
-                    filterable
-                    initialSelected={selectedCategoryKeys}
-                    inputName="categories"
-                  />
-                </div>
-              </div>
+              {hasActiveSearch ? (
+                <DiscoverActiveFilters
+                  basePath="/marka/discover"
+                  q={q}
+                  city={city.trim()}
+                  categoryKeys={selectedCategoryKeys}
+                />
+              ) : null}
 
               <div className="influencer-search-form__actions discovery-search-actions">
                 <TrackedDiscoverSubmitButton location="marka_discover" />
@@ -191,17 +174,8 @@ export default async function MarkaDiscoverPage({
                 </a>
               </div>
             </form>
+
           </div>
-
-          {hasActiveSearch ? (
-            <DiscoverActiveFilters
-              basePath="/marka/discover"
-              q={q}
-              city={city.trim()}
-              categoryKeys={selectedCategoryKeys}
-            />
-          ) : null}
-
         </section>
       )}
 
@@ -258,6 +232,18 @@ export default async function MarkaDiscoverPage({
             )}
           </div>
         </section>
+      ) : null}
+
+      {canUseMarketplace ? (
+        <DiscoverFilterPanel
+          basePath="/marka/discover"
+          cityInputId="city-marka-discover"
+          categoryLabelId="marka-disc-cat-label"
+          city={city.trim()}
+          q={q}
+          selectedCategoryKeys={selectedCategoryKeys}
+          submitLocation="marka_discover"
+        />
       ) : null}
 
       {canUseMarketplace && showExploreRail && exploreData ? (

@@ -1,10 +1,9 @@
 import Link from "next/link";
-import CategoryMultiSelect from "@/components/CategoryMultiSelect";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
-import CitySelect from "@/components/CitySelect";
 import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
 import { DiscoverActiveFilters } from "@/components/marketplace/DiscoverActiveFilters";
+import { DiscoverFilterPanel } from "@/components/marketplace/DiscoverFilterPanel";
 import { TrackedDiscoverSubmitButton } from "@/components/marketplace/TrackedDiscoverSubmitButton";
 import { DiscoverExploreBrands } from "@/components/marketplace/DiscoverExplore";
 import { DiscoverySearchQueryField } from "@/components/marketplace/DiscoverySearchQueryField";
@@ -61,7 +60,7 @@ export default async function InfluencerDiscoverPage({
         : [];
   const selectedCategoryKeys = categoriesArray.filter(Boolean).slice(0, 3);
   const hasBrandSearch = Boolean(city) || Boolean(q) || selectedCategoryKeys.length > 0;
-  const showExploreRail = Boolean(profile) && !q.trim();
+  const showExploreRail = Boolean(profile) && !hasBrandSearch;
 
   const explorePromise = showExploreRail ? loadBrandDiscoverExplore(prisma) : Promise.resolve(null);
 
@@ -103,27 +102,30 @@ export default async function InfluencerDiscoverPage({
 
       {profile ? (
         <section
-          className="dash-card dash-card--section dash-card--emphasis discovery-search-card"
+          className="dash-card dash-card--section dash-card--emphasis discovery-search-card discovery-search-card--compact"
           id="influencer-marka-ara"
         >
           <header className="discovery-search-card__intro">
             <h2 className="dash-section__title discovery-search-card__title">Marka bul</h2>
             <p className="dash-section__lede muted discovery-search-card__lede">
-              Marka adı, şehir veya kategoriye göre hızlıca arayın.
+              Arayın, sonuçları hemen görün.
             </p>
             <p className="discovery-context-hint muted">
-              Arayın, gerekirse filtreleyin; uygun markada teklif alanını açın.
+              Profili inceleyin veya teklif gönderin.
             </p>
           </header>
-          <div className="discovery-next-steps" aria-label="Keşfet adımları">
-            <span>1. Ara</span>
-            <span>2. Daralt</span>
-            <span>3. Profil veya teklif</span>
-          </div>
           <FirstVisitGuidanceGate scope="discover" />
 
           <div className="discovery-search-panel">
-            <form className="influencer-search-form discovery-search-form" method="get" action="/influencer/discover">
+            <form
+              className="influencer-search-form discovery-search-form discovery-search-form--query"
+              method="get"
+              action="/influencer/discover"
+            >
+              {city ? <input type="hidden" name="city" value={city} /> : null}
+              {selectedCategoryKeys.map((key) => (
+                <input key={key} type="hidden" name="categories" value={key} />
+              ))}
               <div className="discovery-search-field discovery-search-field--query">
                 <label className="discovery-search-field__label" htmlFor="discovery-query-influencer-discover">
                   Marka, kategori veya şehir ara
@@ -139,33 +141,14 @@ export default async function InfluencerDiscoverPage({
                 </p>
               </div>
 
-              <div className="discovery-search-field">
-                <label className="discovery-search-field__label" htmlFor="brand-city-discover">
-                  Şehir
-                </label>
-                <div className="influencer-search-form__city discovery-search-field__control--city">
-                  <CitySelect
-                    id="brand-city-discover"
-                    name="city"
-                    defaultValue={city}
-                    required={false}
-                    searchable
-                  />
-                </div>
-              </div>
-
-              <div className="discovery-search-field discovery-search-field--categories">
-                <span className="discovery-search-field__label" id="influencer-disc-cat-label">
-                  Kategori
-                </span>
-                <div className="discovery-search-field__control" aria-labelledby="influencer-disc-cat-label">
-                  <CategoryMultiSelect
-                    filterable
-                    initialSelected={selectedCategoryKeys}
-                    inputName="categories"
-                  />
-                </div>
-              </div>
+              {hasBrandSearch ? (
+                <DiscoverActiveFilters
+                  basePath="/influencer/discover"
+                  q={q}
+                  city={city}
+                  categoryKeys={selectedCategoryKeys}
+                />
+              ) : null}
 
               <div className="influencer-search-form__actions discovery-search-actions">
                 <TrackedDiscoverSubmitButton location="influencer_discover" />
@@ -175,15 +158,6 @@ export default async function InfluencerDiscoverPage({
               </div>
             </form>
           </div>
-
-          {hasBrandSearch ? (
-            <DiscoverActiveFilters
-              basePath="/influencer/discover"
-              q={q}
-              city={city}
-              categoryKeys={selectedCategoryKeys}
-            />
-          ) : null}
 
         </section>
       ) : null}
@@ -239,6 +213,18 @@ export default async function InfluencerDiscoverPage({
             )}
           </div>
         </section>
+      ) : null}
+
+      {profile ? (
+        <DiscoverFilterPanel
+          basePath="/influencer/discover"
+          cityInputId="brand-city-discover"
+          categoryLabelId="influencer-disc-cat-label"
+          city={city}
+          q={q}
+          selectedCategoryKeys={selectedCategoryKeys}
+          submitLocation="influencer_discover"
+        />
       ) : null}
 
       {profile && showExploreRail && exploreData ? (
