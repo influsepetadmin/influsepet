@@ -210,7 +210,7 @@ main:has(.app-shell) {
   border: 1px solid rgba(203, 213, 225, 0.78);
   border-radius: var(--radius-btn);
   background: rgba(255, 255, 255, 0.82);
-  color: var(--text);
+  color: #334155;
   cursor: pointer;
   transition:
     background 0.18s ease,
@@ -228,7 +228,10 @@ main:has(.app-shell) {
 
 .app-shell-sidebar__pin-icon {
   display: block;
-  color: #111827;
+  width: 20px;
+  height: 20px;
+  color: currentColor;
+  stroke-width: 2.08;
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.72));
   transform-origin: center;
   transition:
@@ -237,18 +240,15 @@ main:has(.app-shell) {
 }
 
 .app-shell-sidebar__collapse-btn:hover .app-shell-sidebar__pin-icon {
-  color: #0f172a;
   transform: translateY(-1px);
 }
 
 .app-shell--sidebar-collapsed .app-shell-sidebar__pin-icon {
-  color: #475569;
-  transform: rotate(-8deg);
+  color: currentColor;
 }
 
 .app-shell--sidebar-collapsed .app-shell-sidebar__collapse-btn:hover .app-shell-sidebar__pin-icon {
-  color: #111827;
-  transform: rotate(0deg) translateY(-1px);
+  transform: translateY(-1px);
 }
 
 /* Collapsed rail: delayed tooltips (nav + collapse control) */
@@ -360,20 +360,30 @@ main:has(.app-shell) {
 
 .app-shell-sidebar-item__icon {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
-  color: #94a3b8;
+  color: #64748b;
   transition:
     color 0.2s ease,
     transform 0.2s ease;
 }
 
+.app-shell-sidebar-item__icon svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.05;
+}
+
 .app-shell-sidebar-item:not(.app-shell-sidebar-item--active):hover .app-shell-sidebar-item__icon {
-  color: #6366f1;
+  color: #1f2937;
   transform: scale(1.04);
 }
 
 .app-shell-sidebar-item--active .app-shell-sidebar-item__icon {
-  color: #4f46e5;
+  color: color-mix(in srgb, var(--app-primary, #4f46e5) 78%, #111827);
 }
 
 .app-shell-sidebar-item__label {
@@ -513,7 +523,7 @@ main:has(.app-shell) {
   border-radius: 10px;
   border: 1px solid transparent;
   background: transparent;
-  color: var(--muted);
+  color: #64748b;
   cursor: pointer;
   text-decoration: none !important;
   transition:
@@ -523,11 +533,11 @@ main:has(.app-shell) {
 
 .app-shell__footer-icon-btn:hover {
   background: rgba(248, 250, 252, 0.95);
-  color: var(--text);
+  color: #111827;
 }
 
 .app-shell__footer-icon-btn--quiet {
-  color: #94a3b8;
+  color: #64748b;
   border-color: transparent;
 }
 
@@ -535,6 +545,14 @@ main:has(.app-shell) {
   color: #475569;
   background: rgba(241, 245, 249, 0.85);
   border-color: rgba(226, 232, 240, 0.85);
+}
+
+.app-shell__footer-icon-btn svg,
+.app-shell-topbar__menu-btn svg,
+.app-shell-mobile-bar__item svg {
+  width: 21px;
+  height: 21px;
+  stroke-width: 2.05;
 }
 
 .app-shell__logout-form {
@@ -763,7 +781,7 @@ main:has(.app-shell) {
   border-radius: 12px;
   font-size: 0.62rem;
   font-weight: 700;
-  color: #94a3b8;
+  color: #64748b;
   text-decoration: none !important;
   border: none;
   background: transparent;
@@ -775,11 +793,11 @@ main:has(.app-shell) {
 
 .app-shell-mobile-bar__item:hover {
   background: rgba(238, 242, 255, 0.75);
-  color: #4f46e5;
+  color: #1f2937;
 }
 
 .app-shell-mobile-bar__item--active {
-  color: var(--app-primary);
+  color: color-mix(in srgb, var(--app-primary, #4f46e5) 82%, #111827);
   background: #ffffff;
   font-weight: 800;
   box-shadow: inset 0 0 0 1px rgba(199, 210, 254, 0.45);

@@ -3376,7 +3376,16 @@ main:has(.public-profile-page--app) {
 .chat-thread--premium .empty-state-card__icon {
   margin-left: auto;
   margin-right: auto;
-  opacity: 0.88;
+  color: color-mix(in srgb, var(--app-primary, #4f46e5) 70%, #111827);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-color: rgba(203, 213, 225, 0.88);
+  opacity: 1;
+}
+
+.chat-thread--premium .empty-state-card__glyph-svg {
+  width: 26px;
+  height: 26px;
+  stroke-width: 2.05;
 }
 
 /* Date groups — subtle rail */
@@ -3602,7 +3611,10 @@ main:has(.public-profile-page--app) {
 
 .chat-event-pill__glyph svg {
   display: block;
+  width: 13px;
+  height: 13px;
   flex-shrink: 0;
+  stroke-width: 2;
 }
 
 .chat-event-pill--positive {
@@ -5966,7 +5978,13 @@ main:has(.dashboard-page) {
 .dashboard-page .discovery-search-query__icon {
   flex-shrink: 0;
   color: var(--app-primary);
-  opacity: 0.88;
+  opacity: 0.94;
+}
+
+.dashboard-page .discovery-search-query__icon svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.05;
 }
 
 .dashboard-page .discovery-search-query__input {
@@ -6086,6 +6104,12 @@ main:has(.dashboard-page) {
 
 .dashboard-page .discovery-save-btn__text {
   line-height: 1;
+}
+
+.dashboard-page .discovery-save-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.05;
 }
 
 .dashboard-page .saved-page__count {
@@ -7998,10 +8022,11 @@ main:has(.dashboard-page) {
 }
 
 .collab-meta-chip__glyph {
-  width: 14px;
-  height: 14px;
-  color: #6366f1;
-  opacity: 0.9;
+  width: 15px;
+  height: 15px;
+  color: color-mix(in srgb, var(--app-primary, #4f46e5) 72%, #111827);
+  opacity: 1;
+  stroke-width: 2.05;
 }
 
 .collab-meta-chip__body {
@@ -9273,16 +9298,24 @@ main:has(.dashboard-page) {
   height: 52px;
   margin-bottom: 12px;
   border-radius: 14px;
-  background: linear-gradient(145deg, #eef2ff 0%, #e0e7ff 100%);
-  border: 1px solid rgba(165, 180, 252, 0.55);
+  color: color-mix(in srgb, var(--app-primary, #4f46e5) 72%, #111827);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(203, 213, 225, 0.88);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.65) inset,
-    0 6px 16px rgba(79, 70, 229, 0.1);
+    0 1px 0 rgba(255, 255, 255, 0.92) inset,
+    0 6px 16px rgba(15, 23, 42, 0.055);
   font-size: 1.38rem;
 }
 
 .dashboard-page .dash-card .empty-state-card__icon:has(.empty-state-card__glyph-svg) {
   font-size: unset;
+}
+
+.dashboard-page .dash-card .empty-state-card__glyph-svg {
+  width: 26px;
+  height: 26px;
+  color: currentColor;
+  stroke-width: 2.05;
 }
 
 .status-badge {
