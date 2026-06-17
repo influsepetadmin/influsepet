@@ -1,5 +1,14 @@
 import type { PublicProfileByUsernameResponse } from "@/lib/publicProfile/publicProfileByUsername";
-import { PublicProfileStatCards } from "./PublicProfileStatCards";
+import { BadgeCheck, ListChecks, ReceiptTurkishLira, Star, UsersRound } from "lucide-react";
+import { PublicProfileStatCards, type PublicProfileStatIconMap } from "./PublicProfileStatCards";
+
+const INFLUENCER_STAT_ICONS: PublicProfileStatIconMap = {
+  "Tamamlanan iş birliği": BadgeCheck,
+  "Ortalama puan": Star,
+  "Puanlama sayısı": ListChecks,
+  Takipçi: UsersRound,
+  "Baz fiyat": ReceiptTurkishLira,
+};
 
 export function PublicProfileStats({ data }: { data: PublicProfileByUsernameResponse }) {
   const items: { label: string; value: string; displayLabel?: string }[] = [
@@ -23,5 +32,5 @@ export function PublicProfileStats({ data }: { data: PublicProfileByUsernameResp
     },
   ];
 
-  return <PublicProfileStatCards items={items} iconTreatment="line" />;
+  return <PublicProfileStatCards items={items} iconTreatment="line" lineIcons={INFLUENCER_STAT_ICONS} />;
 }

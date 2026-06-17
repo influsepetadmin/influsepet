@@ -20,7 +20,7 @@ import { getInfluencerPanelAccess } from "@/lib/influencer/panelAccess";
 import { buildOfferTabHref } from "@/lib/panel/offerTabHref";
 import { countOffersByStatusFilter } from "@/lib/panel/offerFilterCounts";
 import { prisma } from "@/lib/prisma";
-import { EmptyGlyphInbox, EmptyGlyphPaperAirplane } from "@/components/icons/emptyStateGlyphs";
+import { EmptyGlyphOffer, EmptyGlyphPaperAirplane } from "@/components/icons/emptyStateGlyphs";
 
 const STATUS_FILTER: { key: string; label: string; match: OfferStatus[] | null }[] = [
   { key: "tumu", label: "Tümü", match: null },
@@ -154,7 +154,7 @@ export default async function InfluencerOffersPage({
       {filtered.length === 0 ? (
         <section className="dash-card dash-card--section dashboard-empty-section">
           <EmptyStateCard
-            icon={tab === "gelen" ? <EmptyGlyphInbox /> : <EmptyGlyphPaperAirplane />}
+            icon={tab === "gelen" ? <EmptyGlyphOffer /> : <EmptyGlyphPaperAirplane />}
             hint={
               tabSourceList.length === 0 && durumKey === "tumu"
                 ? tab === "gelen"

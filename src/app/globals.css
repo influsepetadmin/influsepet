@@ -11841,27 +11841,27 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
   justify-content: center;
   width: 36px;
   height: 36px;
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: #fff;
+  color: var(--public-profile-accent-strong, #4338ca);
   border-radius: 999px;
-  background: var(--public-profile-accent, #64748b);
+  background: linear-gradient(180deg, #ffffff 0%, var(--public-profile-accent-soft, #f8fafc) 100%);
+  border: 1px solid var(--public-profile-accent-border, rgba(199, 210, 254, 0.72));
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.25) inset,
-    0 6px 14px var(--public-profile-accent-shadow, rgba(15, 23, 42, 0.12));
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 6px 14px var(--public-profile-accent-shadow, rgba(15, 23, 42, 0.055));
 }
 
-.public-profile-social-card__glyph--instagram {
-  background: linear-gradient(145deg, #e11d48 0%, #be185d 50%, #7c3aed 100%);
+.public-profile-social-card__glyph svg {
+  display: block;
+  width: 19px;
+  height: 19px;
+  stroke-width: 2.05;
 }
 
-.public-profile-social-card__glyph--tiktok {
-  background: linear-gradient(145deg, #0f172a 0%, #334155 100%);
-}
-
+.public-profile-social-card__glyph--instagram,
+.public-profile-social-card__glyph--tiktok,
 .public-profile-social-card__glyph--youtube {
-  background: linear-gradient(145deg, #dc2626 0%, #991b1b 100%);
+  background: linear-gradient(180deg, #ffffff 0%, var(--public-profile-accent-soft, #f8fafc) 100%);
+  color: var(--public-profile-accent-strong, #4338ca);
 }
 
 .public-profile-social-card__head-text {
@@ -11882,6 +11882,23 @@ main:has(.public-profile-page--app) .public-profile-page .btn.secondary:hover {
 
 .public-profile-social-card .social-verification-badge {
   max-width: 100%;
+}
+
+.public-profile-social-card .social-verification-badge--public {
+  padding: 3px 8px 3px 5px;
+  color: var(--public-profile-accent-strong, #4338ca);
+  background: color-mix(in srgb, var(--public-profile-accent-soft, #eef2ff) 68%, white);
+  border-color: var(--public-profile-accent-border, rgba(199, 210, 254, 0.72));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.85) inset;
+}
+
+.public-profile-social-card .social-verification-badge--public .social-verification-badge__mark {
+  width: 15px;
+  height: 15px;
+  background: transparent;
+  color: currentColor;
+  border: 1px solid currentColor;
+  font-size: 0.58rem;
 }
 
 .public-profile-social-card .social-verification-badge__text {

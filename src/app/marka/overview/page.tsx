@@ -11,7 +11,7 @@ import { getMarkaPanelAccess } from "@/lib/marka/panelAccess";
 import { prisma } from "@/lib/prisma";
 import { statusBadgeLabel } from "@/components/offers/StatusBadge";
 import { isBrandDashboardProfileComplete } from "@/lib/dashboardProfileCompletion";
-import { EmptyGlyphChatBubble, EmptyGlyphInbox } from "@/components/icons/emptyStateGlyphs";
+import { EmptyGlyphChatHistory, EmptyGlyphOffer } from "@/components/icons/emptyStateGlyphs";
 
 function messagePreview(body: string, kind: string): string {
   if (kind === "MEDIA") {
@@ -197,7 +197,7 @@ export default async function MarkaOverviewPage() {
         <OverviewSectionCard title="Son teklifler" footerHref="/marka/offers" footerLabel="Tüm teklifler">
           {!canUseMarketplace ? (
             <EmptyStateCard
-              icon={<EmptyGlyphInbox />}
+              icon={<EmptyGlyphOffer />}
               title="Önce marka profilini tamamla"
               description="Teklif göndermek ve gelen istekleri görmek için şirket profilinizi kaydedin."
             >
@@ -207,7 +207,7 @@ export default async function MarkaOverviewPage() {
             </EmptyStateCard>
           ) : recentOffers.length === 0 ? (
             <EmptyStateCard
-              icon={<EmptyGlyphInbox />}
+              icon={<EmptyGlyphOffer />}
               title="Henüz teklif yok"
               description="Influencer arayıp teklif gönderin veya gelen istekleri Teklifler’de yanıtlayın."
             >
@@ -241,13 +241,13 @@ export default async function MarkaOverviewPage() {
         <OverviewSectionCard title="Son sohbetler" footerHref="/chat" footerLabel="Tüm sohbetler">
           {!canUseMarketplace ? (
             <EmptyStateCard
-              icon={<EmptyGlyphChatBubble />}
+              icon={<EmptyGlyphChatHistory />}
               title="Sohbetler profil sonrası açılır"
               description="Marka profilinizi kaydedince teklif sohbetleri burada görünür."
             />
           ) : recentChats.length === 0 ? (
             <EmptyStateCard
-              icon={<EmptyGlyphChatBubble />}
+              icon={<EmptyGlyphChatHistory />}
               title="Henüz sohbet yok"
               description="Teklif gönderdiğinizde veya gelen isteği yanıtladığınızda sohbet burada açılır."
             >

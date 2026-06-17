@@ -7,7 +7,7 @@ import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { getSessionPayload } from "@/lib/session";
 import { StatusBadge } from "@/components/offers/StatusBadge";
 import {
-  EmptyGlyphChatBubble,
+  EmptyGlyphChatHistory,
   EmptyGlyphExclamationTriangle,
   EmptyGlyphLockClosed,
 } from "@/components/icons/emptyStateGlyphs";
@@ -182,7 +182,7 @@ export default async function ChatIndexPage() {
       {conversations.length === 0 ? (
         <section className="dash-card dash-card--section dashboard-empty-section chat-inbox-empty-card">
           <EmptyStateCard
-            icon={<EmptyGlyphChatBubble />}
+            icon={<EmptyGlyphChatHistory />}
             hint="Sohbet için önce teklif akışı gerekir"
             title="Henüz sohbet yok"
             description="Sohbetler teklif oluşturulduğunda veya gelen teklif yanıtlandığında açılır. Açık bir teklifiniz varsa Teklifler’den ilgili karta girin."

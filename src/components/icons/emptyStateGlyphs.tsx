@@ -1,4 +1,5 @@
 import type { SVGProps } from "react";
+import { Inbox, MessageSquareText } from "lucide-react";
 import {
   PublicProfileIconBuildingOffice2,
   PublicProfileIconChatBubbleLeftRight,
@@ -23,6 +24,10 @@ export function EmptyGlyphChatBubble(p: SVGProps<SVGSVGElement>) {
   return <PublicProfileIconChatBubbleLeftRight {...big(p)} />;
 }
 
+export function EmptyGlyphChatHistory(p: SVGProps<SVGSVGElement>) {
+  return <MessageSquareText {...big(p)} />;
+}
+
 export function EmptyGlyphLockClosed(p: SVGProps<SVGSVGElement>) {
   return <PublicProfileIconLockClosed {...big(p)} />;
 }
@@ -33,6 +38,10 @@ export function EmptyGlyphMagnifyingGlass(p: SVGProps<SVGSVGElement>) {
 
 export function EmptyGlyphInbox(p: SVGProps<SVGSVGElement>) {
   return <PublicProfileIconInbox {...big(p)} />;
+}
+
+export function EmptyGlyphOffer(p: SVGProps<SVGSVGElement>) {
+  return <Inbox {...big(p)} />;
 }
 
 export function EmptyGlyphPaperAirplane(p: SVGProps<SVGSVGElement>) {

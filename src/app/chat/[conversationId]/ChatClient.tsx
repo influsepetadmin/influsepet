@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatOfferWorkflowActions } from "@/components/chat/ChatOfferWorkflowActions";
 import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
-import { EmptyGlyphChatBubble } from "@/components/icons/emptyStateGlyphs";
+import { EmptyGlyphChatHistory } from "@/components/icons/emptyStateGlyphs";
 import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
 import { CollaborationRatingPanel } from "@/components/offers/CollaborationRatingPanel";
 import { DeliveryPanel } from "@/components/offers/DeliveryPanel";
@@ -725,7 +725,7 @@ export default function ChatClient({
         ) : messages.length === 0 ? (
           <div className="chat-thread-empty chat-thread-empty--premium">
             <EmptyStateCard
-              icon={<EmptyGlyphChatBubble />}
+              icon={<EmptyGlyphChatHistory />}
               title="Henüz mesaj yok"
               description="İlk mesajı gönderin; teslim bağlantısı, dosya ve değerlendirme adımları bu çalışma alanında takip edilir."
             />

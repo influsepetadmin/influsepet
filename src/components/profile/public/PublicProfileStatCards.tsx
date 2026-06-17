@@ -1,4 +1,4 @@
-import type { ComponentType, SVGProps } from "react";
+import type { ElementType, SVGProps } from "react";
 import {
   PublicProfileIconBanknote,
   PublicProfileIconBriefcase,
@@ -22,8 +22,10 @@ const STAT_EMOJI: Record<string, string> = {
   "Baz fiyat": "₺",
 };
 
-/** İnce çizgi ikonlar — yalnızca influencer public profilinde `iconTreatment="line"` ile. */
-const STAT_LINE: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
+export type PublicProfileStatIconMap = Partial<Record<string, ElementType<SVGProps<SVGSVGElement>>>>;
+
+/** İnce çizgi ikonlar — varsayılan public profil stat ikonları. */
+const STAT_LINE: PublicProfileStatIconMap = {
   "Tamamlanan iş birliği": PublicProfileIconBriefcase,
   "Ortalama puan": PublicProfileIconStar,
   "Puanlama sayısı": PublicProfileIconListBullet,
@@ -34,14 +36,16 @@ const STAT_LINE: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
 export function PublicProfileStatCards({
   items,
   iconTreatment = "line",
+  lineIcons,
 }: {
   items: PublicProfileStatItem[];
   iconTreatment?: "emoji" | "line";
+  lineIcons?: PublicProfileStatIconMap;
 }) {
   return (
     <div className="public-profile-stats" data-stat-count={items.length} role="list">
       {items.map((item) => {
-        const LineIcon = STAT_LINE[item.label];
+        const LineIcon = lineIcons?.[item.label] ?? STAT_LINE[item.label];
         const displayLabel = item.displayLabel ?? item.label;
         return (
           <div key={item.label} className="public-profile-stat-card" role="listitem">

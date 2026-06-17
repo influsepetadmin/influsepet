@@ -23,7 +23,7 @@ import {
 import { getInfluencerPanelAccess } from "@/lib/influencer/panelAccess";
 import { prisma } from "@/lib/prisma";
 import { statusBadgeLabel } from "@/components/offers/StatusBadge";
-import { EmptyGlyphChatBubble, EmptyGlyphInbox } from "@/components/icons/emptyStateGlyphs";
+import { EmptyGlyphChatHistory, EmptyGlyphOffer } from "@/components/icons/emptyStateGlyphs";
 
 function messagePreview(body: string, kind: string): string {
   if (kind === "MEDIA") {
@@ -203,7 +203,7 @@ export default async function InfluencerOverviewPage() {
         <OverviewSectionCard title="Son teklifler" footerHref="/influencer/offers" footerLabel="Tüm teklifler">
           {recentOffers.length === 0 ? (
             <EmptyStateCard
-              icon={<EmptyGlyphInbox />}
+              icon={<EmptyGlyphOffer />}
               title="Henüz teklif yok"
               description="Markalardan gelen ve sizin gönderdiğiniz teklifler burada görünür. İlk adım için marka arayın."
             >
@@ -237,7 +237,7 @@ export default async function InfluencerOverviewPage() {
         <OverviewSectionCard title="Son sohbetler" footerHref="/chat" footerLabel="Tüm sohbetler">
           {recentChats.length === 0 ? (
             <EmptyStateCard
-              icon={<EmptyGlyphChatBubble />}
+              icon={<EmptyGlyphChatHistory />}
               title="Sohbet geçmişi boş"
               description="Teklif gönderdiğinizde veya gelen teklifi yanıtladığınızda sohbet burada açılır."
             >
