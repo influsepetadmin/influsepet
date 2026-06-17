@@ -36,7 +36,7 @@ export default async function MarkaSettingsPage() {
         <section className="dash-card dash-card--section influencer-settings__card influencer-settings__card--info">
           <div className="influencer-settings__card-head">
             <h2 className="dash-section__title">Hesap bilgileri</h2>
-            <span className="influencer-settings__status">Hazırlanıyor</span>
+            <span className="influencer-settings__status">Planlandı</span>
           </div>
           <p className="muted dash-section__lede">
             E-posta ve güvenlik seçenekleri bu bölümde toplanacak.
@@ -46,7 +46,7 @@ export default async function MarkaSettingsPage() {
         <section className="dash-card dash-card--section influencer-settings__card influencer-settings__card--info">
           <div className="influencer-settings__card-head">
             <h2 className="dash-section__title">Bildirim tercihleri</h2>
-            <span className="influencer-settings__status">Hazırlanıyor</span>
+            <span className="influencer-settings__status">Planlandı</span>
           </div>
           <p className="muted dash-section__lede">
             Teklif, mesaj ve teslim bildirimleri için tercih ekranı hazırlanıyor.
