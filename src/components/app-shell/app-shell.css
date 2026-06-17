@@ -226,6 +226,31 @@ main:has(.app-shell) {
     0 8px 22px rgba(79, 70, 229, 0.1);
 }
 
+.app-shell-sidebar__pin-icon {
+  display: block;
+  color: #111827;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.72));
+  transform-origin: center;
+  transition:
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.app-shell-sidebar__collapse-btn:hover .app-shell-sidebar__pin-icon {
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+.app-shell--sidebar-collapsed .app-shell-sidebar__pin-icon {
+  color: #475569;
+  transform: rotate(-8deg);
+}
+
+.app-shell--sidebar-collapsed .app-shell-sidebar__collapse-btn:hover .app-shell-sidebar__pin-icon {
+  color: #111827;
+  transform: rotate(0deg) translateY(-1px);
+}
+
 /* Collapsed rail: delayed tooltips (nav + collapse control) */
 .app-shell--sidebar-collapsed:not(.app-shell--sidebar-hover) .app-shell-sidebar__collapse-btn:hover::after,
 .app-shell--sidebar-collapsed:not(.app-shell--sidebar-hover) .app-shell-sidebar-item:hover::after {

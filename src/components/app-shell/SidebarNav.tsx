@@ -1,6 +1,6 @@
 "use client";
 
-import { PanelLeftClose, PanelLeft } from "lucide-react";
+import { Pin, PinOff } from "lucide-react";
 import { SidebarNavItem } from "./SidebarNavItem";
 import { SidebarSection } from "./SidebarSection";
 import type { ShellNavGroup } from "./navConfig";
@@ -31,10 +31,14 @@ export function SidebarNav({
             className="app-shell-sidebar__collapse-btn"
             onClick={onToggleCollapse}
             aria-expanded={!collapsed}
-            data-tooltip={collapsed ? "Menüyü genişlet" : "Menüyü daralt"}
-            aria-label={collapsed ? "Menüyü genişlet" : "Menüyü daralt"}
+            data-tooltip={collapsed ? "Menüyü sabitle" : "Menüyü daralt"}
+            aria-label={collapsed ? "Menüyü sabitle" : "Menüyü daralt"}
           >
-            {collapsed ? <PanelLeft size={20} strokeWidth={1.75} /> : <PanelLeftClose size={20} strokeWidth={1.75} />}
+            {collapsed ? (
+              <PinOff className="app-shell-sidebar__pin-icon" size={19} strokeWidth={2.15} aria-hidden />
+            ) : (
+              <Pin className="app-shell-sidebar__pin-icon" size={19} strokeWidth={2.15} aria-hidden />
+            )}
           </button>
         </div>
       ) : null}
