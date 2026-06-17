@@ -4,6 +4,7 @@ import { PublicProfileAsideInfluencer } from "./PublicProfileAsideInfluencer";
 import { PublicProfileCollaborationTrust } from "./PublicProfileCollaborationTrust";
 import { PublicProfileHeader } from "./PublicProfileHeader";
 import { PublicProfileHomeLink } from "./PublicProfileHomeLink";
+import { PublicProfilePortfolio } from "./PublicProfilePortfolio";
 import { PublicProfileRatingSummary } from "./PublicProfileRatingSummary";
 import { PublicProfileStats } from "./PublicProfileStats";
 import { PublicRecentReviewsSection } from "./PublicRecentReviewsSection";
@@ -57,6 +58,10 @@ export function PublicInfluencerProfileView({
               />
               <PublicProfileStats data={data} />
               <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
+              <PublicProfilePortfolio
+                items={data.portfolioItems}
+                isOwnPublicProfile={isOwnPublicProfile}
+              />
               <div className="public-profile-trust-stack">
                 <PublicProfileCollaborationTrust completedCount={data.completedCollaborationsCount} />
                 <PublicProfileRatingSummary

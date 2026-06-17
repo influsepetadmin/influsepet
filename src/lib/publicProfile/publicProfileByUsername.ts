@@ -1,6 +1,13 @@
 import { getCategoryLabel } from "@/lib/categories";
-import type { SocialPlatform } from "@prisma/client";
+import type { PortfolioPlatform, SocialPlatform } from "@prisma/client";
 import type { PublicProfileRecentReviewJson } from "@/lib/publicProfile/influencerPublicReviews";
+
+export type PublicProfilePortfolioItem = {
+  platform: PortfolioPlatform;
+  title: string | null;
+  url: string;
+  createdAt: string;
+};
 
 /** GET /api/public-profile/[username] — public-safe JSON (no UI). */
 export type PublicProfileByUsernameResponse = {
@@ -22,6 +29,7 @@ export type PublicProfileByUsernameResponse = {
     profileUrl: string | null;
     verifiedAt: string | null;
   }[];
+  portfolioItems: PublicProfilePortfolioItem[];
   completedCollaborationsCount: number;
   /** Ortalama yıldız: CollaborationRating (tamamlanan teklifler), Review ile karıştırılmaz. */
   averageRating: number | null;
@@ -40,6 +48,12 @@ type ProfileRow = {
   basePriceTRY: number;
   city: string | null;
   selectedCategories: { categoryKey: string }[];
+  portfolioItems: {
+    platform: PortfolioPlatform;
+    title: string | null;
+    url: string;
+    createdAt: Date;
+  }[];
   user: { id: string; name: string; role: "INFLUENCER" };
 };
 
@@ -77,6 +91,12 @@ export function mapToPublicProfileByUsernameResponse(
       username: s.username,
       profileUrl: s.profileUrl,
       verifiedAt: s.verifiedAt ? s.verifiedAt.toISOString() : null,
+    })),
+    portfolioItems: profile.portfolioItems.map((item) => ({
+      platform: item.platform,
+      title: item.title,
+      url: item.url,
+      createdAt: item.createdAt.toISOString(),
     })),
     completedCollaborationsCount,
     averageRating,

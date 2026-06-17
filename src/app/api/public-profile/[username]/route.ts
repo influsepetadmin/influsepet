@@ -32,6 +32,16 @@ export async function GET(
       basePriceTRY: true,
       city: true,
       selectedCategories: { select: { categoryKey: true } },
+      portfolioItems: {
+        select: {
+          platform: true,
+          title: true,
+          url: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+      },
       user: { select: { id: true, name: true, role: true } },
     },
   });
@@ -87,6 +97,7 @@ export async function GET(
       basePriceTRY: profile.basePriceTRY,
       city: profile.city,
       selectedCategories: profile.selectedCategories,
+      portfolioItems: profile.portfolioItems,
       user: { id: profile.user.id, name: profile.user.name, role: "INFLUENCER" },
     },
     completedCount,
