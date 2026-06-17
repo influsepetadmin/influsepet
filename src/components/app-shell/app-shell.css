@@ -365,7 +365,7 @@ main:has(.app-shell) {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
-  color: #64748b;
+  color: #334155;
   transition:
     color 0.2s ease,
     transform 0.2s ease;
@@ -378,7 +378,7 @@ main:has(.app-shell) {
 }
 
 .app-shell-sidebar-item:not(.app-shell-sidebar-item--active):hover .app-shell-sidebar-item__icon {
-  color: #1f2937;
+  color: #111827;
   transform: scale(1.04);
 }
 
@@ -523,7 +523,7 @@ main:has(.app-shell) {
   border-radius: 10px;
   border: 1px solid transparent;
   background: transparent;
-  color: #64748b;
+  color: #475569;
   cursor: pointer;
   text-decoration: none !important;
   transition:
@@ -537,12 +537,12 @@ main:has(.app-shell) {
 }
 
 .app-shell__footer-icon-btn--quiet {
-  color: #64748b;
+  color: #475569;
   border-color: transparent;
 }
 
 .app-shell__footer-icon-btn--quiet:hover {
-  color: #475569;
+  color: #111827;
   background: rgba(241, 245, 249, 0.85);
   border-color: rgba(226, 232, 240, 0.85);
 }
