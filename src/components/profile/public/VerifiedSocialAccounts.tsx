@@ -1,4 +1,4 @@
-import type { SocialPlatform } from "@prisma/client";
+import type { SocialAccountVerificationStatus, SocialPlatform } from "@prisma/client";
 import type { LucideIcon } from "lucide-react";
 import { Camera, Music2, SquarePlay } from "lucide-react";
 import { platformLabel } from "@/components/social/SocialAccountCard";
@@ -8,6 +8,8 @@ export type PublicVerifiedSocialAccount = {
   platform: SocialPlatform;
   username: string;
   profileUrl: string | null;
+  isVerified?: boolean;
+  verificationStatus?: SocialAccountVerificationStatus;
   verifiedAt: string | null;
 };
 
@@ -24,17 +26,32 @@ function platformGlyph(platform: SocialPlatform): LucideIcon {
   }
 }
 
-export function VerifiedSocialAccounts({ accounts }: { accounts: PublicVerifiedSocialAccount[] }) {
+function isPublicVerified(account: PublicVerifiedSocialAccount): boolean {
+  const status = account.verificationStatus ?? "VERIFIED";
+  return Boolean(account.isVerified ?? account.verifiedAt) && status === "VERIFIED";
+}
+
+export function VerifiedSocialAccounts({
+  accounts,
+  title = "Doğrulanmış hesaplar",
+}: {
+  accounts: PublicVerifiedSocialAccount[];
+  title?: string;
+}) {
   if (accounts.length === 0) return null;
 
   return (
-    <section className="public-profile-section public-profile-section--social" aria-labelledby="public-profile-social-heading">
+    <section
+      className="public-profile-section public-profile-section--social"
+      aria-labelledby="public-profile-social-heading"
+    >
       <h2 id="public-profile-social-heading" className="public-profile-section__title">
-        Doğrulanmış hesaplar
+        {title}
       </h2>
       <ul className="public-profile-social-list">
         {accounts.map((a) => {
           const PlatformGlyph = platformGlyph(a.platform);
+          const showVerifiedBadge = isPublicVerified(a);
           return (
             <li key={`${a.platform}-${a.username}`} className="public-profile-social-card">
               <div className="public-profile-social-card__header">
@@ -46,7 +63,9 @@ export function VerifiedSocialAccounts({ accounts }: { accounts: PublicVerifiedS
                 </span>
                 <div className="public-profile-social-card__head-text">
                   <span className="public-profile-social-card__platform">{platformLabel(a.platform)}</span>
-                  <SocialVerificationBadge status="VERIFIED" mode="public" />
+                  {showVerifiedBadge ? (
+                    <SocialVerificationBadge status="VERIFIED" mode="public" />
+                  ) : null}
                 </div>
               </div>
               <p className="public-profile-social-card__handle">@{a.username}</p>

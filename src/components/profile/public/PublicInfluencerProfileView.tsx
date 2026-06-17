@@ -57,7 +57,10 @@ export function PublicInfluencerProfileView({
                 cameFromDiscover={cameFromDiscover}
               />
               <PublicProfileStats data={data} />
-              <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
+              <VerifiedSocialAccounts
+                accounts={data.verifiedSocialAccounts}
+                title="Sosyal Hesaplar"
+              />
               <PublicProfilePortfolio
                 items={data.portfolioItems}
                 isOwnPublicProfile={isOwnPublicProfile}

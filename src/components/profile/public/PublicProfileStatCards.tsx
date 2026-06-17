@@ -3,6 +3,7 @@ import {
   PublicProfileIconBanknote,
   PublicProfileIconBriefcase,
   PublicProfileIconListBullet,
+  PublicProfileIconPhoto,
   PublicProfileIconStar,
   PublicProfileIconUsers,
 } from "./publicProfileInfluencerIcons";
@@ -18,6 +19,7 @@ const STAT_EMOJI: Record<string, string> = {
   "Tamamlanan iş birliği": "✓",
   "Ortalama puan": "★",
   "Puanlama sayısı": "#",
+  "Portföy öğesi": "□",
   Takipçi: "◎",
   "Baz fiyat": "₺",
 };
@@ -29,6 +31,7 @@ const STAT_LINE: PublicProfileStatIconMap = {
   "Tamamlanan iş birliği": PublicProfileIconBriefcase,
   "Ortalama puan": PublicProfileIconStar,
   "Puanlama sayısı": PublicProfileIconListBullet,
+  "Portföy öğesi": PublicProfileIconPhoto,
   Takipçi: PublicProfileIconUsers,
   "Baz fiyat": PublicProfileIconBanknote,
 };

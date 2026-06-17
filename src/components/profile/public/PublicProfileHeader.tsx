@@ -40,7 +40,9 @@ export function PublicProfileHeader({
   cameFromDiscover?: boolean;
 }) {
   const avatarSrc = getProfileImageOrAvatarUrl(data.avatarUrl, data.id);
-  const socialVerifiedCount = data.verifiedSocialAccounts.length;
+  const socialVerifiedCount = data.verifiedSocialAccounts.filter(
+    (account) => account.isVerified && account.verificationStatus === "VERIFIED",
+  ).length;
   const categoryLine = categoryLeadLine(data);
 
   return (

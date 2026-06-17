@@ -52,7 +52,7 @@ export async function GET(
 
   const userId = profile.userId;
 
-  const [completedCount, ratingAgg, verifiedSocial, recentPublicReviews] = await Promise.all([
+  const [completedCount, ratingAgg, socialAccounts, recentPublicReviews] = await Promise.all([
     prisma.offer.count({
       where: {
         status: "COMPLETED",
@@ -68,14 +68,16 @@ export async function GET(
       _count: { _all: true },
     }),
     prisma.socialAccount.findMany({
-      where: { userId, isVerified: true, verificationStatus: "VERIFIED" },
+      where: { userId, isConnected: true },
       select: {
         platform: true,
         username: true,
         profileUrl: true,
+        isVerified: true,
+        verificationStatus: true,
         verifiedAt: true,
       },
-      orderBy: { platform: "asc" },
+      orderBy: [{ platform: "asc" }, { username: "asc" }],
     }),
     getRecentPublicReviewsForPublicProfile(userId),
   ]);
@@ -103,7 +105,7 @@ export async function GET(
     completedCount,
     averageRating,
     ratingCount,
-    verifiedSocial,
+    socialAccounts,
     recentPublicReviews,
   );
 

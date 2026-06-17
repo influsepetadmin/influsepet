@@ -40,13 +40,13 @@ function previewIcon(kind: PortfolioPreviewKind): LucideIcon {
 function previewLabel(kind: PortfolioPreviewKind): string {
   switch (kind) {
     case "instagram":
-      return "IG";
+      return "Instagram";
     case "tiktok":
-      return "TT";
+      return "TikTok";
     case "youtube":
-      return "YT";
+      return "YouTube";
     case "link":
-      return "Link";
+      return "Bağlantı";
   }
 }
 
@@ -130,6 +130,7 @@ export function PublicProfilePortfolio({
                 <span className="public-profile-portfolio-card__icon" aria-hidden>
                   <PreviewIcon size={24} strokeWidth={2.05} />
                 </span>
+                <span className="public-profile-portfolio-card__preview-text">Örnek içerik</span>
                 <span className="public-profile-portfolio-card__media-label">{previewLabel(kind)}</span>
               </a>
               <div className="public-profile-portfolio-card__body">

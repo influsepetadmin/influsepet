@@ -1,11 +1,12 @@
 import type { PublicProfileByUsernameResponse } from "@/lib/publicProfile/publicProfileByUsername";
-import { BadgeCheck, ListChecks, ReceiptTurkishLira, Star, UsersRound } from "lucide-react";
+import { BadgeCheck, ReceiptTurkishLira, Star, UsersRound } from "lucide-react";
 import { PublicProfileStatCards, type PublicProfileStatIconMap } from "./PublicProfileStatCards";
+import { PublicProfileIconPhoto } from "./publicProfileInfluencerIcons";
 
 const INFLUENCER_STAT_ICONS: PublicProfileStatIconMap = {
   "Tamamlanan iş birliği": BadgeCheck,
   "Ortalama puan": Star,
-  "Puanlama sayısı": ListChecks,
+  "Portföy öğesi": PublicProfileIconPhoto,
   Takipçi: UsersRound,
   "Baz fiyat": ReceiptTurkishLira,
 };
@@ -21,7 +22,7 @@ export function PublicProfileStats({ data }: { data: PublicProfileByUsernameResp
       label: "Ortalama puan",
       value: data.averageRating != null ? data.averageRating.toFixed(1) : "—",
     },
-    { label: "Puanlama sayısı", displayLabel: "Puan sayısı", value: String(data.ratingCount) },
+    { label: "Portföy öğesi", value: String(data.portfolioItems.length) },
     {
       label: "Takipçi",
       value: data.followerCount > 0 ? data.followerCount.toLocaleString("tr-TR") : "—",

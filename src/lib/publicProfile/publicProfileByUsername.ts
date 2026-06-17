@@ -1,5 +1,9 @@
 import { getCategoryLabel } from "@/lib/categories";
-import type { PortfolioPlatform, SocialPlatform } from "@prisma/client";
+import type {
+  PortfolioPlatform,
+  SocialAccountVerificationStatus,
+  SocialPlatform,
+} from "@prisma/client";
 import type { PublicProfileRecentReviewJson } from "@/lib/publicProfile/influencerPublicReviews";
 
 export type PublicProfilePortfolioItem = {
@@ -27,6 +31,8 @@ export type PublicProfileByUsernameResponse = {
     platform: SocialPlatform;
     username: string;
     profileUrl: string | null;
+    isVerified: boolean;
+    verificationStatus: SocialAccountVerificationStatus;
     verifiedAt: string | null;
   }[];
   portfolioItems: PublicProfilePortfolioItem[];
@@ -62,10 +68,12 @@ export function mapToPublicProfileByUsernameResponse(
   completedCollaborationsCount: number,
   averageRating: number | null,
   ratingCount: number,
-  verifiedSocial: {
+  socialAccounts: {
     platform: SocialPlatform;
     username: string;
     profileUrl: string | null;
+    isVerified: boolean;
+    verificationStatus: SocialAccountVerificationStatus;
     verifiedAt: Date | null;
   }[],
   recentPublicReviews: PublicProfileRecentReviewJson[],
@@ -86,10 +94,12 @@ export function mapToPublicProfileByUsernameResponse(
       label: getCategoryLabel(c.categoryKey),
     })),
     nicheText: profile.nicheText,
-    verifiedSocialAccounts: verifiedSocial.map((s) => ({
+    verifiedSocialAccounts: socialAccounts.map((s) => ({
       platform: s.platform,
       username: s.username,
       profileUrl: s.profileUrl,
+      isVerified: s.isVerified,
+      verificationStatus: s.verificationStatus,
       verifiedAt: s.verifiedAt ? s.verifiedAt.toISOString() : null,
     })),
     portfolioItems: profile.portfolioItems.map((item) => ({
