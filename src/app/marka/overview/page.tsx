@@ -57,6 +57,7 @@ export default async function MarkaOverviewPage() {
     recentOffers,
     conversationRows,
     socialAccountCount,
+    verifiedSocialAccountCount,
   ] = await Promise.all([
     canUseMarketplace
       ? prisma.offer.count({ where: { brandId: user.id, initiatedBy: "BRAND" } })
@@ -136,12 +137,15 @@ export default async function MarkaOverviewPage() {
       },
     }),
     prisma.socialAccount.count({ where: { userId: user.id, isConnected: true } }),
+    prisma.socialAccount.count({
+      where: { userId: user.id, isVerified: true, verificationStatus: "VERIFIED" },
+    }),
   ]);
 
   const profileCompletion = computeBrandProfileCompletion({
     profile,
     socialAccountCount,
-    businessSetupCount: sentOfferCount,
+    verifiedSocialAccountCount,
   });
 
   const recentChats = [...conversationRows]

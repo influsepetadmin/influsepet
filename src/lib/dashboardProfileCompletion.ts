@@ -34,7 +34,7 @@ type InfluencerCompletionInput = {
 type BrandCompletionInput = {
   profile: (BrandProfile & { selectedCategories?: { categoryKey: string }[] }) | null | undefined;
   socialAccountCount: number | null | undefined;
-  businessSetupCount: number | null | undefined;
+  verifiedSocialAccountCount: number | null | undefined;
 };
 
 function completionResult(items: ProfileCompletionItem[]): ProfileCompletionResult {
@@ -109,7 +109,7 @@ export function computeInfluencerProfileCompletion({
 export function computeBrandProfileCompletion({
   profile,
   socialAccountCount,
-  businessSetupCount,
+  verifiedSocialAccountCount,
 }: BrandCompletionInput): ProfileCompletionResult {
   const hasCategory = profile?.selectedCategories?.some((category) => category.categoryKey.trim().length > 0) ?? false;
 
@@ -128,15 +128,19 @@ export function computeBrandProfileCompletion({
     },
     { key: "city", label: "Şehir ekle", completed: Boolean(profile?.city?.trim()), section: "general" },
     { key: "category", label: "Sektör veya kategori seç", completed: hasCategory, section: "general" },
-    { key: "website", label: "Web sitesi ekle", completed: Boolean(profile?.website?.trim()), section: "general" },
-    { key: "social", label: "Sosyal hesap ekle", completed: (socialAccountCount ?? 0) > 0, section: "social" },
-    {
-      key: "business",
-      label: "İlk teklifini oluştur",
-      completed: (businessSetupCount ?? 0) > 0,
-      section: "business",
-    },
     { key: "about", label: "Marka hakkında alanını doldur", completed: Boolean(profile?.bio?.trim()), section: "general" },
+    {
+      key: "social",
+      label: "Sosyal hesap ekle",
+      completed: (socialAccountCount ?? 0) > 0,
+      section: "social",
+    },
+    {
+      key: "verified-social",
+      label: "Sosyal hesabını doğrula",
+      completed: (verifiedSocialAccountCount ?? 0) > 0,
+      section: "social",
+    },
   ]);
 }
 
