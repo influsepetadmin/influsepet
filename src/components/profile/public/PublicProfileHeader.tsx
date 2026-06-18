@@ -11,15 +11,6 @@ import {
 } from "./publicProfileInfluencerIcons";
 import { PublicProfileOwnerPreviewNote } from "./PublicProfileOwnerPreviewNote";
 
-function categoryLeadLine(data: PublicProfileByUsernameResponse): string | null {
-  const labels = data.categories.slice(0, 4).map((c) => c.label);
-  const niche = data.nicheText?.trim();
-  if (labels.length === 0 && !niche) return null;
-  if (labels.length >= 2) return labels.slice(0, 3).join(" · ");
-  if (labels.length === 1) return niche ? `${labels[0]} · ${niche}` : labels[0];
-  return niche ?? null;
-}
-
 export function PublicProfileHeader({
   data,
   cta,
@@ -43,7 +34,6 @@ export function PublicProfileHeader({
   const socialVerifiedCount = data.verifiedSocialAccounts.filter(
     (account) => account.isVerified && account.verificationStatus === "VERIFIED",
   ).length;
-  const categoryLine = categoryLeadLine(data);
 
   return (
     <header className="public-profile-hero public-profile-hero--influencer public-profile-hero--premium">
@@ -66,9 +56,6 @@ export function PublicProfileHeader({
             ) : null}
           </div>
           <p className="public-profile-hero__handle muted">@{data.username}</p>
-          {categoryLine ? (
-            <p className="public-profile-hero__category-lead muted">{categoryLine}</p>
-          ) : null}
 
           <div className="public-profile-hero__meta public-profile-hero__meta--hero-tight">
             {data.city?.trim() ? (
