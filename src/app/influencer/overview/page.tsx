@@ -4,7 +4,6 @@ import {
   Compass,
   Inbox,
   MessageCircle,
-  Percent,
   User,
   UserCircle,
 } from "lucide-react";
@@ -13,13 +12,10 @@ import { EmptyStateCard } from "@/components/feedback/EmptyStateCard";
 import { PageHeader } from "@/components/app-shell/PageHeader";
 import { OverviewSectionCard } from "@/components/overview/OverviewSectionCard";
 import { OverviewStatCard } from "@/components/overview/OverviewStatCard";
+import { ProfileCompletionCard } from "@/components/overview/ProfileCompletionCard";
 import { QuickActionCard } from "@/components/overview/QuickActionCard";
 import "@/components/overview/overview.css";
-import { getCategoryLabel } from "@/lib/categories";
-import {
-  computeInfluencerProfileCompletionPercent,
-  isInfluencerDashboardProfileComplete,
-} from "@/lib/dashboardProfileCompletion";
+import { computeInfluencerProfileCompletion } from "@/lib/dashboardProfileCompletion";
 import { getInfluencerPanelAccess } from "@/lib/influencer/panelAccess";
 import { prisma } from "@/lib/prisma";
 import { statusBadgeLabel } from "@/components/offers/StatusBadge";
@@ -65,17 +61,15 @@ export default async function InfluencerOverviewPage() {
       : profile?.category
         ? [profile.category]
         : [];
-  const profileComplete = isInfluencerDashboardProfileComplete(profile, selectedCategoryKeys);
-  const profilePct = profileComplete
-    ? 100
-    : computeInfluencerProfileCompletionPercent(profile, selectedCategoryKeys);
-
   const [
     pendingOfferCount,
     pipelineOfferCount,
     unreadChatThreads,
     recentOffers,
     conversationRows,
+    socialAccountCount,
+    verifiedSocialAccountCount,
+    portfolioItemCount,
   ] = await Promise.all([
     profile ? prisma.offer.count({ where: { influencerId: user.id, status: "PENDING" } }) : 0,
     profile
@@ -140,7 +134,23 @@ export default async function InfluencerOverviewPage() {
         },
       },
     }),
+    prisma.socialAccount.count({ where: { userId: user.id, isConnected: true } }),
+    prisma.socialAccount.count({
+      where: { userId: user.id, isVerified: true, verificationStatus: "VERIFIED" },
+    }),
+    profile
+      ? prisma.influencerPortfolioItem.count({ where: { influencerProfileId: profile.id } })
+      : 0,
   ]);
+
+  const profileCompletion = computeInfluencerProfileCompletion({
+    profile,
+    displayName: user.name,
+    selectedCategoryKeys,
+    socialAccountCount,
+    verifiedSocialAccountCount,
+    portfolioItemCount,
+  });
 
   const recentChats = [...conversationRows]
     .sort((a, b) => {
@@ -168,7 +178,9 @@ export default async function InfluencerOverviewPage() {
         }
       />
 
-      <div className="overview-page__grid-stats">
+      <ProfileCompletionCard completion={profileCompletion} profileHref="/influencer/profile" />
+
+      <div className="overview-page__grid-stats overview-page__grid-stats--three">
         <OverviewStatCard
           href="/influencer/offers?tab=gelen&durum=bekleyen"
           label="Bekleyen teklifler"
@@ -189,13 +201,6 @@ export default async function InfluencerOverviewPage() {
           value={unreadChatThreads}
           hint="Markalardan gelen yeni mesajlar"
           icon={<MessageCircle size={18} strokeWidth={1.85} />}
-        />
-        <OverviewStatCard
-          href="/influencer/profile?tab=genel"
-          label="Profil tamamlama"
-          value={`${profilePct}%`}
-          hint={profileComplete ? "Profil güncel" : "Eksik alanları tamamla"}
-          icon={<Percent size={18} strokeWidth={1.85} />}
         />
       </div>
 
@@ -307,21 +312,6 @@ export default async function InfluencerOverviewPage() {
           icon={<Briefcase size={20} strokeWidth={1.75} />}
         />
       </div>
-
-      {!profileComplete && profile ? (
-        <section className="ov-profile-nudge--compact">
-          <h2 className="dash-section__title">Profil tamamlama</h2>
-          <p className="dash-section__lede muted" style={{ marginBottom: 12 }}>
-            Kategori, şehir ve fiyat bilgileri markaların doğru teklifi göndermesini sağlar.
-            {selectedCategoryKeys.length > 0
-              ? ` Seçili kategoriler: ${selectedCategoryKeys.map((k) => getCategoryLabel(k)).join(", ")}.`
-              : ""}
-          </p>
-          <Link className="btn btn--sm" href="/influencer/profile?tab=genel">
-            Profili tamamla
-          </Link>
-        </section>
-      ) : null}
 
       {profile ? (
         <p className="muted" style={{ marginTop: 16, fontSize: "0.88rem" }}>

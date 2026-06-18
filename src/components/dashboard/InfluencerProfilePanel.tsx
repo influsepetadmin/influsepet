@@ -25,6 +25,7 @@ export function InfluencerProfilePanel({
     instagramUrl: string;
     tiktokUrl: string;
     nicheText: string;
+    bio: string;
   };
   isExistingProfile: boolean;
   summary: {

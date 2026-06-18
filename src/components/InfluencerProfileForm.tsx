@@ -14,6 +14,7 @@ export default function InfluencerProfileForm({
     profileImageUrl: string;
     selectedCategoryKeys: string[];
     nicheText: string;
+    bio: string;
     instagramUrl: string;
     tiktokUrl: string;
   };
@@ -91,6 +92,18 @@ export default function InfluencerProfileForm({
             placeholder="Örn: kahve içerikleri, kamp-karavan, minimal yaşam"
             defaultValue={initial.nicheText}
             style={{ maxWidth: "100%", fontSize: "0.95rem" }}
+          />
+        </div>
+
+        <div className="influencer-profile-form__field">
+          <label htmlFor="bio">Hakkında</label>
+          <textarea
+            id="bio"
+            name="bio"
+            rows={3}
+            maxLength={2000}
+            placeholder="İçerik yaklaşımınızı ve iş birliği tarzınızı kısaca anlatın"
+            defaultValue={initial.bio}
           />
         </div>
       </section>

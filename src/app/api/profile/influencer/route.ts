@@ -5,6 +5,8 @@ import { getSessionPayload } from "@/lib/session";
 import { CATEGORY_KEYS } from "@/lib/categories";
 import { parseOptionalHttpHttpsUrl, parseOptionalProfileImageUrl } from "@/lib/safeUrl";
 
+const BIO_MAX = 2000;
+
 function parseNonNegativeNumber(value: FormDataEntryValue | null, error: string) {
   const n = Number(value ?? 0);
   if (!Number.isFinite(n)) return { ok: false as const, error };
@@ -51,6 +53,12 @@ export async function POST(request: Request) {
   const nicheTextRaw = String(form.get("nicheText") ?? "").trim();
   const nicheText = nicheTextRaw.length > 500 ? nicheTextRaw.slice(0, 500) : nicheTextRaw;
   const nicheTextOrNull = nicheText.length > 0 ? nicheText : null;
+  let bioOrNull = user.influencer.bio;
+  if (form.has("bio")) {
+    const bioRaw = String(form.get("bio") ?? "").trim();
+    const bio = bioRaw.length > BIO_MAX ? bioRaw.slice(0, BIO_MAX) : bioRaw;
+    bioOrNull = bio.length > 0 ? bio : null;
+  }
 
   // Missing or empty image fields must not erase a previously saved avatar.
   let profileImageUrl = user.influencer.profileImageUrl;
@@ -106,6 +114,7 @@ export async function POST(request: Request) {
         instagramUrl,
         tiktokUrl,
         nicheText: nicheTextOrNull,
+        bio: bioOrNull,
         category: primaryCategory,
       },
     });

@@ -5,12 +5,13 @@ import { ForbiddenStateCard } from "@/components/feedback/ForbiddenStateCard";
 import { PageHeader } from "@/components/app-shell/PageHeader";
 import { OverviewSectionCard } from "@/components/overview/OverviewSectionCard";
 import { OverviewStatCard } from "@/components/overview/OverviewStatCard";
+import { ProfileCompletionCard } from "@/components/overview/ProfileCompletionCard";
 import { QuickActionCard } from "@/components/overview/QuickActionCard";
 import "@/components/overview/overview.css";
 import { getMarkaPanelAccess } from "@/lib/marka/panelAccess";
 import { prisma } from "@/lib/prisma";
 import { statusBadgeLabel } from "@/components/offers/StatusBadge";
-import { isBrandDashboardProfileComplete } from "@/lib/dashboardProfileCompletion";
+import { computeBrandProfileCompletion } from "@/lib/dashboardProfileCompletion";
 import { EmptyGlyphChatHistory, EmptyGlyphOffer } from "@/components/icons/emptyStateGlyphs";
 
 function messagePreview(body: string, kind: string): string {
@@ -46,7 +47,6 @@ export default async function MarkaOverviewPage() {
 
   const { user } = access;
   const profile = user.brand;
-  const profileComplete = isBrandDashboardProfileComplete(profile);
   const canUseMarketplace = Boolean(profile);
 
   const [
@@ -56,6 +56,7 @@ export default async function MarkaOverviewPage() {
     unreadChatThreads,
     recentOffers,
     conversationRows,
+    socialAccountCount,
   ] = await Promise.all([
     canUseMarketplace
       ? prisma.offer.count({ where: { brandId: user.id, initiatedBy: "BRAND" } })
@@ -134,7 +135,14 @@ export default async function MarkaOverviewPage() {
         },
       },
     }),
+    prisma.socialAccount.count({ where: { userId: user.id, isConnected: true } }),
   ]);
+
+  const profileCompletion = computeBrandProfileCompletion({
+    profile,
+    socialAccountCount,
+    businessSetupCount: sentOfferCount,
+  });
 
   const recentChats = [...conversationRows]
     .sort((a, b) => {
@@ -160,6 +168,12 @@ export default async function MarkaOverviewPage() {
             </Link>
           </div>
         }
+      />
+
+      <ProfileCompletionCard
+        completion={profileCompletion}
+        profileHref="/marka/profile"
+        businessHref="/marka/discover"
       />
 
       <div className="overview-page__grid-stats">
@@ -319,18 +333,6 @@ export default async function MarkaOverviewPage() {
           icon={<Megaphone size={20} strokeWidth={1.75} />}
         />
       </div>
-
-      {!profileComplete && profile ? (
-        <section className="ov-profile-nudge--compact">
-          <h2 className="dash-section__title">Profil tamamlama</h2>
-          <p className="dash-section__lede muted" style={{ marginBottom: 12 }}>
-            Şirket adı, şehir ve kategori bilgisi içerik üreticilerinin sizi güvenle değerlendirmesini sağlar.
-          </p>
-          <Link className="btn btn--sm" href="/marka/profile?tab=genel">
-            Profili tamamla
-          </Link>
-        </section>
-      ) : null}
 
       {profile?.username?.trim() ? (
         <p className="muted" style={{ marginTop: 16, fontSize: "0.88rem" }}>

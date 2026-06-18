@@ -147,6 +147,7 @@ export default async function InfluencerProfilePage({
                 profileImageUrl: profile?.profileImageUrl ?? "",
                 selectedCategoryKeys: formCategoryKeys,
                 nicheText: profile?.nicheText ?? "",
+                bio: profile?.bio ?? "",
                 instagramUrl: profile?.instagramUrl ?? "",
                 tiktokUrl: profile?.tiktokUrl ?? "",
               }}
