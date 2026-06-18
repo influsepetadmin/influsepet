@@ -15,7 +15,11 @@ export async function POST(request: Request) {
 
   const user = await prisma.user.findUnique({
     where: { id: session.uid },
-    select: { id: true, role: true },
+    select: {
+      id: true,
+      role: true,
+      brand: { select: { profileImageUrl: true } },
+    },
   });
   if (!user || user.role !== "BRAND") {
     return NextResponse.json({ error: "Yetkisiz." }, { status: 403 });
@@ -39,12 +43,20 @@ export async function POST(request: Request) {
   if (websiteCheck.ok === false) {
     return sameOriginRedirect("/marka/profile?err=" + encodeURIComponent(websiteCheck.error));
   }
-  const profileImageCheck = parseOptionalProfileImageUrl(String(form.get("profileImageUrl") ?? "").trim() || null);
-  if (profileImageCheck.ok === false) {
-    return sameOriginRedirect("/marka?err=" + encodeURIComponent(profileImageCheck.error));
+  const profileImageUrlRaw = String(form.get("profileImageUrl") ?? "").trim();
+  const removeProfileImage = String(form.get("removeProfileImage") ?? "").trim().toLowerCase() === "true";
+  // Missing or empty image fields must not erase a previously saved avatar.
+  let profileImageUrl = user.brand?.profileImageUrl ?? null;
+  if (removeProfileImage) {
+    profileImageUrl = null;
+  } else if (profileImageUrlRaw) {
+    const profileImageCheck = parseOptionalProfileImageUrl(profileImageUrlRaw);
+    if (profileImageCheck.ok === false) {
+      return sameOriginRedirect("/marka?err=" + encodeURIComponent(profileImageCheck.error));
+    }
+    profileImageUrl = profileImageCheck.value;
   }
   const website = websiteCheck.value;
-  const profileImageUrl = profileImageCheck.value;
 
   if (!companyName) {
     return sameOriginRedirect("/marka/profile?err=" + encodeURIComponent("Sirket adi gerekli"));

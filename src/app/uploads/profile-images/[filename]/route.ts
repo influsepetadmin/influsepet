@@ -46,8 +46,9 @@ export async function GET(
     return new NextResponse(getAvatarPlaceholderSvg(), {
       headers: {
         "Content-Type": "image/svg+xml; charset=utf-8",
-        "Cache-Control": "public, max-age=300",
+        "Cache-Control": "no-store",
         "X-InfluSepet-Upload-Fallback": "profile-image-missing",
+        "X-Influsepet-Missing-Upload": "true",
       },
     });
   }

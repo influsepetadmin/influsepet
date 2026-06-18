@@ -44,16 +44,24 @@ export async function POST(request: Request) {
   const followerCount = followerCountParsed.value;
   const basePriceTRY = basePriceTRYParsed.value;
   const city = String(form.get("city") ?? "").trim() || null;
-  const profileImageUrlRaw = String(form.get("profileImageUrl") ?? "").trim() || null;
+  const profileImageUrlRaw = String(form.get("profileImageUrl") ?? "").trim();
+  const removeProfileImage = String(form.get("removeProfileImage") ?? "").trim().toLowerCase() === "true";
   const instagramUrlRaw = String(form.get("instagramUrl") ?? "").trim() || null;
   const tiktokUrlRaw = String(form.get("tiktokUrl") ?? "").trim() || null;
   const nicheTextRaw = String(form.get("nicheText") ?? "").trim();
   const nicheText = nicheTextRaw.length > 500 ? nicheTextRaw.slice(0, 500) : nicheTextRaw;
   const nicheTextOrNull = nicheText.length > 0 ? nicheText : null;
 
-  const profileImageUrlCheck = parseOptionalProfileImageUrl(profileImageUrlRaw);
-  if (profileImageUrlCheck.ok === false) {
-    return sameOriginRedirect("/influencer/profile?err=" + encodeURIComponent(profileImageUrlCheck.error));
+  // Missing or empty image fields must not erase a previously saved avatar.
+  let profileImageUrl = user.influencer.profileImageUrl;
+  if (removeProfileImage) {
+    profileImageUrl = null;
+  } else if (profileImageUrlRaw) {
+    const profileImageUrlCheck = parseOptionalProfileImageUrl(profileImageUrlRaw);
+    if (profileImageUrlCheck.ok === false) {
+      return sameOriginRedirect("/influencer/profile?err=" + encodeURIComponent(profileImageUrlCheck.error));
+    }
+    profileImageUrl = profileImageUrlCheck.value;
   }
   const instagramCheck = parseOptionalHttpHttpsUrl(instagramUrlRaw);
   if (instagramCheck.ok === false) {
@@ -64,7 +72,6 @@ export async function POST(request: Request) {
     return sameOriginRedirect("/influencer/profile?err=" + encodeURIComponent(tiktokCheck.error));
   }
 
-  const profileImageUrl = profileImageUrlCheck.value;
   const instagramUrl = instagramCheck.value;
   const tiktokUrl = tiktokCheck.value;
 
