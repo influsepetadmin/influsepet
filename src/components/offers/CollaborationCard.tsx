@@ -101,7 +101,7 @@ function transitionButtonClass(next: OfferStatus): string {
   return "btn secondary";
 }
 
-function briefPreview(brief: string, max = 160): string {
+function briefPreview(brief: string, max = 120): string {
   const t = brief.trim();
   if (t.length <= max) return t;
   return `${t.slice(0, max).trim()}…`;
@@ -213,11 +213,13 @@ export function CollaborationCard({
   const metaChips = useMemo(() => {
     const dueStr = formatDue(offer.dueDate);
     const chips: { key: string; label: string; value: string }[] = [];
-    chips.push({
-      key: "offer",
-      label: "Teklif tutarı",
-      value: `${offer.offerAmountTRY.toLocaleString("tr-TR")} TRY`,
-    });
+    if (offer.offerAmountTRY !== budget) {
+      chips.push({
+        key: "offer",
+        label: "Teklif",
+        value: `${offer.offerAmountTRY.toLocaleString("tr-TR")} TRY`,
+      });
+    }
     const ratePct = formatCommissionPercentTr(offer.commissionRate);
     chips.push({
       key: "commission",
@@ -252,18 +254,8 @@ export function CollaborationCard({
         value: String(offer.deliveryCount),
       });
     }
-    chips.push({
-      key: "created",
-      label: "Oluşturulma",
-      value: formatShortDateTime(offer.createdAt),
-    });
-    chips.push({
-      key: "updated",
-      label: "Güncellendi",
-      value: formatShortDateTime(offer.updatedAt),
-    });
     return chips;
-  }, [offer]);
+  }, [budget, offer]);
 
   const runTransition = useCallback(
     async (nextStatus: OfferStatus) => {
@@ -322,13 +314,15 @@ export function CollaborationCard({
         <StatusBadge status={offer.status} />
       </header>
 
-      <div className="collab-card__stage" aria-label="Süreç aşaması">
-        <span className="collab-card__stage-label">{stageLabel}</span>
-      </div>
-
       <div className="collab-card__party">
-        <span className="collab-card__party-label">{otherSideLabel}</span>
-        <span className="collab-card__party-name">{visibleOtherSideName}</span>
+        <span className="collab-card__party-copy">
+          <span className="collab-card__party-label">{otherSideLabel}</span>
+          <span className="collab-card__party-name">{visibleOtherSideName}</span>
+        </span>
+        <span className="collab-card__stage-label">{stageLabel}</span>
+        <time className="collab-card__updated" dateTime={offer.updatedAt}>
+          Güncellendi {formatShortDateTime(offer.updatedAt)}
+        </time>
         {ratingBadge ? (
           <div
             className="collab-card__rating-badge"
@@ -383,50 +377,47 @@ export function CollaborationCard({
 
       {error ? <p className="alert-inline alert-inline--error collab-card__alert">{error}</p> : null}
 
-      <div className="collab-card__actions collab-card__actions--primary">
-        {chatHref ? (
-          <a
-            className="btn"
-            href={chatHref}
-            onClick={() =>
-              trackProductEvent({
-                event: "chat_open",
-                location: "offers_or_collab_card",
-                label: "sohbete_git",
-                offerId: offer.id,
-              })
-            }
-          >
-            {workspaceCtaLabel(offer.status, viewerRole, offer)}
-          </a>
-        ) : null}
-        {profileHref ? (
-          <a
-            className="btn secondary"
-            href={profileHref}
-            onClick={() =>
-              trackProductEvent({
-                event: "profile_cta_click",
-                location: "offers_or_collab_card",
-                label: "profili_goruntule",
-                offerId: offer.id,
-                variant: getProfileCtaAbVariantForTrack(),
-              })
-            }
-          >
-            Profili görüntüle
-          </a>
-        ) : null}
-      </div>
-
       {deliveryHint ? (
         <p className="muted collab-card__hint">
           {deliveryHint}
         </p>
       ) : null}
 
-      {transitions.length > 0 ? (
-        <div className="collab-card__actions collab-card__actions--transitions">
+      {chatHref || profileHref || transitions.length > 0 ? (
+        <div className="collab-card__actions collab-card__actions--footer">
+          {chatHref ? (
+            <a
+              className="btn"
+              href={chatHref}
+              onClick={() =>
+                trackProductEvent({
+                  event: "chat_open",
+                  location: "offers_or_collab_card",
+                  label: "sohbete_git",
+                  offerId: offer.id,
+                })
+              }
+            >
+              {workspaceCtaLabel(offer.status, viewerRole, offer)}
+            </a>
+          ) : null}
+          {profileHref ? (
+            <a
+              className="btn secondary"
+              href={profileHref}
+              onClick={() =>
+                trackProductEvent({
+                  event: "profile_cta_click",
+                  location: "offers_or_collab_card",
+                  label: "profili_goruntule",
+                  offerId: offer.id,
+                  variant: getProfileCtaAbVariantForTrack(),
+                })
+              }
+            >
+              Profili gör
+            </a>
+          ) : null}
           {transitions.map((next) => {
             const key = `${offer.id}:${next}`;
             const loading = pendingKey === key;
