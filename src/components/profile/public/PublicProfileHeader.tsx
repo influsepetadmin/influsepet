@@ -5,11 +5,13 @@ import { getProfileImageOrAvatarUrl } from "@/lib/avatar";
 import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
 import { SocialVerificationBadge } from "@/components/social/SocialVerificationBadge";
 import { PublicCollaborationRequestCta } from "./PublicCollaborationRequestCta";
+import { CategoryBadgeGroup } from "./CategoryBadgeGroup";
 import {
   PublicProfileIconMapPin,
   PublicProfileIconShieldCheck,
 } from "./publicProfileInfluencerIcons";
 import { PublicProfileOwnerPreviewNote } from "./PublicProfileOwnerPreviewNote";
+import { getPublicProfileBioSummary } from "./publicProfileBioSummary";
 
 export function PublicProfileHeader({
   data,
@@ -34,6 +36,8 @@ export function PublicProfileHeader({
   const socialVerifiedCount = data.verifiedSocialAccounts.filter(
     (account) => account.isVerified && account.verificationStatus === "VERIFIED",
   ).length;
+  const bioSummary = getPublicProfileBioSummary(data.bio);
+  const hasPositioning = data.categories.length > 0 || Boolean(data.nicheText?.trim());
 
   return (
     <header className="public-profile-hero public-profile-hero--influencer public-profile-hero--premium">
@@ -57,6 +61,12 @@ export function PublicProfileHeader({
           </div>
           <p className="public-profile-hero__handle muted">@{data.username}</p>
 
+          {hasPositioning ? (
+            <div className="public-profile-hero__positioning" aria-label="Kategoriler ve niş">
+              <CategoryBadgeGroup bare categories={data.categories} nicheText={data.nicheText} />
+            </div>
+          ) : null}
+
           <div className="public-profile-hero__meta public-profile-hero__meta--hero-tight">
             {data.city?.trim() ? (
               <p className="public-profile-hero__meta-line muted public-profile-hero__meta-line--icon">
@@ -78,6 +88,9 @@ export function PublicProfileHeader({
               </p>
             ) : null}
           </div>
+          {bioSummary.text ? (
+            <p className="public-profile-hero__bio-summary">{bioSummary.text}</p>
+          ) : null}
         </div>
       </div>
 

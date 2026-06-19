@@ -9651,11 +9651,11 @@ main:has(.dashboard-page) {
   }
 
   .public-profile-page--influencer .public-profile-section--social {
-    order: 3;
+    order: 4;
   }
 
   .public-profile-page--influencer .public-profile-section--portfolio {
-    order: 4;
+    order: 3;
   }
 }
 
@@ -9859,6 +9859,61 @@ main:has(.dashboard-page) {
 
 .public-profile-hero__meta--hero-tight {
   margin-bottom: 0;
+}
+
+.public-profile-hero__positioning {
+  width: 100%;
+  margin: 8px 0 10px;
+}
+
+.public-profile-hero__positioning .public-profile-category-bare {
+  margin: 0;
+}
+
+.public-profile-hero__positioning .public-profile-badge-row {
+  gap: 6px;
+}
+
+.public-profile-hero__positioning .public-profile-badge {
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  background: var(--public-profile-accent-wash, #f8fafc);
+}
+
+.public-profile-hero__positioning .public-profile-niche-wrap {
+  display: inline-flex;
+  margin-top: 7px;
+  padding: 6px 10px;
+  background: var(--public-profile-accent-wash, #f8fafc);
+}
+
+.public-profile-hero__positioning .public-profile-niche {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.8rem;
+}
+
+.public-profile-hero__positioning .public-profile-niche__label {
+  display: inline;
+  margin: 0;
+  font-size: 0.62rem;
+}
+
+.public-profile-hero__bio-summary {
+  max-width: 42rem;
+  margin: 10px 0 0;
+  color: #475569;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 639px) {
+  .public-profile-hero__bio-summary {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
 }
 
 .public-profile-hero--influencer .public-profile-hero__category-lead {

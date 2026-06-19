@@ -4,26 +4,20 @@ import type { PublicBrandProfileResponse } from "@/lib/publicProfile/publicBrand
 import { getProfileImageOrAvatarUrl } from "@/lib/avatar";
 import { FirstVisitGuidanceGate } from "@/components/onboarding/FirstVisitGuidanceGate";
 import { SocialVerificationBadge } from "@/components/social/SocialVerificationBadge";
+import { CategoryBadgeGroup } from "./CategoryBadgeGroup";
 import {
   PublicProfileIconArrowTopRightOnSquare,
   PublicProfileIconMapPin,
   PublicProfileIconShieldCheck,
 } from "./publicProfileInfluencerIcons";
 import { PublicInfluencerBrandOfferCta } from "./PublicInfluencerBrandOfferCta";
+import { getPublicProfileBioSummary } from "./publicProfileBioSummary";
 
 function safeWebsiteHref(url: string): string | null {
   const t = url.trim();
   if (!t) return null;
   if (/^https?:\/\//i.test(t)) return t;
   return `https://${t}`;
-}
-
-function sectorLeadLine(data: PublicBrandProfileResponse): string | null {
-  if (data.categories.length === 0) return null;
-  return data.categories
-    .slice(0, 4)
-    .map((c) => c.label)
-    .join(" · ");
 }
 
 /** Üst kimlik + CTA; detay bölümleri sayfa akışında gösterilir. */
@@ -47,7 +41,7 @@ export function PublicBrandProfileHeader({
   const avatarSrc = getProfileImageOrAvatarUrl(data.avatarUrl, data.id, "brand");
   const socialVerifiedCount = data.verifiedSocialAccounts.length;
   const webHref = data.website ? safeWebsiteHref(data.website) : null;
-  const sectorLine = sectorLeadLine(data);
+  const bioSummary = getPublicProfileBioSummary(data.bio);
 
   return (
     <div className="public-profile-brand-hero-wrap">
@@ -76,8 +70,10 @@ export function PublicBrandProfileHeader({
                 <p className="public-profile-hero__contact muted">{data.contactName.trim()}</p>
               ) : null}
 
-              {sectorLine ? (
-                <p className="public-profile-hero__category-lead muted">{sectorLine}</p>
+              {data.categories.length > 0 ? (
+                <div className="public-profile-hero__positioning" aria-label="Sektörler">
+                  <CategoryBadgeGroup bare categories={data.categories} nicheText={null} />
+                </div>
               ) : null}
 
               <div className="public-profile-hero__meta public-profile-hero__meta--brand-row public-profile-hero__meta--hero-tight">
@@ -119,6 +115,9 @@ export function PublicBrandProfileHeader({
                   </p>
                 ) : null}
               </div>
+              {bioSummary.text ? (
+                <p className="public-profile-hero__bio-summary">{bioSummary.text}</p>
+              ) : null}
             </div>
           </div>
         </div>

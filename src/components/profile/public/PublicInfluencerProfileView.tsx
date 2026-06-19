@@ -57,13 +57,13 @@ export function PublicInfluencerProfileView({
                 cameFromDiscover={cameFromDiscover}
               />
               <PublicProfileStats data={data} />
-              <VerifiedSocialAccounts
-                accounts={data.verifiedSocialAccounts}
-                title="Sosyal Hesaplar"
-              />
               <PublicProfilePortfolio
                 items={data.portfolioItems}
                 isOwnPublicProfile={isOwnPublicProfile}
+              />
+              <VerifiedSocialAccounts
+                accounts={data.verifiedSocialAccounts}
+                title="Sosyal Hesaplar"
               />
               <div className="public-profile-trust-stack">
                 <PublicProfileCollaborationTrust completedCount={data.completedCollaborationsCount} />
