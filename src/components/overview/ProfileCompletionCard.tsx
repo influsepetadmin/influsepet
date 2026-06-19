@@ -16,10 +16,28 @@ function sectionHref(profileHref: string, businessHref: string | undefined, sect
 }
 
 export function ProfileCompletionCard({ completion, profileHref, businessHref }: Props) {
-  const visibleItems = completion.isComplete
-    ? completion.items.slice(0, 3)
-    : completion.items.filter((item) => !item.completed).slice(0, 3);
-  const status = completion.isComplete ? "Profil güçlü görünüyor." : `${completion.remainingCount} adım kaldı.`;
+  if (completion.isComplete) {
+    return (
+      <section className="ov-profile-completion ov-profile-completion--complete">
+        <span className="ov-profile-completion__complete-icon" aria-hidden>
+          <Check size={17} strokeWidth={2.2} />
+        </span>
+        <div className="ov-profile-completion__complete-copy">
+          <p className="ov-profile-completion__complete-title">Profil %100 tamamlandı</p>
+          <p className="ov-profile-completion__complete-body">
+            Profiliniz keşfet ve public sayfanız için hazır görünüyor.
+          </p>
+        </div>
+        <Link className="ov-profile-completion__complete-link" href={profileHref}>
+          Profili yönet
+          <ArrowRight size={14} strokeWidth={2} aria-hidden />
+        </Link>
+      </section>
+    );
+  }
+
+  const visibleItems = completion.items.filter((item) => !item.completed).slice(0, 3);
+  const status = `${completion.remainingCount} adım kaldı.`;
 
   return (
     <section className={`ov-profile-completion${completion.isComplete ? " ov-profile-completion--complete" : ""}`}>
@@ -44,23 +62,16 @@ export function ProfileCompletionCard({ completion, profileHref, businessHref }:
         </div>
 
         <div className="ov-profile-completion__steps" aria-label="Profil tamamlama adımları">
-          {visibleItems.map((item) =>
-            completion.isComplete ? (
-              <span className="ov-profile-completion__step ov-profile-completion__step--done" key={item.key}>
-                <Check size={15} strokeWidth={2.2} aria-hidden />
-                {item.label}
-              </span>
-            ) : (
-              <Link
-                className="ov-profile-completion__step"
-                href={sectionHref(profileHref, businessHref, item.section)}
-                key={item.key}
-              >
-                <Circle size={13} strokeWidth={2} aria-hidden />
-                {item.label}
-              </Link>
-            ),
-          )}
+          {visibleItems.map((item) => (
+            <Link
+              className="ov-profile-completion__step"
+              href={sectionHref(profileHref, businessHref, item.section)}
+              key={item.key}
+            >
+              <Circle size={13} strokeWidth={2} aria-hidden />
+              {item.label}
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -68,7 +79,7 @@ export function ProfileCompletionCard({ completion, profileHref, businessHref }:
         className="btn btn--sm ov-profile-completion__cta"
         href={sectionHref(profileHref, businessHref, visibleItems[0]?.section ?? "general")}
       >
-        {completion.isComplete ? "Profili yönet" : "Eksikleri tamamla"}
+        Eksikleri tamamla
         <ArrowRight size={15} strokeWidth={2} aria-hidden />
       </Link>
     </section>
