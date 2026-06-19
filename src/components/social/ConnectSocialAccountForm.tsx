@@ -38,7 +38,7 @@ export function ConnectSocialAccountForm({ onConnected }: { onConnected: () => v
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
         if (res.status === 409) {
-          setError(data.error ?? "Bu hesap başka bir kullanıcıya bağlı.");
+          setError(data.error ?? "Bu sosyal hesap zaten başka bir profile bağlanmış.");
         } else {
           setError(data.error ?? "Hesap bağlanamadı.");
         }

@@ -3,9 +3,8 @@ import { SocialPlatform } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSessionPayload } from "@/lib/session";
 import {
-  buildProfileUrl,
+  canonicalizeSocialAccountInput,
   generateVerificationCode,
-  parseUsernameOrUrl,
 } from "@/lib/socialAccounts";
 
 const VERIFICATION_CODE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -29,6 +28,33 @@ const connectSelect = {
   verificationCode: true,
 } as const;
 
+type ExistingSocialAccount = {
+  id: string;
+  userId: string;
+  username: string;
+  profileUrl: string | null;
+};
+
+function duplicateResponse(existing: Pick<ExistingSocialAccount, "userId">, userId: string) {
+  const error =
+    existing.userId === userId
+      ? "Bu sosyal hesap zaten profilinize ekli."
+      : "Bu sosyal hesap zaten başka bir profile bağlanmış.";
+  return NextResponse.json({ error }, { status: 409 });
+}
+
+function canonicalHandleForStoredAccount(
+  platform: SocialPlatform,
+  account: Pick<ExistingSocialAccount, "username" | "profileUrl">,
+): string | null {
+  for (const candidate of [account.username, account.profileUrl]) {
+    if (!candidate) continue;
+    const parsed = canonicalizeSocialAccountInput(platform, candidate);
+    if (parsed.ok) return parsed.canonicalHandle;
+  }
+  return null;
+}
+
 export async function POST(request: Request) {
   const session = await getSessionPayload();
   if (!session) {
@@ -48,66 +74,74 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "usernameOrUrl gerekli." }, { status: 400 });
   }
 
-  const parsed = parseUsernameOrUrl(platform, usernameOrUrl);
+  const parsed = canonicalizeSocialAccountInput(platform, usernameOrUrl);
   if (parsed.ok === false) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
-  const username = parsed.username;
-  const profileUrl = buildProfileUrl(platform, username);
+  const username = parsed.canonicalHandle;
+  const profileUrl = parsed.normalizedProfileUrl;
   const code = generateVerificationCode();
   const expiresAt = new Date(Date.now() + VERIFICATION_CODE_TTL_MS);
 
-  const existing = await prisma.socialAccount.findUnique({
+  const exactExisting = await prisma.socialAccount.findUnique({
     where: {
       platform_username: { platform, username },
     },
+    select: { id: true, userId: true, username: true, profileUrl: true },
   });
 
-  if (existing && existing.userId !== session.uid) {
-    return NextResponse.json(
-      { error: "Bu hesap baska bir kullaniciya bagli." },
-      { status: 409 },
-    );
+  if (exactExisting) {
+    return duplicateResponse(exactExisting, session.uid);
+  }
+
+  // Protect against a small candidate set of legacy rows that predates canonical storage.
+  const platformAccounts = await prisma.socialAccount.findMany({
+    where: {
+      platform,
+      OR: [
+        { username: { contains: username, mode: "insensitive" } },
+        { profileUrl: { contains: username, mode: "insensitive" } },
+      ],
+    },
+    select: { id: true, userId: true, username: true, profileUrl: true },
+    take: 25,
+  });
+  const legacyEquivalent = platformAccounts.find(
+    (account) => canonicalHandleForStoredAccount(platform, account) === username,
+  );
+  if (legacyEquivalent) {
+    return duplicateResponse(legacyEquivalent, session.uid);
   }
 
   try {
-    const row = existing
-      ? await prisma.socialAccount.update({
-          where: { id: existing.id },
-          data: {
-            profileUrl,
-            isConnected: true,
-            isVerified: false,
-            verificationStatus: "UNVERIFIED",
-            verificationMethod: "BIO_CODE",
-            verificationCode: code,
-            verificationRequestedAt: null,
-            verificationReviewedAt: null,
-            verificationExpiresAt: expiresAt,
-            verificationReviewerNote: null,
-            verifiedAt: null,
-            lastSyncedAt: null,
-          },
-          select: connectSelect,
-        })
-      : await prisma.socialAccount.create({
-          data: {
-            userId: session.uid,
-            platform,
-            username,
-            profileUrl,
-            isConnected: true,
-            isVerified: false,
-            verificationStatus: "UNVERIFIED",
-            verificationMethod: "BIO_CODE",
-            verificationCode: code,
-            verificationExpiresAt: expiresAt,
-          },
-          select: connectSelect,
-        });
+    const row = await prisma.socialAccount.create({
+      data: {
+        userId: session.uid,
+        platform,
+        username,
+        profileUrl,
+        isConnected: true,
+        isVerified: false,
+        verificationStatus: "UNVERIFIED",
+        verificationMethod: "BIO_CODE",
+        verificationCode: code,
+        verificationExpiresAt: expiresAt,
+      },
+      select: connectSelect,
+    });
 
     return NextResponse.json({ ok: true, socialAccount: row });
   } catch {
+    // The existing DB unique constraint closes races between concurrent requests.
+    try {
+      const conflict = await prisma.socialAccount.findUnique({
+        where: { platform_username: { platform, username } },
+        select: { userId: true },
+      });
+      if (conflict) return duplicateResponse(conflict, session.uid);
+    } catch {
+      // Fall through to the existing generic persistence error.
+    }
     return NextResponse.json({ error: "Kayit olusturulamadi." }, { status: 500 });
   }
 }

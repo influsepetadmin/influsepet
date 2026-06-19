@@ -19,6 +19,7 @@ const IG_SKIP_SEGMENTS = new Set([
 
 /** TikTok path prefixes that are not profile handles. */
 const TT_SKIP_SEGMENTS = new Set(["video", "foryou", "following", "live", "explore"]);
+const PROFILE_HANDLE_RE = /^[a-z0-9._]{1,64}$/;
 
 /**
  * Trim, strip control chars, collapse internal whitespace, cap length.
@@ -33,6 +34,19 @@ export function sanitizeSocialUsernameInput(input: string): string {
 
 function stripAtPrefix(s: string): string {
   return s.startsWith("@") ? s.slice(1) : s;
+}
+
+function decodePathSegment(segment: string): string | null {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return null;
+  }
+}
+
+function canonicalProfileHandle(input: string): string | null {
+  const handle = stripAtPrefix(input.trim()).toLowerCase();
+  return PROFILE_HANDLE_RE.test(handle) ? handle : null;
 }
 
 /**
@@ -88,18 +102,19 @@ export function looksLikeUrl(input: string): boolean {
 function parseInstagramPath(pathname: string): string | null {
   const parts = pathname.split("/").filter(Boolean);
   if (parts.length === 0) return null;
-  const first = parts[0];
+  const first = decodePathSegment(parts[0]);
   if (!first || IG_SKIP_SEGMENTS.has(first.toLowerCase())) return null;
-  return normalizeUsername("INSTAGRAM", first);
+  return canonicalProfileHandle(first);
 }
 
 function parseTikTokPath(pathname: string): string | null {
   const parts = pathname.split("/").filter(Boolean);
   if (parts.length === 0) return null;
-  let seg = parts[0];
-  if (seg.startsWith("@")) seg = seg.slice(1);
+  const first = decodePathSegment(parts[0]);
+  if (!first?.startsWith("@")) return null;
+  const seg = first.slice(1);
   if (TT_SKIP_SEGMENTS.has(seg.toLowerCase())) return null;
-  return normalizeUsername("TIKTOK", seg);
+  return canonicalProfileHandle(seg);
 }
 
 function parseYouTubePath(pathname: string, searchParams: URLSearchParams): string | null {
@@ -137,11 +152,11 @@ export function extractUsernameFromUrl(input: string, platform: SocialPlatform):
 
   switch (platform) {
     case "INSTAGRAM": {
-      if (!host.endsWith("instagram.com")) return null;
+      if (host !== "instagram.com") return null;
       return parseInstagramPath(url.pathname);
     }
     case "TIKTOK": {
-      if (!host.endsWith("tiktok.com")) return null;
+      if (host !== "tiktok.com") return null;
       return parseTikTokPath(url.pathname);
     }
     case "YOUTUBE": {
@@ -176,6 +191,8 @@ export function parseUsernameOrUrl(platform: SocialPlatform, rawInput: string): 
     if (!username) {
       return { ok: false, error: "URL bu platform icin cozumlenemedi veya gecersiz." };
     }
+  } else if (platform === "INSTAGRAM" || platform === "TIKTOK") {
+    username = canonicalProfileHandle(sanitized);
   } else {
     username = normalizeUsername(platform, sanitized);
   }
@@ -185,4 +202,29 @@ export function parseUsernameOrUrl(platform: SocialPlatform, rawInput: string): 
   }
 
   return { ok: true, username };
+}
+
+export type CanonicalSocialAccountInput =
+  | {
+      ok: true;
+      platform: SocialPlatform;
+      canonicalHandle: string;
+      normalizedProfileUrl: string;
+    }
+  | { ok: false; error: string };
+
+/** Canonical identity used by the connect route and its uniqueness checks. */
+export function canonicalizeSocialAccountInput(
+  platform: SocialPlatform,
+  rawInput: string,
+): CanonicalSocialAccountInput {
+  const parsed = parseUsernameOrUrl(platform, rawInput);
+  if (parsed.ok === false) return parsed;
+
+  return {
+    ok: true,
+    platform,
+    canonicalHandle: parsed.username,
+    normalizedProfileUrl: buildProfileUrl(platform, parsed.username),
+  };
 }
