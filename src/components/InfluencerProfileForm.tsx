@@ -1,3 +1,4 @@
+import Link from "next/link";
 import CitySelect from "@/components/CitySelect";
 import CategoryMultiSelect from "@/components/CategoryMultiSelect";
 import ProfileImageField from "@/components/ProfileImageField";
@@ -128,38 +129,21 @@ export default function InfluencerProfileForm({
         <header className="influencer-profile-form__section-head">
           <span className="influencer-profile-form__eyebrow">Bağlantılar</span>
           <h3 id="influencer-profile-social-heading" className="influencer-profile-form__title">
-            Sosyal bağlantılar
+            Sosyal hesaplarını ayrı sekmeden yönet
           </h3>
-          <p className="influencer-profile-form__hint muted">
-            Güven ve doğrulama için öncelikle paneldeki <strong>Sosyal Hesaplar</strong> bölümünden hesap bağlayıp
-            doğrulamanız önerilir. Aşağıdaki alanlar geçici olarak serbest metin bağlantıları içindir.
-          </p>
         </header>
 
-        <div className="influencer-profile-form__grid">
-          <div className="influencer-profile-form__field">
-            <label htmlFor="instagramUrl">Instagram URL (opsiyonel)</label>
-            <input
-              id="instagramUrl"
-              name="instagramUrl"
-              type="text"
-              inputMode="url"
-              autoComplete="url"
-              defaultValue={initial.instagramUrl}
-            />
-          </div>
+        <input type="hidden" name="instagramUrl" value={initial.instagramUrl} />
+        <input type="hidden" name="tiktokUrl" value={initial.tiktokUrl} />
 
-          <div className="influencer-profile-form__field">
-            <label htmlFor="tiktokUrl">TikTok URL (opsiyonel)</label>
-            <input
-              id="tiktokUrl"
-              name="tiktokUrl"
-              type="text"
-              inputMode="url"
-              autoComplete="url"
-              defaultValue={initial.tiktokUrl}
-            />
-          </div>
+        <div className="influencer-profile-form__social-guidance">
+          <p className="influencer-profile-form__social-guidance-text muted">
+            Instagram ve TikTok hesaplarını Sosyal hesaplar sekmesinden bağlayıp doğrulayabilirsin.
+            Doğrulanan hesaplar herkese açık profilinde güven sinyali olarak görünür.
+          </p>
+          <Link className="btn secondary btn--sm" href="/influencer/profile?tab=sosyal">
+            Sosyal hesaplara git
+          </Link>
         </div>
       </section>
 

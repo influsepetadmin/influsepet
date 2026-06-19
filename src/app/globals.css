@@ -271,6 +271,35 @@ main:has(.dashboard-page) .category-multi-select__input {
   font-size: 0.88rem;
 }
 
+.influencer-profile-form__social-guidance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid rgba(199, 210, 254, 0.72);
+  border-radius: 12px;
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.influencer-profile-form__social-guidance-text {
+  margin: 0;
+  max-width: 68ch;
+  font-size: 0.86rem;
+}
+
+@media (min-width: 640px) {
+  .influencer-profile-form__social-guidance {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .influencer-profile-form__social-guidance .btn {
+    flex-shrink: 0;
+  }
+}
+
 .influencer-profile-form__grid {
   display: grid;
   grid-template-columns: 1fr;
