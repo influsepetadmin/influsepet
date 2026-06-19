@@ -57,6 +57,11 @@ export function PublicBrandProfileHeader({
             <div className="public-profile-hero__identity-text">
               <div className="public-profile-hero__title-row">
                 <h1 className="public-profile-hero__name">{data.name}</h1>
+              </div>
+              <div
+                className="public-profile-hero__badge-row public-profile-hero__badge-row--brand"
+                aria-label="Profil rozetleri"
+              >
                 <span className="public-profile-role-badge public-profile-role-badge--brand">Marka</span>
                 {socialVerifiedCount > 0 ? (
                   <span className="public-profile-hero__verified-badge">
@@ -65,10 +70,6 @@ export function PublicBrandProfileHeader({
                 ) : null}
               </div>
               <p className="public-profile-hero__handle muted">@{data.username}</p>
-
-              {data.contactName?.trim() && data.contactName.trim() !== data.name.trim() ? (
-                <p className="public-profile-hero__contact muted">{data.contactName.trim()}</p>
-              ) : null}
 
               {data.categories.length > 0 ? (
                 <div className="public-profile-hero__positioning" aria-label="Sektörler">
@@ -87,6 +88,22 @@ export function PublicBrandProfileHeader({
                     </span>
                     {data.city.trim()}
                   </p>
+                ) : null}
+                {webHref ? (
+                  <a
+                    href={webHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="public-profile-hero__meta-line public-profile-hero__meta-line--icon public-profile-brand-website-pill"
+                  >
+                    <span
+                      className="public-profile-hero__meta-icon public-profile-hero__meta-icon--svg"
+                      aria-hidden
+                    >
+                      <PublicProfileIconArrowTopRightOnSquare className="public-profile-icon public-profile-icon--meta" />
+                    </span>
+                    Web sitesi
+                  </a>
                 ) : null}
                 {socialVerifiedCount > 0 ? (
                   <p className="public-profile-hero__meta-line public-profile-hero__meta-line--trust muted public-profile-hero__meta-line--icon">
@@ -131,21 +148,6 @@ export function PublicBrandProfileHeader({
               </p>
             </div>
           )}
-          {webHref ? (
-            <div className="public-profile-brand-secondary-actions">
-              <a
-                href={webHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn secondary public-profile-brand-website-cta"
-              >
-                Web sitesini ziyaret et
-                <PublicProfileIconArrowTopRightOnSquare
-                  className="public-profile-icon public-profile-brand-website-cta__icon"
-                />
-              </a>
-            </div>
-          ) : null}
           {!isOwnPublicProfile ? <FirstVisitGuidanceGate scope="profile" /> : null}
         </div>
       </header>
