@@ -54,7 +54,10 @@ export function PublicBrandProfileView({
                 cameFromDiscover={cameFromDiscover}
               />
               <PublicBrandProfileStats data={data} />
-              <VerifiedSocialAccounts accounts={data.verifiedSocialAccounts} />
+              <VerifiedSocialAccounts
+                accounts={data.verifiedSocialAccounts}
+                title="Sosyal Hesaplar"
+              />
               <PublicProfileAsideBrand data={data} />
               <div className="public-profile-trust-stack">
                 <PublicProfileCollaborationTrust completedCount={data.completedCollaborationsCount} />
