@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   buildProfileImageObjectKey,
   buildR2ProfileImageUrl,
+  buildR2S3ClientConfig,
   ProfileImageStorageConfigError,
   resolveProfileImageStorageConfig,
 } from "../../src/lib/uploads/profileImageStorage";
@@ -28,6 +29,44 @@ test("uses R2 storage when all R2 variables are present", () => {
     bucket: completeR2Env.R2_BUCKET,
     publicBaseUrl: completeR2Env.R2_PUBLIC_BASE_URL,
   });
+});
+
+test("normalizes the R2 endpoint to its account-level origin", () => {
+  const config = resolveProfileImageStorageConfig({
+    ...completeR2Env,
+    R2_ENDPOINT: "  https://account-id.r2.cloudflarestorage.com/  ",
+  });
+
+  assert.equal(config.mode, "r2");
+  if (config.mode === "r2") {
+    assert.equal(config.endpoint, "https://account-id.r2.cloudflarestorage.com");
+  }
+});
+
+test("rejects public domains and paths as the R2 write endpoint", () => {
+  assert.throws(
+    () => resolveProfileImageStorageConfig({ ...completeR2Env, R2_ENDPOINT: completeR2Env.R2_PUBLIC_BASE_URL }),
+    ProfileImageStorageConfigError,
+  );
+  assert.throws(
+    () =>
+      resolveProfileImageStorageConfig({
+        ...completeR2Env,
+        R2_ENDPOINT: "https://account-id.r2.cloudflarestorage.com/influsepet-profile-images",
+      }),
+    ProfileImageStorageConfigError,
+  );
+});
+
+test("keeps the public URL separate and forces path-style R2 requests", () => {
+  const config = resolveProfileImageStorageConfig(completeR2Env);
+  assert.equal(config.mode, "r2");
+  if (config.mode !== "r2") return;
+
+  const clientConfig = buildR2S3ClientConfig(config);
+  assert.equal(clientConfig.endpoint, completeR2Env.R2_ENDPOINT);
+  assert.notEqual(clientConfig.endpoint, completeR2Env.R2_PUBLIC_BASE_URL);
+  assert.equal(clientConfig.forcePathStyle, true);
 });
 
 test("rejects partial R2 configuration instead of falling back locally", () => {

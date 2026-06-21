@@ -5,7 +5,10 @@ import {
   PROFILE_UPLOAD_MAX_BYTES,
   validateImageBuffer,
 } from "@/lib/uploads/profileImageUpload";
-import { storeProfileImage } from "@/lib/uploads/profileImageStorage";
+import {
+  safeProfileImageStorageError,
+  storeProfileImage,
+} from "@/lib/uploads/profileImageStorage";
 
 const ALLOWED_DECLARED_NORMALIZED = new Set(["image/jpeg", "image/png", "image/webp"]);
 
@@ -84,10 +87,9 @@ export async function POST(request: Request) {
 
   try {
     const url = await storeProfileImage(buffer, magic.mime);
-    console.log("PROFILE_IMAGE_UPLOAD_URL", url);
     return NextResponse.json({ ok: true, url });
   } catch (error) {
-    console.error("PROFILE_IMAGE_UPLOAD_FAILED", error);
+    console.error("PROFILE_IMAGE_UPLOAD_FAILED", safeProfileImageStorageError(error));
     return NextResponse.json({ error: "Yukleme basarisiz. Tekrar deneyin." }, { status: 500 });
   }
 }
