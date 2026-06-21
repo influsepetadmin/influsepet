@@ -5,26 +5,26 @@ import { join } from "path";
 /** Max upload size for profile images (5 MB). */
 export const PROFILE_UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
 
-/** Local development fallback and legacy local-upload serving path. */
+// TODO(production-storage): This writes profile/logo uploads to the app's local
+// filesystem. Railway redeploys do not preserve runtime-created files; replace
+// with persistent object storage such as Cloudflare R2/S3 before production use.
 export const PROFILE_UPLOAD_DIR_SEGMENTS = ["public", "uploads", "profile-images"] as const;
 
 export const PROFILE_UPLOAD_PUBLIC_PREFIX = "/uploads/profile-images";
 
-export type ProfileImageMime = "image/jpeg" | "image/png" | "image/webp";
-
-const MIME_TO_EXT: Record<ProfileImageMime, string> = {
+const MIME_TO_EXT: Record<"image/jpeg" | "image/png" | "image/webp", string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
 };
 
-export function extensionForMime(mime: ProfileImageMime): string {
+export function extensionForMime(mime: "image/jpeg" | "image/png" | "image/webp"): string {
   return MIME_TO_EXT[mime];
 }
 
 export function validateImageBuffer(
   buf: Buffer,
-): { ok: true; mime: ProfileImageMime } | { ok: false; error: string } {
+): { ok: true; mime: "image/jpeg" | "image/png" | "image/webp" } | { ok: false; error: string } {
   if (buf.length < 12) {
     return { ok: false, error: "Dosya cok kucuk veya gecersiz." };
   }
@@ -46,7 +46,7 @@ export function validateImageBuffer(
 
 export async function saveProfileImageFile(
   buffer: Buffer,
-  mime: ProfileImageMime,
+  mime: "image/jpeg" | "image/png" | "image/webp",
 ): Promise<string> {
   const ext = extensionForMime(mime);
   const name = `${randomUUID()}.${ext}`;
