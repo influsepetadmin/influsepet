@@ -1,0 +1,8 @@
+name = "influsepet-profile-image-gateway"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+workers_dev = true
+
+[[r2_buckets]]
+binding = "PROFILE_IMAGES"
+bucket_name = "influsepet-profile-images"

@@ -3,9 +3,12 @@ import { getSessionPayload } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import {
   PROFILE_UPLOAD_MAX_BYTES,
-  saveProfileImageFile,
   validateImageBuffer,
 } from "@/lib/uploads/profileImageUpload";
+import {
+  ProfileImageUploadConfigurationError,
+  saveProfileImage,
+} from "@/lib/uploads/profileImageGateway";
 
 const ALLOWED_DECLARED_NORMALIZED = new Set(["image/jpeg", "image/png", "image/webp"]);
 
@@ -83,11 +86,21 @@ export async function POST(request: Request) {
   }
 
   try {
-    const url = await saveProfileImageFile(buffer, magic.mime);
+    const url = await saveProfileImage(buffer, magic.mime);
     console.log("PROFILE_IMAGE_UPLOAD_URL", url);
     return NextResponse.json({ ok: true, url });
   } catch (error) {
-    console.error("PROFILE_IMAGE_UPLOAD_FAILED", error);
+    if (error instanceof ProfileImageUploadConfigurationError) {
+      console.error("PROFILE_IMAGE_UPLOAD_CONFIG_ERROR", { message: error.message });
+      return NextResponse.json(
+        { error: "Yukleme servisi yapilandirmasi eksik." },
+        { status: 500 },
+      );
+    }
+    console.error("PROFILE_IMAGE_UPLOAD_FAILED", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message : "Unknown upload error",
+    });
     return NextResponse.json({ error: "Yukleme basarisiz. Tekrar deneyin." }, { status: 500 });
   }
 }
