@@ -72,6 +72,11 @@ enum CollaborationMediaKind {
   VIDEO
 }
 
+enum MediaStorageProvider {
+  LOCAL
+  R2
+}
+
 model User {
   id             String   @id @default(cuid())
   name           String
@@ -314,6 +319,8 @@ model OfferDeliveryMedia {
   kind                 CollaborationMediaKind
   mimeType             String
   storedFilename       String
+  storageProvider      MediaStorageProvider   @default(LOCAL)
+  objectKey            String?
   sizeBytes            Int
   originalFilenameSafe String?
   createdAt            DateTime               @default(now())
@@ -321,6 +328,7 @@ model OfferDeliveryMedia {
   delivery OfferDelivery @relation(fields: [offerDeliveryId], references: [id], onDelete: Cascade)
 
   @@index([offerDeliveryId])
+  @@index([storageProvider])
 }
 
 model Conversation {

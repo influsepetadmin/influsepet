@@ -15,6 +15,52 @@ It intentionally does not use R2 S3 access keys. Railway talks to the Worker ove
 - R2 bucket: `influsepet-profile-images`
 - Public URL response: `https://media.influsepet.com/profile-images/{uuid}.{ext}`
 
+## Private delivery-media endpoints (Phase 1 infrastructure)
+
+The Worker also contains private delivery-proof media infrastructure for a later activation phase. These endpoints are not wired into the current delivery UI/API yet.
+
+Delivery media is private:
+
+- no public R2 URLs are returned
+- object keys are generated under `delivery-media/`
+- browser upload calls use short-lived `PrivateMediaTicket` bearer tickets
+- server read/head/delete calls use the existing `PROFILE_IMAGE_GATEWAY_SECRET`
+- `PROFILE_IMAGES` remains the only R2 binding
+
+Future endpoint namespace:
+
+```text
+POST   /delivery-media/multipart/init
+PUT    /delivery-media/multipart/part?partNumber=1
+POST   /delivery-media/multipart/complete
+POST   /delivery-media/multipart/abort
+GET    /delivery-media/{uuid}.{ext}
+HEAD   /delivery-media/{uuid}.{ext}
+DELETE /delivery-media/{uuid}.{ext}
+```
+
+The browser upload flow is intentionally ticket-based:
+
+- `init` accepts a short-lived `PrivateMediaTicket` and returns a Worker-signed `uploadSession`
+- `part` accepts only the signed `uploadSession`, a part number, and a raw request body stream
+- `complete` accepts only the signed `uploadSession` plus Worker-signed `partReceipt` values
+- `abort` accepts only the signed `uploadSession`
+- browsers never provide raw R2 object keys, upload IDs, buckets, storage providers, or public URLs
+
+Accepted delivery media limits:
+
+- JPEG, PNG, WebP: 10 MB
+- MP4, MOV, WebM: 200 MB
+- multipart upload parts are designed around 10 MB chunks
+
+Set this Worker secret before Phase 2 activation:
+
+```bash
+npx wrangler secret put PRIVATE_MEDIA_TICKET_SECRET
+```
+
+The same value must also be stored in Railway as `PRIVATE_MEDIA_TICKET_SECRET`. If it is missing, delivery-media ticket endpoints fail closed; profile-image uploads continue to use their existing configuration.
+
 ## Deploy
 
 From this directory:
@@ -60,6 +106,8 @@ After the Worker is deployed and reachable, set both variables together in Railw
 ```text
 PROFILE_IMAGE_GATEWAY_URL=https://profile-image-gateway.influsepet.com
 PROFILE_IMAGE_GATEWAY_SECRET=<same long random secret stored as the Worker secret>
+# Phase 2+ only:
+PRIVATE_MEDIA_TICKET_SECRET=<same long random ticket secret stored as the Worker secret>
 ```
 
 If only one variable is set, the Next.js app intentionally returns a safe configuration error for profile-image uploads.
