@@ -4,6 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { getSessionPayload } from "@/lib/session";
 import type { OfferBasics } from "@/lib/offers/deliveries";
 import { deliveryMediaAbsolutePath } from "@/lib/uploads/deliveryMediaUpload";
+import {
+  resolveDeliveryMediaObjectKey,
+  validateDeliveryMediaStorageRecord,
+} from "@/lib/uploads/privateDeliveryMedia";
+import { getPrivateDeliveryMediaObjectResponse } from "@/lib/uploads/privateDeliveryMediaGateway";
 
 function isParticipant(offer: OfferBasics, userId: string): boolean {
   return offer.brandId === userId || offer.influencerId === userId;
@@ -11,7 +16,7 @@ function isParticipant(offer: OfferBasics, userId: string): boolean {
 
 type RouteCtx = { params: Promise<{ offerId: string; mediaId: string }> };
 
-export async function GET(_request: Request, ctx: RouteCtx) {
+export async function GET(request: Request, ctx: RouteCtx) {
   const session = await getSessionPayload();
   if (!session) {
     return NextResponse.json({ error: "Oturum bulunamadi." }, { status: 401 });
@@ -43,6 +48,37 @@ export async function GET(_request: Request, ctx: RouteCtx) {
   const offer = media.delivery.offer;
   if (!isParticipant(offer, session.uid)) {
     return NextResponse.json({ error: "Yetkisiz." }, { status: 403 });
+  }
+
+  if ((media.storageProvider ?? "LOCAL") === "R2") {
+    if (!validateDeliveryMediaStorageRecord(media)) {
+      return NextResponse.json({ error: "Gecersiz dosya." }, { status: 500 });
+    }
+    const objectKey = resolveDeliveryMediaObjectKey(media);
+    if (!objectKey) {
+      return NextResponse.json({ error: "Gecersiz dosya." }, { status: 500 });
+    }
+
+    let workerResponse: Response;
+    try {
+      workerResponse = await getPrivateDeliveryMediaObjectResponse(objectKey, request.headers.get("range"));
+    } catch {
+      return NextResponse.json({ error: "Dosya okunamadi." }, { status: 502 });
+    }
+
+    const headers = new Headers();
+    for (const name of ["Content-Type", "Content-Length", "Content-Range", "Accept-Ranges", "ETag"]) {
+      const value = workerResponse.headers.get(name);
+      if (value) headers.set(name, value);
+    }
+    headers.set("Cache-Control", "private, no-store");
+    const downloadName = media.originalFilenameSafe ?? `delivery-${media.id}`;
+    headers.set("Content-Disposition", `inline; filename*=UTF-8''${encodeURIComponent(downloadName)}`);
+
+    return new NextResponse(workerResponse.body, {
+      status: workerResponse.status,
+      headers,
+    });
   }
 
   let absolute: string;

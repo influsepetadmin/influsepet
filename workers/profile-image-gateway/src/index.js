@@ -16,6 +16,9 @@ const DELIVERY_MEDIA_MIME_LIMITS = new Map([
 ]);
 const DELIVERY_MEDIA_KEY_RE =
   /^delivery-media\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.(?:jpg|png|webp|mp4|mov|webm)$/i;
+const DELIVERY_MEDIA_CORS_ORIGINS = new Set(["https://influsepet.com"]);
+const DELIVERY_MEDIA_CORS_METHODS = "POST, PUT, OPTIONS";
+const DELIVERY_MEDIA_CORS_HEADERS = "Content-Type, Authorization, X-Influsepet-Upload-Session";
 const TOKEN_VERSION = 1;
 const DELIVERY_UPLOAD_AUDIENCE = "delivery-media:upload";
 const UPLOAD_SESSION_AUDIENCE = "delivery-media:upload-session";
@@ -28,6 +31,42 @@ function json(body, status) {
       "Cache-Control": "no-store",
     },
   });
+}
+
+function isDeliveryMultipartPath(pathname) {
+  return pathname.startsWith("/delivery-media/multipart/");
+}
+
+function deliveryCorsHeaders(request) {
+  const origin = request.headers.get("Origin") || "";
+  if (!DELIVERY_MEDIA_CORS_ORIGINS.has(origin)) return null;
+  const headers = new Headers();
+  headers.set("Access-Control-Allow-Origin", origin);
+  headers.set("Vary", "Origin");
+  headers.set("Access-Control-Allow-Methods", DELIVERY_MEDIA_CORS_METHODS);
+  headers.set("Access-Control-Allow-Headers", DELIVERY_MEDIA_CORS_HEADERS);
+  headers.set("Access-Control-Max-Age", "600");
+  return headers;
+}
+
+function withDeliveryCors(request, response) {
+  const cors = deliveryCorsHeaders(request);
+  if (!cors) return response;
+  const headers = new Headers(response.headers);
+  for (const [key, value] of cors) {
+    headers.set(key, value);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+function deliveryCorsPreflight(request) {
+  const cors = deliveryCorsHeaders(request);
+  if (!cors) return json({ error: "Not found" }, 404);
+  return new Response(null, { status: 204, headers: cors });
 }
 
 function normalizeContentType(value) {
@@ -667,6 +706,7 @@ async function handleDeliveryMediaRead(request, env, objectKey, headOnly = false
       headers.set("etag", object.httpEtag);
       headers.set("Cache-Control", "private, no-store");
       headers.set("Content-Length", String(object.size));
+      headers.set("X-Influsepet-Private-Media-Scope", object.customMetadata?.privateMediaScope || "");
       return new Response(null, { status: 200, headers });
     }
 
@@ -682,8 +722,21 @@ async function handleDeliveryMediaRead(request, env, objectKey, headOnly = false
     headers.set("etag", object.httpEtag);
     headers.set("Cache-Control", "private, no-store");
     headers.set("Content-Length", String(object.size));
+    headers.set("Accept-Ranges", "bytes");
     if (parsedRange.range) {
-      headers.set("Accept-Ranges", "bytes");
+      const totalSize = object.size;
+      if (typeof parsedRange.range.offset === "number") {
+        const start = parsedRange.range.offset;
+        const length = parsedRange.range.length || Math.max(totalSize - start, 0);
+        const end = Math.min(start + length - 1, totalSize - 1);
+        headers.set("Content-Range", `bytes ${start}-${end}/${totalSize}`);
+        headers.set("Content-Length", String(Math.max(end - start + 1, 0)));
+      } else if (typeof parsedRange.range.suffix === "number") {
+        const start = Math.max(totalSize - parsedRange.range.suffix, 0);
+        const end = totalSize - 1;
+        headers.set("Content-Range", `bytes ${start}-${end}/${totalSize}`);
+        headers.set("Content-Length", String(totalSize - start));
+      }
     }
     return new Response(object.body, {
       status: parsedRange.range ? 206 : 200,
@@ -717,6 +770,10 @@ const worker = {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    if (request.method === "OPTIONS" && isDeliveryMultipartPath(url.pathname)) {
+      return deliveryCorsPreflight(request);
+    }
+
     if (url.pathname === "/profile-images") {
       if (request.method !== "POST") {
         return json({ error: "Method not allowed" }, 405);
@@ -725,16 +782,16 @@ const worker = {
     }
 
     if (url.pathname === "/delivery-media/multipart/init" && request.method === "POST") {
-      return handleDeliveryMultipartInit(request, env);
+      return withDeliveryCors(request, await handleDeliveryMultipartInit(request, env));
     }
     if (url.pathname === "/delivery-media/multipart/part" && request.method === "PUT") {
-      return handleDeliveryMultipartPart(request, env);
+      return withDeliveryCors(request, await handleDeliveryMultipartPart(request, env));
     }
     if (url.pathname === "/delivery-media/multipart/complete" && request.method === "POST") {
-      return handleDeliveryMultipartComplete(request, env);
+      return withDeliveryCors(request, await handleDeliveryMultipartComplete(request, env));
     }
     if (url.pathname === "/delivery-media/multipart/abort" && request.method === "POST") {
-      return handleDeliveryMultipartAbort(request, env);
+      return withDeliveryCors(request, await handleDeliveryMultipartAbort(request, env));
     }
 
     const deliveryObjectKey = deliveryMediaFilenameFromPath(url.pathname);

@@ -78,6 +78,26 @@ function isLikelyVideoFile(file: Pick<File, "type" | "name">): boolean {
 
 type DeliveryApiErr = { error?: string; code?: string };
 
+type DeliveryR2Ticket =
+  | {
+      mode: "r2";
+      gatewayUrl: string;
+      ticket: string;
+      partSizeBytes: number;
+    }
+  | { mode: "local" };
+
+type CompletedDeliveryR2Media = {
+  uploadSession: string;
+  completion: {
+    storageProvider: "R2";
+    objectKey: string;
+    mimeType: string;
+    sizeBytes: number;
+  };
+  originalFilename: string;
+};
+
 function messageForDeliverySubmitFailure(
   res: Response,
   data: DeliveryApiErr,
@@ -203,11 +223,13 @@ export function DeliveryPanel({
   const [deliveryUrl, setDeliveryUrl] = useState("");
   const [deliveryText, setDeliveryText] = useState("");
   const [staged, setStaged] = useState<{ key: string; file: File; previewUrl: string }[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
   const [reviewBusy, setReviewBusy] = useState<"APPROVE" | "REQUEST_REVISION" | null>(null);
   const busySubmit = useRef(false);
+  const activeR2Uploads = useRef<{ gatewayUrl: string; uploadSession: string }[]>([]);
 
   const revokeStagedUrls = useCallback((items: { previewUrl: string }[]) => {
     for (const it of items) {
@@ -222,7 +244,13 @@ export function DeliveryPanel({
   const stagedRef = useRef(staged);
   stagedRef.current = staged;
   useEffect(() => {
-    return () => revokeStagedUrls(stagedRef.current);
+    return () => {
+      revokeStagedUrls(stagedRef.current);
+      for (const upload of activeR2Uploads.current) {
+        void abortR2Upload(upload.gatewayUrl, upload.uploadSession);
+      }
+      activeR2Uploads.current = [];
+    };
   }, [revokeStagedUrls]);
 
   const loadDeliveries = useCallback(async () => {
@@ -290,6 +318,161 @@ export function DeliveryPanel({
     }
   }
 
+  async function abortR2Upload(gatewayUrl: string, uploadSession: string) {
+    try {
+      await fetch(`${gatewayUrl.replace(/\/+$/, "")}/delivery-media/multipart/abort`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uploadSession }),
+      });
+    } catch {
+      /* best-effort cleanup */
+    }
+  }
+
+  async function issueR2Ticket(file: File): Promise<DeliveryR2Ticket> {
+    const res = await fetch(`/api/offers/${offerId}/deliveries/media/upload-ticket`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filename: file.name,
+        mimeType: file.type,
+        sizeBytes: file.size,
+      }),
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      ok?: boolean;
+      gatewayUrl?: string;
+      ticket?: string;
+      partSizeBytes?: number;
+      error?: string;
+      code?: string;
+    };
+    if (res.status === 409 && data.code === "DELIVERY_R2_DISABLED") {
+      return { mode: "local" };
+    }
+    if (!res.ok || data.ok !== true || !data.gatewayUrl || !data.ticket || !data.partSizeBytes) {
+      throw new Error(data.error || "Teslim dosyasi yukleme izni alinamadi.");
+    }
+    return {
+      mode: "r2",
+      gatewayUrl: data.gatewayUrl.replace(/\/+$/, ""),
+      ticket: data.ticket,
+      partSizeBytes: data.partSizeBytes,
+    };
+  }
+
+  async function uploadFileToR2(
+    item: { key: string; file: File },
+    ticket: Extract<DeliveryR2Ticket, { mode: "r2" }>,
+  ): Promise<CompletedDeliveryR2Media> {
+    setUploadProgress((prev) => ({ ...prev, [item.key]: 0 }));
+    const initRes = await fetch(`${ticket.gatewayUrl}/delivery-media/multipart/init`, {
+      method: "POST",
+      headers: { Authorization: `PrivateMediaTicket ${ticket.ticket}` },
+    });
+    const initData = (await initRes.json().catch(() => ({}))) as {
+      uploadSession?: string;
+      expectedPartCount?: number;
+      error?: string;
+    };
+    if (!initRes.ok || !initData.uploadSession || !initData.expectedPartCount) {
+      throw new Error(initData.error || "Dosya yukleme baslatilamadi.");
+    }
+
+    const uploadSession = initData.uploadSession;
+    activeR2Uploads.current.push({ gatewayUrl: ticket.gatewayUrl, uploadSession });
+
+    try {
+      const partReceipts: string[] = [];
+      for (let partNumber = 1; partNumber <= initData.expectedPartCount; partNumber += 1) {
+        const start = (partNumber - 1) * ticket.partSizeBytes;
+        const end = Math.min(start + ticket.partSizeBytes, item.file.size);
+        const chunk = item.file.slice(start, end);
+        const partRes = await fetch(`${ticket.gatewayUrl}/delivery-media/multipart/part?partNumber=${partNumber}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": item.file.type || "application/octet-stream",
+            "X-Influsepet-Upload-Session": uploadSession,
+          },
+          body: chunk,
+        });
+        const partData = (await partRes.json().catch(() => ({}))) as { partReceipt?: string; error?: string };
+        if (!partRes.ok || !partData.partReceipt) {
+          throw new Error(partData.error || "Dosya parcasi yuklenemedi.");
+        }
+        partReceipts.push(partData.partReceipt);
+        setUploadProgress((prev) => ({
+          ...prev,
+          [item.key]: Math.round((partNumber / initData.expectedPartCount!) * 100),
+        }));
+      }
+
+      const completeRes = await fetch(`${ticket.gatewayUrl}/delivery-media/multipart/complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uploadSession, partReceipts }),
+      });
+      const completion = (await completeRes.json().catch(() => ({}))) as {
+        ok?: boolean;
+        storageProvider?: "R2";
+        objectKey?: string;
+        mimeType?: string;
+        sizeBytes?: number;
+        error?: string;
+      };
+      if (
+        !completeRes.ok ||
+        completion.ok !== true ||
+        completion.storageProvider !== "R2" ||
+        !completion.objectKey ||
+        !completion.mimeType ||
+        !completion.sizeBytes
+      ) {
+        throw new Error(completion.error || "Dosya yukleme tamamlanamadi.");
+      }
+
+      activeR2Uploads.current = activeR2Uploads.current.filter((x) => x.uploadSession !== uploadSession);
+      return {
+        uploadSession,
+        completion: {
+          storageProvider: "R2",
+          objectKey: completion.objectKey,
+          mimeType: completion.mimeType,
+          sizeBytes: completion.sizeBytes,
+        },
+        originalFilename: item.file.name,
+      };
+    } catch (err) {
+      await abortR2Upload(ticket.gatewayUrl, uploadSession);
+      activeR2Uploads.current = activeR2Uploads.current.filter((x) => x.uploadSession !== uploadSession);
+      throw err;
+    }
+  }
+
+  async function submitLocalDelivery(url: string, note: string, files: File[]): Promise<Response> {
+    if (files.length > 0) {
+      const fd = new FormData();
+      fd.append("deliveryUrl", url);
+      fd.append("deliveryText", note);
+      for (const f of files) {
+        fd.append("files", f);
+      }
+      return fetch(`/api/offers/${offerId}/deliveries`, {
+        method: "POST",
+        body: fd,
+      });
+    }
+    return fetch(`/api/offers/${offerId}/deliveries`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...(url ? { deliveryUrl: url } : {}),
+        ...(note ? { deliveryText: note } : {}),
+      }),
+    });
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const url = normalizeDeliveryUrlField(deliveryUrl);
@@ -314,25 +497,31 @@ export function DeliveryPanel({
     try {
       let res: Response;
       if (files.length > 0) {
-        const fd = new FormData();
-        fd.append("deliveryUrl", url);
-        fd.append("deliveryText", note);
-        for (const f of files) {
-          fd.append("files", f);
+        const firstTicket = await issueR2Ticket(files[0]);
+        if (firstTicket.mode === "local") {
+          res = await submitLocalDelivery(url, note, files);
+        } else {
+          const completed: CompletedDeliveryR2Media[] = [];
+          completed.push(await uploadFileToR2({ key: staged[0].key, file: files[0] }, firstTicket));
+          for (let index = 1; index < files.length; index += 1) {
+            const ticket = await issueR2Ticket(files[index]);
+            if (ticket.mode === "local") {
+              throw new Error("Teslim dosya depolama modu degisti. Lutfen tekrar deneyin.");
+            }
+            completed.push(await uploadFileToR2({ key: staged[index].key, file: files[index] }, ticket));
+          }
+          res = await fetch(`/api/offers/${offerId}/deliveries`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...(url ? { deliveryUrl: url } : {}),
+              ...(note ? { deliveryText: note } : {}),
+              media: completed,
+            }),
+          });
         }
-        res = await fetch(`/api/offers/${offerId}/deliveries`, {
-          method: "POST",
-          body: fd,
-        });
       } else {
-        res = await fetch(`/api/offers/${offerId}/deliveries`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...(url ? { deliveryUrl: url } : {}),
-            ...(note ? { deliveryText: note } : {}),
-          }),
-        });
+        res = await submitLocalDelivery(url, note, files);
       }
       const rawText = await res.text();
       let data: DeliveryApiErr = {};
@@ -347,13 +536,14 @@ export function DeliveryPanel({
       }
       revokeStagedUrls(staged);
       setStaged([]);
+      setUploadProgress({});
       setDeliveryUrl("");
       setDeliveryText("");
       setFeedback("Teslim başarıyla gönderildi.");
       await loadDeliveries();
       router.refresh();
-    } catch {
-      setError("Baglanti kesildi veya zaman asimi. Tekrar deneyin.");
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "Baglanti kesildi veya zaman asimi. Tekrar deneyin.");
     } finally {
       setSubmitting(false);
       busySubmit.current = false;
@@ -594,12 +784,15 @@ export function DeliveryPanel({
                       <div className="chat-delivery-staged-meta">
                         <span className="chat-delivery-staged-name">{s.file.name}</span>
                         <span className="chat-delivery-staged-size-row">
-                          <span className="chat-delivery-staged-size">{formatBytes(s.file.size)}</span>
-                          {isLikelyVideoFile(s.file) && s.file.size > DELIVERY_VIDEO_MAX_BYTES * 0.85 ? (
-                            <span className="chat-delivery-staged-size-warn muted">Yakın sınır</span>
-                          ) : null}
-                        </span>
-                      </div>
+                        <span className="chat-delivery-staged-size">{formatBytes(s.file.size)}</span>
+                        {isLikelyVideoFile(s.file) && s.file.size > DELIVERY_VIDEO_MAX_BYTES * 0.85 ? (
+                          <span className="chat-delivery-staged-size-warn muted">Yakın sınır</span>
+                        ) : null}
+                      </span>
+                      {submitting && uploadProgress[s.key] !== undefined ? (
+                        <span className="chat-delivery-staged-size muted">Yükleniyor: %{uploadProgress[s.key]}</span>
+                      ) : null}
+                    </div>
                       <button
                         type="button"
                         className="chat-delivery-staged-remove"

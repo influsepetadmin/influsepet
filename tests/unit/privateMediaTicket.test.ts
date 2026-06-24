@@ -6,6 +6,7 @@ import {
   PRIVATE_MEDIA_TICKET_VERSION,
   type PrivateMediaTicketClaims,
   signPrivateMediaTicket,
+  verifyPrivateMediaUploadSession,
   verifyPrivateMediaTicket,
 } from "../../src/lib/uploads/privateMediaTicket";
 
@@ -67,5 +68,52 @@ test("missing private media ticket secret disables ticket verification only", ()
   assert.deepEqual(verifyPrivateMediaTicket(ticket, "", "delivery-media:upload"), {
     ok: false,
     error: "CONFIG_MISSING",
+  });
+});
+
+test("signed Worker upload sessions verify and bind generated delivery object state", () => {
+  const uploadSession = signRawClaims({
+    version: PRIVATE_MEDIA_TICKET_VERSION,
+    audience: "delivery-media:upload-session",
+    sessionId: "session_123",
+    claimsHash: "claims_hash_123",
+    offerId: baseClaims.offerId,
+    actorUserId: baseClaims.actorUserId,
+    mimeType: baseClaims.mimeType,
+    declaredSize: baseClaims.declaredSize,
+    maxBytes: baseClaims.maxBytes,
+    nonce: baseClaims.nonce,
+    objectKey: "delivery-media/123e4567-e89b-12d3-a456-426614174000.mp4",
+    uploadId: "upload-12345678",
+    issuedAt: now,
+    expiresAt: now + 60_000,
+  });
+  const result = verifyPrivateMediaUploadSession(uploadSession, secret, now);
+  assert.equal(result.ok, true);
+  if (result.ok) {
+    assert.equal(result.claims.offerId, baseClaims.offerId);
+    assert.equal(result.claims.actorUserId, baseClaims.actorUserId);
+    assert.equal(result.claims.objectKey, "delivery-media/123e4567-e89b-12d3-a456-426614174000.mp4");
+  }
+
+  const tampered = signRawClaims({
+    version: PRIVATE_MEDIA_TICKET_VERSION,
+    audience: "delivery-media:upload-session",
+    sessionId: "session_123",
+    claimsHash: "claims_hash_123",
+    offerId: baseClaims.offerId,
+    actorUserId: baseClaims.actorUserId,
+    mimeType: baseClaims.mimeType,
+    declaredSize: baseClaims.declaredSize,
+    maxBytes: baseClaims.maxBytes,
+    nonce: baseClaims.nonce,
+    objectKey: "profile-images/123e4567-e89b-12d3-a456-426614174000.mp4",
+    uploadId: "upload-12345678",
+    issuedAt: now,
+    expiresAt: now + 60_000,
+  });
+  assert.deepEqual(verifyPrivateMediaUploadSession(tampered, secret, now), {
+    ok: false,
+    error: "CLAIMS_INVALID",
   });
 });

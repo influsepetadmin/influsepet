@@ -19,6 +19,17 @@ import {
   type ValidatedCollabMedia,
 } from "@/lib/uploads/collabMediaUpload";
 import { deliveryMediaAbsolutePath, saveDeliveryMediaFile } from "@/lib/uploads/deliveryMediaUpload";
+import {
+  isValidDeliveryMediaObjectKey,
+  maxBytesForDeliveryMediaMime,
+  validateDeliveryMediaStorageRecord,
+} from "@/lib/uploads/privateDeliveryMedia";
+import {
+  deletePrivateDeliveryMediaObject,
+  getPrivateDeliveryMediaStorageConfig,
+  headPrivateDeliveryMediaObject,
+} from "@/lib/uploads/privateDeliveryMediaGateway";
+import { verifyPrivateMediaUploadSession } from "@/lib/uploads/privateMediaTicket";
 
 function isParticipant(offer: OfferBasics, userId: string): boolean {
   return offer.brandId === userId || offer.influencerId === userId;
@@ -39,6 +50,34 @@ function mediaJsonShape(offerId: string, rows: { id: string; kind: string; mimeT
     createdAt: m.createdAt,
     url: `/api/offers/${offerId}/deliveries/media/${m.id}`,
   }));
+}
+
+type CompletedR2DeliveryMediaInput = {
+  uploadSession?: unknown;
+  completion?: unknown;
+  originalFilename?: unknown;
+};
+
+function kindFromDeliveryMime(mimeType: string): ReturnType<typeof prismaKindFromValidated> | null {
+  if (mimeType.startsWith("image/")) return "IMAGE";
+  if (mimeType.startsWith("video/")) return "VIDEO";
+  return null;
+}
+
+function storedFilenameFromObjectKey(objectKey: string): string {
+  return objectKey.slice("delivery-media/".length);
+}
+
+async function deleteR2ObjectsBestEffort(objectKeys: string[]) {
+  await Promise.all(
+    objectKeys.map(async (objectKey) => {
+      try {
+        await deletePrivateDeliveryMediaObject(objectKey);
+      } catch {
+        /* best-effort cleanup */
+      }
+    }),
+  );
 }
 
 export async function GET(
@@ -128,12 +167,30 @@ export async function POST(
     return NextResponse.json({ error: "Kullanici bulunamadi." }, { status: 404 });
   }
 
+  const storageConfig = getPrivateDeliveryMediaStorageConfig();
+  if (storageConfig.mode === "error") {
+    return NextResponse.json(
+      {
+        error: "Teslim dosya depolama ayari eksik. Lutfen daha sonra tekrar deneyin.",
+        code: storageConfig.code,
+      },
+      { status: 503 },
+    );
+  }
+
   const contentType = request.headers.get("content-type") ?? "";
   let rawUrl = "";
   let rawText = "";
   let files: File[] = [];
+  let r2MediaInputs: CompletedR2DeliveryMediaInput[] = [];
 
   if (contentType.includes("multipart/form-data")) {
+    if (storageConfig.mode === "r2") {
+      return NextResponse.json(
+        { error: "Teslim dosyalari R2 yukleme akisiyle gonderilmeli.", code: "DELIVERY_R2_REQUIRED" },
+        { status: 400 },
+      );
+    }
     let formData: FormData;
     try {
       formData = await request.formData();
@@ -151,9 +208,13 @@ export async function POST(
     const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
     rawUrl = typeof body?.deliveryUrl === "string" ? body.deliveryUrl : "";
     rawText = typeof body?.deliveryText === "string" ? body.deliveryText : "";
+    r2MediaInputs =
+      storageConfig.mode === "r2" && Array.isArray(body?.media)
+        ? (body.media as CompletedR2DeliveryMediaInput[])
+        : [];
   }
 
-  if (files.length > DELIVERY_MEDIA_MAX_FILES) {
+  if (files.length > DELIVERY_MEDIA_MAX_FILES || r2MediaInputs.length > DELIVERY_MEDIA_MAX_FILES) {
     return NextResponse.json(
       { error: `En fazla ${DELIVERY_MEDIA_MAX_FILES} dosya yukleyebilirsiniz.`, code: "DELIVERY_TOO_MANY_FILES" },
       { status: 400 },
@@ -266,7 +327,7 @@ export async function POST(
     return NextResponse.json({ error: parsed.error, code: "DELIVERY_TEXT_INVALID" }, { status: 400 });
   }
 
-  if (!parsed.deliveryUrl && !parsed.deliveryText && files.length === 0) {
+  if (!parsed.deliveryUrl && !parsed.deliveryText && files.length === 0 && r2MediaInputs.length === 0) {
     return NextResponse.json({ error: DELIVERY_PARSE_REQUIRED, code: "DELIVERY_PROOF_REQUIRED" }, { status: 400 });
   }
 
@@ -274,14 +335,109 @@ export async function POST(
     kind: ReturnType<typeof prismaKindFromValidated>;
     mime: string;
     storedFilename: string;
+    storageProvider: "LOCAL" | "R2";
+    objectKey?: string | null;
     sizeBytes: number;
     originalFilenameSafe: string | null;
   };
 
   const writtenPaths: string[] = [];
+  const verifiedR2ObjectKeys: string[] = [];
 
   try {
     const prepared: PreparedFile[] = [];
+    if (storageConfig.mode === "r2") {
+      for (const item of r2MediaInputs) {
+        const uploadSession = typeof item.uploadSession === "string" ? item.uploadSession : "";
+        const completion = item.completion as Record<string, unknown> | null;
+        const objectKey = typeof completion?.objectKey === "string" ? completion.objectKey : "";
+        const mimeType = typeof completion?.mimeType === "string" ? completion.mimeType : "";
+        const sizeBytes = typeof completion?.sizeBytes === "number" ? completion.sizeBytes : NaN;
+        const storageProvider = completion?.storageProvider;
+
+        const sessionCheck = verifyPrivateMediaUploadSession(uploadSession, storageConfig.ticketSecret);
+        const maxBytes = maxBytesForDeliveryMediaMime(mimeType);
+        const kind = kindFromDeliveryMime(mimeType);
+        const sessionClaims = sessionCheck.ok ? sessionCheck.claims : null;
+        const sessionMatchesObject =
+          Boolean(sessionClaims) &&
+          sessionClaims?.offerId === offerId &&
+          sessionClaims.actorUserId === session.uid &&
+          sessionClaims.objectKey === objectKey;
+        if (
+          storageProvider !== "R2" ||
+          !sessionMatchesObject ||
+          sessionClaims?.mimeType !== mimeType ||
+          sessionClaims?.declaredSize !== sizeBytes ||
+          !isValidDeliveryMediaObjectKey(objectKey) ||
+          !maxBytes ||
+          !kind ||
+          !Number.isSafeInteger(sizeBytes) ||
+          sizeBytes <= 0 ||
+          sizeBytes > maxBytes
+        ) {
+          if (sessionMatchesObject && isValidDeliveryMediaObjectKey(objectKey)) {
+            await deleteR2ObjectsBestEffort([objectKey]);
+          }
+          return NextResponse.json(
+            { error: "Teslim dosyasi dogrulanamadi. Lutfen tekrar yukleyin.", code: "DELIVERY_R2_VERIFY_FAILED" },
+            { status: 400 },
+          );
+        }
+
+        let metadata: Awaited<ReturnType<typeof headPrivateDeliveryMediaObject>>;
+        try {
+          metadata = await headPrivateDeliveryMediaObject(objectKey);
+        } catch {
+          await deleteR2ObjectsBestEffort([objectKey]);
+          return NextResponse.json(
+            { error: "Teslim dosyasi dogrulanamadi. Lutfen tekrar yukleyin.", code: "DELIVERY_R2_VERIFY_FAILED" },
+            { status: 502 },
+          );
+        }
+
+        if (
+          metadata.objectKey !== objectKey ||
+          metadata.contentType !== mimeType ||
+          metadata.contentLength !== sizeBytes ||
+          metadata.privateMediaScope !== "delivery"
+        ) {
+          await deleteR2ObjectsBestEffort([objectKey]);
+          return NextResponse.json(
+            { error: "Teslim dosyasi dogrulanamadi. Lutfen tekrar yukleyin.", code: "DELIVERY_R2_VERIFY_FAILED" },
+            { status: 502 },
+          );
+        }
+
+        const storedFilename = storedFilenameFromObjectKey(objectKey);
+        const recordOk = validateDeliveryMediaStorageRecord({
+          storageProvider: "R2",
+          storedFilename,
+          objectKey,
+        });
+        if (!recordOk) {
+          await deleteR2ObjectsBestEffort([objectKey]);
+          return NextResponse.json(
+            { error: "Teslim dosyasi dogrulanamadi. Lutfen tekrar yukleyin.", code: "DELIVERY_R2_VERIFY_FAILED" },
+            { status: 400 },
+          );
+        }
+
+        verifiedR2ObjectKeys.push(objectKey);
+        prepared.push({
+          kind,
+          mime: mimeType,
+          storedFilename,
+          storageProvider: "R2",
+          objectKey,
+          sizeBytes,
+          originalFilenameSafe: sanitizeOriginalFilename(
+            typeof item.originalFilename === "string" ? item.originalFilename : null,
+          ),
+        });
+      }
+    }
+
     for (const w of work) {
       let saved: { storedFilename: string };
       try {
@@ -307,6 +463,8 @@ export async function POST(
         kind: prismaKindFromValidated(w.validated),
         mime: w.validated.mime,
         storedFilename: saved.storedFilename,
+        storageProvider: "LOCAL",
+        objectKey: null,
         sizeBytes: w.buffer.length,
         originalFilenameSafe: w.originalFilenameSafe,
       });
@@ -340,6 +498,8 @@ export async function POST(
             kind: p.kind,
             mimeType: p.mime,
             storedFilename: p.storedFilename,
+            storageProvider: p.storageProvider,
+            objectKey: p.objectKey,
             sizeBytes: p.sizeBytes,
             originalFilenameSafe: p.originalFilenameSafe,
           },
@@ -389,6 +549,7 @@ export async function POST(
         /* ignore */
       }
     }
+    await deleteR2ObjectsBestEffort(verifiedR2ObjectKeys);
     return NextResponse.json(
       {
         error: "Sunucuda islem tamamlanamadi. Lutfen tekrar deneyin.",

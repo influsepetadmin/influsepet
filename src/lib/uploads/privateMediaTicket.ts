@@ -4,6 +4,7 @@ export const PRIVATE_MEDIA_TICKET_VERSION = 1 as const;
 export const PRIVATE_MEDIA_TICKET_MAX_TTL_MS = 15 * 60 * 1000;
 
 export type PrivateMediaTicketAudience = "delivery-media:upload";
+export type PrivateMediaUploadSessionAudience = "delivery-media:upload-session";
 
 export type PrivateMediaTicketClaims = {
   version: typeof PRIVATE_MEDIA_TICKET_VERSION;
@@ -20,6 +21,27 @@ export type PrivateMediaTicketClaims = {
 
 export type PrivateMediaTicketVerifyResult =
   | { ok: true; claims: PrivateMediaTicketClaims }
+  | { ok: false; error: "CONFIG_MISSING" | "MALFORMED" | "BAD_SIGNATURE" | "EXPIRED" | "CLAIMS_INVALID" | "AUDIENCE_MISMATCH" };
+
+export type PrivateMediaUploadSessionClaims = {
+  version: typeof PRIVATE_MEDIA_TICKET_VERSION;
+  audience: PrivateMediaUploadSessionAudience;
+  sessionId: string;
+  claimsHash: string;
+  offerId: string;
+  actorUserId: string;
+  mimeType: string;
+  declaredSize: number;
+  maxBytes: number;
+  nonce: string;
+  objectKey: string;
+  uploadId: string;
+  issuedAt: number;
+  expiresAt: number;
+};
+
+export type PrivateMediaUploadSessionVerifyResult =
+  | { ok: true; claims: PrivateMediaUploadSessionClaims }
   | { ok: false; error: "CONFIG_MISSING" | "MALFORMED" | "BAD_SIGNATURE" | "EXPIRED" | "CLAIMS_INVALID" | "AUDIENCE_MISMATCH" };
 
 const ALLOWED_PRIVATE_MEDIA_MIME_TYPES = new Set([
@@ -89,6 +111,54 @@ export function isValidPrivateMediaTicketClaims(
   return true;
 }
 
+export function isValidPrivateMediaUploadSessionClaims(
+  claims: unknown,
+): claims is PrivateMediaUploadSessionClaims {
+  if (!isRecord(claims)) return false;
+  if (claims.version !== PRIVATE_MEDIA_TICKET_VERSION) return false;
+  if (claims.audience !== "delivery-media:upload-session") return false;
+  const sessionId = safeString(claims.sessionId);
+  const claimsHash = safeString(claims.claimsHash);
+  const offerId = safeString(claims.offerId);
+  const actorUserId = safeString(claims.actorUserId);
+  const mimeType = safeString(claims.mimeType);
+  const nonce = safeString(claims.nonce);
+  const objectKey = safeString(claims.objectKey);
+  const uploadId = safeString(claims.uploadId);
+  const declaredSize = safePositiveInteger(claims.declaredSize);
+  const maxBytes = safePositiveInteger(claims.maxBytes);
+  const issuedAt = safePositiveInteger(claims.issuedAt);
+  const expiresAt = safePositiveInteger(claims.expiresAt);
+  if (
+    !sessionId ||
+    !claimsHash ||
+    !offerId ||
+    !actorUserId ||
+    !mimeType ||
+    !nonce ||
+    !objectKey ||
+    !uploadId ||
+    !declaredSize ||
+    !maxBytes ||
+    !issuedAt ||
+    !expiresAt
+  ) {
+    return false;
+  }
+  if (!isAllowedPrivateMediaMimeType(mimeType)) return false;
+  if (declaredSize > maxBytes) return false;
+  if (expiresAt <= issuedAt || expiresAt - issuedAt > PRIVATE_MEDIA_TICKET_MAX_TTL_MS) return false;
+  if (
+    !/^delivery-media\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.(?:jpg|png|webp|mp4|mov|webm)$/i.test(
+      objectKey,
+    )
+  ) {
+    return false;
+  }
+  if (!/^[a-zA-Z0-9._:-]{8,512}$/.test(uploadId)) return false;
+  return true;
+}
+
 export function signPrivateMediaTicket(
   claims: PrivateMediaTicketClaims,
   secret: string,
@@ -141,6 +211,48 @@ export function verifyPrivateMediaTicket(
     return { ok: false, error: "AUDIENCE_MISMATCH" };
   }
   if (claims.exp <= nowMs) {
+    return { ok: false, error: "EXPIRED" };
+  }
+
+  return { ok: true, claims };
+}
+
+export function verifyPrivateMediaUploadSession(
+  uploadSession: string,
+  secret: string | undefined | null,
+  nowMs = Date.now(),
+): PrivateMediaUploadSessionVerifyResult {
+  const normalizedSecret = normalizePrivateMediaTicketSecret(secret);
+  if (!normalizedSecret) {
+    return { ok: false, error: "CONFIG_MISSING" };
+  }
+
+  const [payload, signature, extra] = uploadSession.split(".");
+  if (!payload || !signature || extra !== undefined) {
+    return { ok: false, error: "MALFORMED" };
+  }
+
+  const expectedSignature = signPayload(payload, normalizedSecret);
+  const actualBytes = Buffer.from(signature);
+  const expectedBytes = Buffer.from(expectedSignature);
+  if (actualBytes.length !== expectedBytes.length || !timingSafeEqual(actualBytes, expectedBytes)) {
+    return { ok: false, error: "BAD_SIGNATURE" };
+  }
+
+  let claims: unknown;
+  try {
+    claims = JSON.parse(base64UrlDecode(payload).toString("utf8"));
+  } catch {
+    return { ok: false, error: "MALFORMED" };
+  }
+
+  if (!isValidPrivateMediaUploadSessionClaims(claims)) {
+    return { ok: false, error: "CLAIMS_INVALID" };
+  }
+  if (claims.audience !== "delivery-media:upload-session") {
+    return { ok: false, error: "AUDIENCE_MISMATCH" };
+  }
+  if (claims.expiresAt <= nowMs) {
     return { ok: false, error: "EXPIRED" };
   }
 

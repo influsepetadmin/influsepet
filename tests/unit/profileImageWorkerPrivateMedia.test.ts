@@ -338,3 +338,45 @@ test("Worker rejects public unauthenticated delivery reads and keeps strict rang
   assert.deepEqual(rangeOptionsFromHeader("bytes=0-99"), { ok: true, range: { offset: 0, length: 100 } });
   assert.deepEqual(rangeOptionsFromHeader("bytes=99-0"), { ok: false });
 });
+
+test("delivery multipart CORS preflight allows only the production browser origin", async () => {
+  const { env } = mockEnv();
+  const trusted = await worker.fetch(
+    new Request("https://worker.example/delivery-media/multipart/part", {
+      method: "OPTIONS",
+      headers: {
+        Origin: "https://influsepet.com",
+        "Access-Control-Request-Method": "PUT",
+        "Access-Control-Request-Headers": "Content-Type, X-Influsepet-Upload-Session",
+      },
+    }),
+    env,
+  );
+  assert.equal(trusted.status, 204);
+  assert.equal(trusted.headers.get("Access-Control-Allow-Origin"), "https://influsepet.com");
+  assert.match(trusted.headers.get("Access-Control-Allow-Headers") ?? "", /X-Influsepet-Upload-Session/);
+
+  const untrusted = await worker.fetch(
+    new Request("https://worker.example/delivery-media/multipart/part", {
+      method: "OPTIONS",
+      headers: {
+        Origin: "https://evil.example",
+        "Access-Control-Request-Method": "PUT",
+      },
+    }),
+    env,
+  );
+  assert.equal(untrusted.headers.get("Access-Control-Allow-Origin"), null);
+});
+
+test("delivery multipart CORS is not added to profile-image endpoints", async () => {
+  const { env } = mockEnv();
+  const res = await worker.fetch(
+    new Request("https://worker.example/profile-images", {
+      method: "OPTIONS",
+      headers: { Origin: "https://influsepet.com" },
+    }),
+    env,
+  );
+  assert.equal(res.headers.get("Access-Control-Allow-Origin"), null);
+});

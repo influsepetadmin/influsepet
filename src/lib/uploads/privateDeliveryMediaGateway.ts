@@ -3,6 +3,11 @@ import { isValidDeliveryMediaObjectKey } from "@/lib/uploads/privateDeliveryMedi
 
 type PrivateDeliveryMediaGatewayEnv = { [key: string]: string | undefined };
 
+export type PrivateDeliveryMediaStorageConfig =
+  | { mode: "local" }
+  | { mode: "r2"; origin: string; gatewaySecret: string; ticketSecret: string }
+  | { mode: "error"; code: "DELIVERY_R2_CONFIG_INVALID"; error: string };
+
 export type PrivateDeliveryMediaGatewayConfig =
   | { mode: "configured"; origin: string; secret: string }
   | { mode: "disabled"; reason: "MISSING" | "PARTIAL" | "INVALID_URL" };
@@ -12,11 +17,43 @@ export type PrivateDeliveryMediaObjectMetadata = {
   contentType: string | null;
   contentLength: number | null;
   etag: string | null;
+  privateMediaScope: string | null;
 };
 
 function present(value: string | undefined): string | null {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
+}
+
+export function getPrivateDeliveryMediaStorageConfig(
+  env: PrivateDeliveryMediaGatewayEnv = process.env,
+): PrivateDeliveryMediaStorageConfig {
+  const ticketSecret = present(env.PRIVATE_MEDIA_TICKET_SECRET);
+  const gatewayUrl = present(env.PROFILE_IMAGE_GATEWAY_URL);
+  const gatewaySecret = present(env.PROFILE_IMAGE_GATEWAY_SECRET);
+
+  if (!ticketSecret) {
+    return { mode: "local" };
+  }
+
+  if (!gatewayUrl || !gatewaySecret) {
+    return {
+      mode: "error",
+      code: "DELIVERY_R2_CONFIG_INVALID",
+      error: "Delivery media R2 gateway configuration is incomplete.",
+    };
+  }
+
+  const origin = normalizeProfileImageGatewayUrl(gatewayUrl);
+  if (!origin) {
+    return {
+      mode: "error",
+      code: "DELIVERY_R2_CONFIG_INVALID",
+      error: "Delivery media R2 gateway URL is invalid.",
+    };
+  }
+
+  return { mode: "r2", origin, gatewaySecret, ticketSecret };
 }
 
 export function getPrivateDeliveryMediaGatewayConfig(
@@ -74,6 +111,7 @@ export async function headPrivateDeliveryMediaObject(
     contentType: response.headers.get("content-type"),
     contentLength: length ? Number(length) : null,
     etag: response.headers.get("etag"),
+    privateMediaScope: response.headers.get("x-influsepet-private-media-scope"),
   };
 }
 
