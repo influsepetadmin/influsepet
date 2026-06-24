@@ -82,9 +82,10 @@ function mockEnv(options: { metadataMismatch?: boolean } = {}) {
         abort: async () => {
           state.deleted.push(`abort:${key}:${uploadId}`);
         },
-        uploadPart: async (partNumber: number, body: ReadableStream<Uint8Array>) => {
+        uploadPart: async (partNumber: number, body: ArrayBuffer | ReadableStream<Uint8Array>) => {
           state.usedPartKeys.push(key);
-          const size = await streamSize(body);
+          assert.equal(body instanceof ArrayBuffer, true);
+          const size = body instanceof ArrayBuffer ? body.byteLength : await streamSize(body);
           const etag = `etag-${partNumber}-${size}`;
           state.uploadedParts.push({ key, uploadId, partNumber, size, etag });
           return { partNumber, etag };
@@ -300,6 +301,7 @@ test("Worker-generated upload session binds objectKey and uploadId; client raw v
   assert.equal(res.status, 200);
   assert.equal(state.usedPartKeys[0], state.created[0].key);
   assert.notEqual(state.usedPartKeys[0], "delivery-media/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa.jpg");
+  assert.equal(state.uploadedParts[0].size, PART_SIZE);
 });
 
 test("tampered upload sessions and bad ticket claims fail", async () => {

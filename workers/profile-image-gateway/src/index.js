@@ -612,31 +612,27 @@ async function handleDeliveryMultipartPart(request, env) {
     await abortMultipartUpload(env, session);
     return json({ error: "Invalid part size" }, 413);
   }
-  if (!request.body) {
+  let partBody;
+  try {
+    partBody = await request.arrayBuffer();
+  } catch {
+    await abortMultipartUpload(env, session);
+    return json({ error: "Invalid part body" }, 400);
+  }
+
+  const bodyByteLength = partBody.byteLength;
+  if (bodyByteLength === 0) {
     await abortMultipartUpload(env, session);
     return json({ error: "Missing upload body" }, 400);
   }
-
-  let byteCount = 0;
-  const countedBody = request.body.pipeThrough(
-    new TransformStream({
-      transform(chunk, controller) {
-        byteCount += chunk.byteLength;
-        if (byteCount > expectedSize) {
-          throw new Error("Part too large");
-        }
-        controller.enqueue(chunk);
-      },
-    }),
-  );
+  if (bodyByteLength !== expectedSize) {
+    await abortMultipartUpload(env, session);
+    return json({ error: "Invalid part size" }, 413);
+  }
 
   try {
     const upload = env.PROFILE_IMAGES.resumeMultipartUpload(session.objectKey, session.uploadId);
-    const part = await upload.uploadPart(partNumber, countedBody);
-    if (byteCount !== expectedSize) {
-      await abortMultipartUpload(env, session);
-      return json({ error: "Invalid part size" }, 413);
-    }
+    const part = await upload.uploadPart(partNumber, partBody);
 
     const receipt = {
       version: TOKEN_VERSION,
@@ -645,7 +641,7 @@ async function handleDeliveryMultipartPart(request, env) {
       claimsHash: session.claimsHash,
       partNumber,
       etag: part.etag,
-      byteCount,
+      byteCount: bodyByteLength,
       expiresAt: session.expiresAt,
     };
 
@@ -656,7 +652,7 @@ async function handleDeliveryMultipartPart(request, env) {
       name: error instanceof Error ? error.name : "UnknownError",
       message: error instanceof Error ? error.message : "",
       partNumber,
-      bodyByteLength: byteCount,
+      bodyByteLength,
       hasKey: Boolean(session.objectKey),
       hasUploadId: Boolean(session.uploadId),
     });
