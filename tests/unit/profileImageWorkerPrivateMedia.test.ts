@@ -15,7 +15,7 @@ import {
 const profileSecret = "profile-secret";
 const privateTicketSecret = "private-ticket-secret";
 const objectKey = "delivery-media/123e4567-e89b-12d3-a456-426614174000.jpg";
-const PART_SIZE = 10 * 1024 * 1024;
+const PART_SIZE = 8 * 1024 * 1024;
 
 function pngBytes(): Uint8Array {
   return new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0, 0, 0, 0, 0, 0, 0, 0]);
@@ -33,6 +33,7 @@ function mockEnv(options: { metadataMismatch?: boolean } = {}) {
   const state = {
     created: [] as { key: string; uploadId: string; metadata: Record<string, string>; contentType: string }[],
     uploadedParts: [] as { key: string; uploadId: string; partNumber: number; size: number; etag: string }[],
+    putObjects: [] as { key: string; size: number; contentType: string; metadata: Record<string, string> }[],
     deleted: [] as string[],
     completed: null as null | { key: string; uploadId: string; parts: { partNumber: number; etag: string }[]; size: number },
     usedPartKeys: [] as string[],
@@ -42,7 +43,14 @@ function mockEnv(options: { metadataMismatch?: boolean } = {}) {
     PROFILE_IMAGE_GATEWAY_SECRET: profileSecret,
     PRIVATE_MEDIA_TICKET_SECRET: privateTicketSecret,
     PROFILE_IMAGES: {
-      put: async () => undefined,
+      put: async (key: string, body: ArrayBuffer, opts: { httpMetadata: { contentType: string }; customMetadata: Record<string, string> }) => {
+        state.putObjects.push({
+          key,
+          size: body.byteLength,
+          contentType: opts.httpMetadata.contentType,
+          metadata: opts.customMetadata,
+        });
+      },
       head: async (key: string) => {
         const created = state.created.find((item) => item.key === key);
         if (!created || !state.completed) return null;
@@ -99,7 +107,7 @@ function mockEnv(options: { metadataMismatch?: boolean } = {}) {
 }
 
 function ticket({
-  declaredSize = 10 * 1024 * 1024,
+  declaredSize = PART_SIZE,
   mimeType = "image/jpeg",
   iat = Date.now(),
   exp = Date.now() + 60_000,
@@ -204,6 +212,85 @@ test("browser private media tickets cannot access profile-image endpoint", async
     env,
   );
   assert.equal(res.status, 401);
+});
+
+test("small private delivery media uploads use direct single-upload path without public URL", async () => {
+  const { env, state } = mockEnv();
+  const size = Math.round(1.7 * 1024 * 1024);
+  const res = await worker.fetch(
+    new Request("https://worker.example/delivery-media/upload", {
+      method: "PUT",
+      headers: {
+        Authorization: `PrivateMediaTicket ${ticket({ declaredSize: size, mimeType: "image/png" })}`,
+        "Content-Type": "image/png",
+        "Content-Length": String(size),
+      },
+      body: new Uint8Array(size),
+    }),
+    env,
+  );
+  assert.equal(res.status, 201);
+  const body = (await res.json()) as {
+    ok?: boolean;
+    url?: string;
+    uploadSession?: string;
+    storageProvider?: string;
+    objectKey?: string;
+    mimeType?: string;
+    sizeBytes?: number;
+  };
+  assert.equal(body.ok, true);
+  assert.equal(body.url, undefined);
+  assert.equal(typeof body.uploadSession, "string");
+  assert.equal(body.storageProvider, "R2");
+  assert.equal(body.mimeType, "image/png");
+  assert.equal(body.sizeBytes, size);
+  assert.equal(state.putObjects.length, 1);
+  assert.equal(state.putObjects[0].size, size);
+  assert.equal(state.putObjects[0].contentType, "image/png");
+  assert.equal(state.putObjects[0].metadata.privateMediaScope, "delivery");
+  assert.equal(body.objectKey, state.putObjects[0].key);
+});
+
+test("direct private delivery upload rejects unauthorized, MIME mismatch, and size mismatch", async () => {
+  const { env } = mockEnv();
+  const size = 1024;
+  const unauthorized = await worker.fetch(
+    new Request("https://worker.example/delivery-media/upload", {
+      method: "PUT",
+      headers: { "Content-Type": "image/png" },
+      body: new Uint8Array(size),
+    }),
+    env,
+  );
+  assert.equal(unauthorized.status, 401);
+
+  const mimeMismatch = await worker.fetch(
+    new Request("https://worker.example/delivery-media/upload", {
+      method: "PUT",
+      headers: {
+        Authorization: `PrivateMediaTicket ${ticket({ declaredSize: size, mimeType: "image/jpeg" })}`,
+        "Content-Type": "image/png",
+      },
+      body: new Uint8Array(size),
+    }),
+    env,
+  );
+  assert.equal(mimeMismatch.status, 400);
+
+  const sizeMismatch = await worker.fetch(
+    new Request("https://worker.example/delivery-media/upload", {
+      method: "PUT",
+      headers: {
+        Authorization: `PrivateMediaTicket ${ticket({ declaredSize: size + 1, mimeType: "image/png" })}`,
+        "Content-Type": "image/png",
+        "Content-Length": String(size),
+      },
+      body: new Uint8Array(size),
+    }),
+    env,
+  );
+  assert.equal(sizeMismatch.status, 413);
 });
 
 test("Worker-generated upload session binds objectKey and uploadId; client raw values are ignored", async () => {

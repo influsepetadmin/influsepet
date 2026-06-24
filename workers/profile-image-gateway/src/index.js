@@ -3,7 +3,7 @@ const PUBLIC_BASE_URL = "https://media.influsepet.com/profile-images/";
 const ALLOWED_CONTENT_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 const DELIVERY_MEDIA_PREFIX = "delivery-media/";
-const DELIVERY_MEDIA_PART_SIZE_BYTES = 10 * 1024 * 1024;
+const DELIVERY_MEDIA_PART_SIZE_BYTES = 8 * 1024 * 1024;
 const PRIVATE_MEDIA_TICKET_MAX_TTL_MS = 15 * 60 * 1000;
 const PRIVATE_MEDIA_SESSION_MAX_TTL_MS = PRIVATE_MEDIA_TICKET_MAX_TTL_MS;
 const DELIVERY_MEDIA_MIME_LIMITS = new Map([
@@ -33,8 +33,8 @@ function json(body, status) {
   });
 }
 
-function isDeliveryMultipartPath(pathname) {
-  return pathname.startsWith("/delivery-media/multipart/");
+function isDeliveryBrowserUploadPath(pathname) {
+  return pathname === "/delivery-media/upload" || pathname.startsWith("/delivery-media/multipart/");
 }
 
 function deliveryCorsHeaders(request) {
@@ -502,6 +502,91 @@ async function handleDeliveryMultipartInit(request, env) {
   }
 }
 
+async function handleDeliverySingleUpload(request, env) {
+  const ticket = await verifyUploadTicket(request, env, DELIVERY_UPLOAD_AUDIENCE);
+  if (!ticket.ok) return ticket.response;
+
+  const contentType = normalizeContentType(request.headers.get("Content-Type"));
+  if (contentType !== ticket.claims.mimeType) {
+    return json({ error: "Unsupported file type" }, 400);
+  }
+
+  const contentLengthHeader = request.headers.get("Content-Length");
+  if (contentLengthHeader && Number(contentLengthHeader) !== ticket.claims.declaredSize) {
+    return json({ error: "Invalid upload size" }, 413);
+  }
+
+  let body;
+  try {
+    body = await request.arrayBuffer();
+  } catch {
+    return json({ error: "Invalid upload" }, 400);
+  }
+
+  if (body.byteLength === 0) {
+    return json({ error: "Invalid upload" }, 400);
+  }
+  if (body.byteLength !== ticket.claims.declaredSize || body.byteLength > ticket.claims.maxBytes) {
+    return json({ error: "Invalid upload size" }, 413);
+  }
+
+  const now = Date.now();
+  const sessionId = crypto.randomUUID();
+  const objectKey = `${DELIVERY_MEDIA_PREFIX}${crypto.randomUUID()}.${ticket.mimeRules.ext}`;
+  const claimsHash = ticket.claimsHash;
+
+  try {
+    await env.PROFILE_IMAGES.put(objectKey, body, {
+      httpMetadata: {
+        contentType: ticket.claims.mimeType,
+        cacheControl: "private, no-store",
+      },
+      customMetadata: {
+        privateMediaScope: "delivery",
+        sessionId,
+        claimsHash,
+      },
+    });
+
+    const session = {
+      version: TOKEN_VERSION,
+      audience: UPLOAD_SESSION_AUDIENCE,
+      sessionId,
+      claimsHash,
+      offerId: ticket.claims.offerId,
+      actorUserId: ticket.claims.actorUserId,
+      mimeType: ticket.claims.mimeType,
+      declaredSize: ticket.claims.declaredSize,
+      maxBytes: ticket.claims.maxBytes,
+      nonce: ticket.claims.nonce,
+      objectKey,
+      uploadId: `single-${sessionId}`,
+      issuedAt: now,
+      expiresAt: Math.min(ticket.claims.exp, now + PRIVATE_MEDIA_SESSION_MAX_TTL_MS),
+    };
+
+    return json(
+      {
+        ok: true,
+        uploadSession: await signToken(session, ticket.secret),
+        storageProvider: "R2",
+        objectKey,
+        mimeType: ticket.claims.mimeType,
+        sizeBytes: ticket.claims.declaredSize,
+      },
+      201,
+    );
+  } catch (error) {
+    console.error("DELIVERY_MEDIA_SINGLE_UPLOAD_FAILED", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message : "",
+      bodyByteLength: body.byteLength,
+      hasKey: Boolean(objectKey),
+    });
+    return json({ error: "Upload failed" }, 502);
+  }
+}
+
 async function handleDeliveryMultipartPart(request, env) {
   const secret = privateMediaSecret(env);
   if (!secret) {
@@ -569,6 +654,11 @@ async function handleDeliveryMultipartPart(request, env) {
     await abortMultipartUpload(env, session);
     console.error("DELIVERY_MEDIA_MULTIPART_PART_FAILED", {
       name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message : "",
+      partNumber,
+      bodyByteLength: byteCount,
+      hasKey: Boolean(session.objectKey),
+      hasUploadId: Boolean(session.uploadId),
     });
     return json({ error: "Part upload failed" }, 502);
   }
@@ -770,7 +860,7 @@ const worker = {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (request.method === "OPTIONS" && isDeliveryMultipartPath(url.pathname)) {
+    if (request.method === "OPTIONS" && isDeliveryBrowserUploadPath(url.pathname)) {
       return deliveryCorsPreflight(request);
     }
 
@@ -779,6 +869,10 @@ const worker = {
         return json({ error: "Method not allowed" }, 405);
       }
       return handleProfileImageUpload(request, env);
+    }
+
+    if (url.pathname === "/delivery-media/upload" && request.method === "PUT") {
+      return withDeliveryCors(request, await handleDeliverySingleUpload(request, env));
     }
 
     if (url.pathname === "/delivery-media/multipart/init" && request.method === "POST") {

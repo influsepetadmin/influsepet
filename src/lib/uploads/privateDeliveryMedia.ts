@@ -1,5 +1,5 @@
 export const DELIVERY_MEDIA_OBJECT_PREFIX = "delivery-media/" as const;
-export const DELIVERY_MEDIA_PART_SIZE_BYTES = 10 * 1024 * 1024;
+export const DELIVERY_MEDIA_PART_SIZE_BYTES = 8 * 1024 * 1024;
 export const DELIVERY_MEDIA_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 export const DELIVERY_MEDIA_VIDEO_MAX_BYTES = 200 * 1024 * 1024;
 

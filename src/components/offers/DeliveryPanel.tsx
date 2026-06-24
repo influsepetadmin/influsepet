@@ -43,6 +43,7 @@ const DELIVERY_STATUS_TR: Record<DeliveryStatus, string> = {
 
 const ACCEPT_MIME =
   "image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,.jpg,.jpeg,.png,.webp,.mp4,.mov,.webm";
+const DELIVERY_R2_SINGLE_UPLOAD_THRESHOLD_BYTES = 16 * 1024 * 1024;
 
 function timelineItemClass(status: DeliveryStatus): string {
   if (status === "APPROVED") return "chat-delivery-timeline__item chat-delivery-timeline__item--approved";
@@ -367,6 +368,48 @@ export function DeliveryPanel({
     ticket: Extract<DeliveryR2Ticket, { mode: "r2" }>,
   ): Promise<CompletedDeliveryR2Media> {
     setUploadProgress((prev) => ({ ...prev, [item.key]: 0 }));
+    if (item.file.size < DELIVERY_R2_SINGLE_UPLOAD_THRESHOLD_BYTES) {
+      const res = await fetch(`${ticket.gatewayUrl}/delivery-media/upload`, {
+        method: "PUT",
+        headers: {
+          Authorization: `PrivateMediaTicket ${ticket.ticket}`,
+          "Content-Type": item.file.type || "application/octet-stream",
+        },
+        body: item.file,
+      });
+      const completion = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        uploadSession?: string;
+        storageProvider?: "R2";
+        objectKey?: string;
+        mimeType?: string;
+        sizeBytes?: number;
+        error?: string;
+      };
+      if (
+        !res.ok ||
+        completion.ok !== true ||
+        !completion.uploadSession ||
+        completion.storageProvider !== "R2" ||
+        !completion.objectKey ||
+        !completion.mimeType ||
+        !completion.sizeBytes
+      ) {
+        throw new Error(completion.error || "Dosya yuklenemedi.");
+      }
+      setUploadProgress((prev) => ({ ...prev, [item.key]: 100 }));
+      return {
+        uploadSession: completion.uploadSession,
+        completion: {
+          storageProvider: "R2",
+          objectKey: completion.objectKey,
+          mimeType: completion.mimeType,
+          sizeBytes: completion.sizeBytes,
+        },
+        originalFilename: item.file.name,
+      };
+    }
+
     const initRes = await fetch(`${ticket.gatewayUrl}/delivery-media/multipart/init`, {
       method: "POST",
       headers: { Authorization: `PrivateMediaTicket ${ticket.ticket}` },
